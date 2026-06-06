@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Скупка скинов</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
 
@@ -471,15 +472,7 @@
   <div class="step-title">Добавь скины</div>
   <div class="step-sub">Выбери оружие и укажи название</div>
 
-  <div class="skins-list" id="skinsList">
-    <div class="skin-item">
-      <div class="si-info">
-        <div class="si-name">AK-47 | Redline</div>
-        <div class="si-quality">Field-Tested</div>
-      </div>
-      <button class="si-remove">✕</button>
-    </div>
-  </div>
+  <div class="skins-list" id="skinsList"></div>
 
   <button class="add-skin-btn" onclick="showAddSkin()">+ Добавить скин</button>
 
@@ -782,7 +775,7 @@
     </div>
   </div>
 
-  <button class="submit-btn">ОТПРАВИТЬ ЗАЯВКУ</button>
+  <button class="submit-btn" onclick="submitOrder()">ОТПРАВИТЬ ЗАЯВКУ</button>
 
   <div class="nav-btns" style="margin-top:10px;">
     <button class="nav-back" onclick="goTo(3)">← Назад</button>
@@ -790,6 +783,26 @@
 </div>
 
 <script>
+  // ─── Telegram WebApp init ───────────────────────────────────────────────────
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
+
+  // ─── Состояние приложения ───────────────────────────────────────────────────
+  const state = {
+    skins: [],        // [{weapon, subtype, skinName, quality}]
+    tradeBan: null,   // false | true
+    banDays: null,    // число
+    payment: null,    // 'Крипта' | 'Карта'
+  };
+
+  // ─── Текущий выбор в форме добавления ──────────────────────────────────────
+  let currentWeaponType = null;
+  let currentWeaponLabel = null;
+
+  // ─── Навигация ──────────────────────────────────────────────────────────────
   function goTo(n) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('s'+n).classList.add('active');
@@ -798,41 +811,38 @@
       if(i+1 < n) p.classList.add('done');
       if(i+1 === n) p.classList.add('active');
     });
+    if (n === 4) renderSummary();
     window.scrollTo(0,0);
   }
 
+  // ─── Экран 1: Оружие ────────────────────────────────────────────────────────
   function selectWeapon(el, type) {
     document.querySelectorAll('.weapon-btn:not(.sub-btn)').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    currentWeaponType = type;
+    currentWeaponLabel = el.querySelector('.name').textContent.trim();
 
-    // Скрыть все подтипы
-    document.getElementById('knifeSubCard').style.display = 'none';
-    document.getElementById('knifeNameCard').style.display = 'none';
-    document.getElementById('gloveSubCard').style.display = 'none';
-    document.getElementById('gloveNameCard').style.display = 'none';
-    document.getElementById('agentSubCard').style.display = 'none';
-    document.getElementById('agentNameCard').style.display = 'none';
-    document.getElementById('otherInputCard').style.display = 'none';
+    ['knifeSubCard','knifeNameCard','gloveSubCard','gloveNameCard',
+     'agentSubCard','agentNameCard','otherInputCard'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
     document.getElementById('qualityCard').style.display = 'block';
     document.getElementById('skinNameCard').style.display = 'block';
-
     document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
 
     if (type === 'knife') {
       document.getElementById('knifeSubCard').style.display = 'block';
-      document.getElementById('qualityCard').style.display = 'block';
       document.getElementById('skinNameCard').style.display = 'none';
     } else if (type === 'gloves') {
       document.getElementById('gloveSubCard').style.display = 'block';
-      document.getElementById('qualityCard').style.display = 'block';
       document.getElementById('skinNameCard').style.display = 'none';
     } else if (type === 'agent') {
       document.getElementById('agentSubCard').style.display = 'block';
       document.getElementById('qualityCard').style.display = 'none';
       document.getElementById('skinNameCard').style.display = 'none';
-    }
-    if (type === 'other') {
+    } else if (type === 'other') {
       document.getElementById('otherInputCard').style.display = 'block';
+      document.getElementById('skinNameCard').style.display = 'none';
     }
   }
 
@@ -850,40 +860,209 @@
     el.classList.add('selected');
   }
 
-  function selectPayment(el) {
-    document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-    document.getElementById('s3Next').style.opacity = '1';
-    document.getElementById('s3Next').style.pointerEvents = 'auto';
+  function showAddSkin() {
+    const f = document.getElementById('addForm');
+    const isHidden = f.style.display === 'none' || f.style.display === '';
+    f.style.display = isHidden ? 'block' : 'none';
+    // Сброс формы
+    if (isHidden) resetAddForm();
+  }
+
+  function resetAddForm() {
+    currentWeaponType = null;
+    currentWeaponLabel = null;
+    document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
+    ['knifeSubCard','knifeNameCard','gloveSubCard','gloveNameCard',
+     'agentSubCard','agentNameCard','otherInputCard'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('qualityCard').style.display = 'block';
+    document.getElementById('skinNameCard').style.display = 'block';
+    document.querySelectorAll('.skin-input').forEach(i => i.value = '');
+    document.querySelectorAll('.quality-btn').forEach((b,i) => {
+      b.classList.toggle('selected', i === 0);
+    });
+  }
+
+  function addSkin() {
+    // ── Собираем данные ──
+    const weaponEl = document.querySelector('.weapon-btn:not(.sub-btn).selected');
+    if (!weaponEl) { alert('Выбери оружие'); return; }
+
+    const type = currentWeaponType;
+    let weapon = currentWeaponLabel;
+    let skinName = '';
+    let quality = '';
+
+    if (type === 'knife') {
+      const subEl = document.querySelector('#knifeSubCard .sub-btn.selected');
+      if (!subEl) { alert('Выбери тип ножа'); return; }
+      weapon = 'Нож: ' + subEl.querySelector('.name').textContent.trim();
+      const inp = document.querySelector('#knifeNameCard .skin-input');
+      skinName = inp ? inp.value.trim() : '';
+      if (!skinName) { alert('Введи название скина ножа'); return; }
+      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+    } else if (type === 'gloves') {
+      const subEl = document.querySelector('#gloveSubCard .sub-btn.selected');
+      if (!subEl) { alert('Выбери тип перчаток'); return; }
+      weapon = 'Перчи: ' + subEl.querySelector('.name').textContent.trim();
+      const inp = document.querySelector('#gloveNameCard .skin-input');
+      skinName = inp ? inp.value.trim() : '';
+      if (!skinName) { alert('Введи название скина перчаток'); return; }
+      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+    } else if (type === 'agent') {
+      const subEl = document.querySelector('#agentSubCard .sub-btn.selected');
+      if (!subEl) { alert('Выбери фракцию агента'); return; }
+      const faction = subEl.querySelector('.ag-name').textContent.trim();
+      const inp = document.querySelector('#agentNameCard .skin-input');
+      skinName = inp ? inp.value.trim() : '';
+      if (!skinName) { alert('Введи имя агента'); return; }
+      weapon = 'Агент (' + faction + ')';
+      quality = '—';
+    } else if (type === 'other') {
+      const inp = document.querySelector('#otherInputCard .skin-input');
+      skinName = inp ? inp.value.trim() : '';
+      if (!skinName) { alert('Введи название'); return; }
+      weapon = 'Другое';
+      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+    } else {
+      // Обычное оружие
+      const inp = document.querySelector('#skinNameCard .skin-input');
+      skinName = inp ? inp.value.trim() : '';
+      if (!skinName) { alert('Введи название скина'); return; }
+      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+    }
+
+    state.skins.push({ weapon, skinName, quality });
+    renderSkinsList();
+
+    document.getElementById('addForm').style.display = 'none';
+    document.getElementById('s1Next').style.opacity = '1';
+    document.getElementById('s1Next').style.pointerEvents = 'auto';
+  }
+
+  function renderSkinsList() {
+    const list = document.getElementById('skinsList');
+    list.innerHTML = '';
+    state.skins.forEach((skin, idx) => {
+      const label = quality => ({FN:'Factory New',MW:'Minimal Wear',FT:'Field-Tested',WW:'Well-Worn',BS:'Battle-Scarred','—':'—'}[quality] || quality);
+      const div = document.createElement('div');
+      div.className = 'skin-item';
+      div.innerHTML = `
+        <div class="si-info">
+          <div class="si-name">${skin.weapon} | ${skin.skinName}</div>
+          <div class="si-quality">${label(skin.quality)}</div>
+        </div>
+        <button class="si-remove" onclick="removeSkin(${idx})">✕</button>
+      `;
+      list.appendChild(div);
+    });
+
+    // Если скинов нет — заблокировать "Далее"
+    const hasAny = state.skins.length > 0;
+    document.getElementById('s1Next').style.opacity = hasAny ? '1' : '0.4';
+    document.getElementById('s1Next').style.pointerEvents = hasAny ? 'auto' : 'none';
+  }
+
+  function removeSkin(idx) {
+    state.skins.splice(idx, 1);
+    renderSkinsList();
+  }
+
+  // ─── Экран 2: Трейд-бан ─────────────────────────────────────────────────────
+  function selectTB(hasTB) {
+    state.tradeBan = hasTB;
+    document.getElementById('tbNo').classList.toggle('selected', !hasTB);
+    document.getElementById('tbYes').classList.toggle('selected', hasTB);
+    document.getElementById('daysBlock').style.display = hasTB ? 'block' : 'none';
+    if (!hasTB) {
+      state.banDays = null;
+      document.getElementById('tbNext').style.opacity = '1';
+      document.getElementById('tbNext').style.pointerEvents = 'auto';
+    } else {
+      // Ждём выбора дней
+      const daySelected = document.querySelector('.day-btn.selected');
+      const canProceed = !!daySelected;
+      document.getElementById('tbNext').style.opacity = canProceed ? '1' : '0.4';
+      document.getElementById('tbNext').style.pointerEvents = canProceed ? 'auto' : 'none';
+    }
   }
 
   function selectDay(el) {
     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    state.banDays = parseInt(el.textContent.trim());
     document.getElementById('tbNext').style.opacity = '1';
     document.getElementById('tbNext').style.pointerEvents = 'auto';
   }
 
-  function selectTB(hasTB) {
-    document.getElementById('tbNo').classList.toggle('selected', !hasTB);
-    document.getElementById('tbYes').classList.toggle('selected', hasTB);
-    document.getElementById('daysBlock').style.display = hasTB ? 'block' : 'none';
-    // Если выбрали "нет" или выбрали "да" и уже выбрали день — разблокировать кнопку
-    const daySelected = document.querySelector('.day-btn.selected');
-    const canProceed = !hasTB || daySelected;
-    document.getElementById('tbNext').style.opacity = canProceed ? '1' : '0.4';
-    document.getElementById('tbNext').style.pointerEvents = canProceed ? 'auto' : 'none';
+  // ─── Экран 3: Оплата ────────────────────────────────────────────────────────
+  function selectPayment(el) {
+    document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    state.payment = el.querySelector('.p-name').textContent.trim();
+    document.getElementById('s3Next').style.opacity = '1';
+    document.getElementById('s3Next').style.pointerEvents = 'auto';
   }
 
-  function showAddSkin() {
-    const f = document.getElementById('addForm');
-    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  // ─── Экран 4: Итог ──────────────────────────────────────────────────────────
+  function renderSummary() {
+    const summaryEl = document.querySelector('.summary');
+    const banText = state.tradeBan
+      ? `Да, ${state.banDays} дн.`
+      : 'Нет';
+
+    const skinsHtml = state.skins.map(s => `
+      <div class="summary-row">
+        <span class="s-label">${s.weapon} | ${s.skinName}</span>
+        <span class="s-value">${s.quality}</span>
+      </div>
+    `).join('');
+
+    summaryEl.innerHTML = `
+      <div class="summary-row">
+        <span class="s-label">Скинов</span>
+        <span class="s-value">${state.skins.length} шт.</span>
+      </div>
+      ${skinsHtml}
+      <div class="summary-row">
+        <span class="s-label">Трейд-бан</span>
+        <span class="s-value">${banText}</span>
+      </div>
+      <div class="summary-row">
+        <span class="s-label">Оплата</span>
+        <span class="s-value">${state.payment || '—'}</span>
+      </div>
+      <div class="summary-row total">
+        <span class="s-label">Заявка принята</span>
+        <span class="s-value">Ждите оценки</span>
+      </div>
+    `;
   }
 
-  function addSkin() {
-    document.getElementById('addForm').style.display = 'none';
-    document.getElementById('s1Next').style.opacity = '1';
-    document.getElementById('s1Next').style.pointerEvents = 'auto';
+  // ─── Отправка ────────────────────────────────────────────────────────────────
+  function submitOrder() {
+    if (state.skins.length === 0) { alert('Добавь хотя бы один скин'); return; }
+    if (state.tradeBan === null) { alert('Укажи трейд-бан'); return; }
+    if (!state.payment) { alert('Выбери способ оплаты'); return; }
+
+    const payload = {
+      skins: state.skins,
+      trade_ban: state.tradeBan,
+      ban_days: state.banDays,
+      payment: state.payment,
+    };
+
+    const jsonStr = JSON.stringify(payload);
+
+    if (tg && tg.sendData) {
+      tg.sendData(jsonStr);
+    } else {
+      // Режим отладки вне Telegram
+      console.log('WebApp payload:', jsonStr);
+      alert('Данные подготовлены (отладка):\n' + jsonStr);
+    }
   }
 </script>
 </body>
