@@ -39,44 +39,23 @@
   }
 
   .logo {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     background: var(--accent);
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 18px;
   }
 
   .header-text h1 {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--accent);
+    font-size: 20px; font-weight: 700;
+    letter-spacing: 1px; color: var(--accent);
   }
 
-  .header-text p {
-    font-size: 11px;
-    color: var(--text2);
-    letter-spacing: 0.5px;
-  }
+  .header-text p { font-size: 11px; color: var(--text2); letter-spacing: 0.5px; }
 
-  .progress {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 24px;
-  }
-
-  .progress-step {
-    flex: 1;
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    transition: background 0.3s;
-  }
-
+  .progress { display: flex; gap: 6px; margin-bottom: 24px; }
+  .progress-step { flex: 1; height: 3px; background: var(--border); border-radius: 2px; transition: background 0.3s; }
   .progress-step.active { background: var(--accent); }
   .progress-step.done { background: var(--accent2); }
 
@@ -90,91 +69,44 @@
 
   .card-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    color: var(--text2);
-    text-transform: uppercase;
-    margin-bottom: 14px;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 1.5px; color: var(--text2);
+    text-transform: uppercase; margin-bottom: 14px;
   }
 
-  .weapon-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
+  .weapon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
   .weapon-btn {
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 6px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-    color: var(--text);
+    cursor: pointer; text-align: center;
+    transition: all 0.2s; color: var(--text);
     font-family: 'Inter', sans-serif;
   }
 
-  .weapon-btn .icon {
-    font-size: 20px;
-    margin-bottom: 4px;
-    display: block;
-  }
-
-  .weapon-btn .icon img {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    filter: brightness(0.9);
-  }
-
-  .weapon-btn .name {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text2);
-  }
-
-  .weapon-btn.selected {
-    border-color: var(--accent);
-    background: rgba(232, 184, 75, 0.08);
-  }
-
+  .weapon-btn .icon { font-size: 20px; margin-bottom: 4px; display: block; }
+  .weapon-btn .name { font-size: 11px; font-weight: 500; color: var(--text2); }
+  .weapon-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); }
   .weapon-btn.selected .name { color: var(--accent); }
   .weapon-btn:hover { border-color: var(--accent2); }
 
-  .quality-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+  .quality-list { display: flex; flex-direction: column; gap: 6px; }
 
   .quality-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: flex; align-items: center; gap: 10px;
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text);
+    border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; transition: all 0.2s; color: var(--text);
     font-family: 'Inter', sans-serif;
   }
 
-  .quality-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
+  .quality-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .quality-btn .q-name { font-size: 13px; font-weight: 500; flex: 1; }
   .quality-btn .q-abbr { font-size: 11px; color: var(--text2); }
-  .quality-btn.selected { border-color: var(--accent); background: rgba(232, 184, 75, 0.08); }
-
-  .input-wrap { position: relative; }
+  .quality-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); }
 
   .skin-input {
     width: 100%;
@@ -184,126 +116,214 @@
     padding: 12px 14px;
     color: var(--text);
     font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    outline: none;
+    font-size: 14px; outline: none;
     transition: border-color 0.2s;
   }
 
   .skin-input:focus { border-color: var(--accent); }
   .skin-input::placeholder { color: var(--text2); }
 
+  /* ── Зона загрузки скрина ── */
   .photo-zone {
     border: 1.5px dashed var(--border);
     border-radius: 10px;
-    padding: 20px;
+    padding: 16px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
     margin-top: 10px;
+    position: relative;
   }
 
   .photo-zone:hover { border-color: var(--accent); }
-  .photo-zone .ph-icon { font-size: 28px; margin-bottom: 6px; }
-  .photo-zone p { font-size: 12px; color: var(--text2); }
+  .photo-zone.loading { border-color: var(--accent); opacity: 0.7; pointer-events: none; }
+  .photo-zone.success { border-color: var(--success); background: rgba(75,232,122,0.05); }
+  .photo-zone.error { border-color: var(--danger); background: rgba(232,75,75,0.05); }
 
+  .photo-zone .ph-icon { font-size: 24px; margin-bottom: 4px; }
+  .photo-zone p { font-size: 12px; color: var(--text2); }
+  .photo-zone p.ph-status { margin-top: 4px; font-size: 11px; }
+  .photo-zone p.ph-status.ok { color: var(--success); }
+  .photo-zone p.ph-status.err { color: var(--danger); }
+
+  #fileInput { display: none; }
+
+  /* ── ТБ в форме скина ── */
+  .tb-section { margin-top: 10px; }
+  .tb-label {
+    font-size: 12px; color: var(--text2);
+    letter-spacing: 1px; text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .tb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+
+  .tb-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px;
+    cursor: pointer; text-align: center;
+    transition: all 0.2s; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 13px;
+  }
+
+  .tb-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); color: var(--accent); }
+
+  .days-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    margin-top: 8px; display: none;
+  }
+
+  .days-grid.visible { display: grid; }
+
+  .day-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px;
+    text-align: center; font-size: 13px;
+    cursor: pointer; color: var(--text);
+    font-family: 'Inter', sans-serif; transition: all 0.2s;
+  }
+
+  .day-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); color: var(--accent); }
+
+  /* ── Список скинов ── */
   .skins-list { display: flex; flex-direction: column; gap: 8px; }
 
   .skin-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: flex; align-items: flex-start; gap: 10px;
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
+    border-radius: 10px; padding: 10px 12px;
   }
 
-  .skin-item .si-info { flex: 1 }
+  .skin-item .si-info { flex: 1; }
   .skin-item .si-name { font-size: 13px; font-weight: 500; }
-  .skin-item .si-quality { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .skin-item .si-meta { font-size: 11px; color: var(--text2); margin-top: 3px; }
 
   .skin-item .si-remove {
-    background: none;
-    border: none;
-    color: var(--danger);
-    cursor: pointer;
-    font-size: 16px;
-    padding: 2px 6px;
+    background: none; border: none;
+    color: var(--danger); cursor: pointer;
+    font-size: 16px; padding: 2px 6px; flex-shrink: 0;
+  }
+
+  .add-btns-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    margin-top: 8px;
   }
 
   .add-skin-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
     background: transparent;
     border: 1px dashed var(--border);
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 10px; padding: 10px;
     color: var(--text2);
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-family: 'Inter', sans-serif; font-size: 13px;
+    cursor: pointer; transition: all 0.2s;
     width: 100%;
-    margin-top: 8px;
   }
 
   .add-skin-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+  .add-skin-btn.photo-mode {
+    border-color: var(--accent2);
+    color: var(--accent);
+  }
+
+  .add-skin-btn.photo-mode:hover { border-color: var(--accent); }
+
+  /* ── Карточка подтверждения после распознавания ── */
+  .confirm-card {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 14px; padding: 16px;
+    margin-top: 12px; display: none;
+  }
+
+  .confirm-card.visible { display: block; }
+
+  .confirm-card .cc-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 1.5px; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  .confirm-row {
+    display: flex; justify-content: space-between;
+    padding: 5px 0; font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .confirm-row:last-of-type { border-bottom: none; }
+  .confirm-row .cr-label { color: var(--text2); }
+  .confirm-row .cr-val { font-weight: 500; }
+
+  .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+
+  .confirm-ok {
+    background: var(--accent); border: none;
+    border-radius: 10px; padding: 11px;
+    color: #0a0a0f; font-family: 'Rajdhani', sans-serif;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+
+  .confirm-cancel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px;
+    color: var(--text2); font-family: 'Inter', sans-serif;
+    font-size: 13px; cursor: pointer;
+  }
+
+  .confirm-tb { margin-top: 12px; }
+  .confirm-tb .tb-label { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+  .confirm-tb .tb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+
+  /* ── Оплата ── */
   .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
   .payment-btn {
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-    color: var(--text);
+    border-radius: 10px; padding: 14px;
+    cursor: pointer; text-align: center;
+    transition: all 0.2s; color: var(--text);
     font-family: 'Inter', sans-serif;
   }
 
   .payment-btn .p-icon { font-size: 22px; margin-bottom: 4px; }
   .payment-btn .p-name { font-size: 13px; font-weight: 500; }
   .payment-btn .p-sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
-  .payment-btn.selected { border-color: var(--accent); background: rgba(232, 184, 75, 0.08); }
+  .payment-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); }
 
+  /* ── Итог ── */
   .summary {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 16px;
+    border-radius: 14px; padding: 18px; margin-bottom: 16px;
   }
 
   .summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 7px 0;
   }
 
   .summary-row:not(:last-child) { border-bottom: 1px solid var(--border); }
-  .summary-row .s-label { font-size: 12px; color: var(--text2); }
-  .summary-row .s-value { font-size: 13px; font-weight: 500; }
+  .summary-row .s-label { font-size: 12px; color: var(--text2); flex: 1; }
+  .summary-row .s-value { font-size: 13px; font-weight: 500; text-align: right; }
   .summary-row.total .s-label { font-size: 13px; color: var(--text); }
   .summary-row.total .s-value { font-size: 16px; color: var(--accent); font-weight: 700; font-family: 'Rajdhani', sans-serif; }
 
   .submit-btn {
     width: 100%;
-    background: var(--accent);
-    border: none;
-    border-radius: 12px;
-    padding: 16px;
+    background: var(--accent); border: none;
+    border-radius: 12px; padding: 16px;
     color: #0a0a0f;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-size: 16px; font-weight: 700; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.2s;
   }
 
   .submit-btn:hover { background: var(--accent2); }
@@ -312,95 +332,24 @@
   .nav-btns { display: flex; gap: 8px; margin-top: 16px; }
 
   .nav-back {
-    flex: 1;
-    background: var(--surface);
+    flex: 1; background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    color: var(--text2);
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
+    border-radius: 10px; padding: 12px;
+    color: var(--text2); font-family: 'Inter', sans-serif;
+    font-size: 13px; cursor: pointer;
   }
 
   .nav-next {
-    flex: 2;
-    background: var(--accent);
-    border: none;
-    border-radius: 10px;
-    padding: 12px;
+    flex: 2; background: var(--accent); border: none;
+    border-radius: 10px; padding: 12px;
     color: #0a0a0f;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    cursor: pointer;
+    font-size: 15px; font-weight: 700; letter-spacing: 0.5px;
+    cursor: pointer; transition: all 0.2s;
   }
 
+  .nav-next:disabled { opacity: 0.4; pointer-events: none; }
   .nav-next:active { transform: scale(0.98); }
-
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-  }
-
-  .toggle-label { font-size: 13px; }
-  .toggle-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-  .toggle {
-    width: 44px;
-    height: 24px;
-    background: var(--border);
-    border-radius: 12px;
-    position: relative;
-    cursor: pointer;
-    transition: background 0.2s;
-    flex-shrink: 0;
-  }
-
-  .toggle.on { background: var(--accent); }
-
-  .toggle::after {
-    content: '';
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    background: white;
-    border-radius: 50%;
-    top: 3px;
-    left: 3px;
-    transition: left 0.2s;
-  }
-
-  .toggle.on::after { left: 23px; }
-
-  .days-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .day-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px;
-    text-align: center;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    transition: all 0.2s;
-  }
-
-  .day-btn.selected { border-color: var(--accent); background: rgba(232, 184, 75, 0.08); color: var(--accent); }
 
   .screen { display: none; }
   .screen.active { display: block; }
@@ -408,46 +357,38 @@
   .step-title { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
   .step-sub { font-size: 12px; color: var(--text2); margin-bottom: 20px; }
 
-  /* Агент список */
   .agent-list { display: flex; flex-direction: column; gap: 6px; }
 
   .agent-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; transition: all 0.2s; color: var(--text);
     font-family: 'Inter', sans-serif;
   }
 
   .agent-btn .ag-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    width: 32px; height: 32px; border-radius: 6px;
     background: var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
   }
 
   .agent-btn .ag-name { font-size: 13px; font-weight: 500; flex: 1; }
   .agent-btn .ag-team { font-size: 10px; color: var(--text2); margin-top: 2px; }
-  .agent-btn.selected { border-color: var(--accent); background: rgba(232, 184, 75, 0.08); }
+  .agent-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); }
 
-  /* Поле для другого */
-  .other-input-wrap {
-    margin-top: 10px;
-    display: none;
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle; margin-right: 6px;
   }
 
-  .other-input-wrap.visible { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -464,17 +405,55 @@
   <div class="progress-step active" id="p1"></div>
   <div class="progress-step" id="p2"></div>
   <div class="progress-step" id="p3"></div>
-  <div class="progress-step" id="p4"></div>
 </div>
 
-<!-- Экран 1 -->
+<!-- ═══════════════════════════════════════════════════════════
+     Экран 1: Добавление скинов
+════════════════════════════════════════════════════════════════ -->
 <div class="screen active" id="s1">
   <div class="step-title">Добавь скины</div>
   <div class="step-sub">Выбери оружие и укажи название</div>
 
   <div class="skins-list" id="skinsList"></div>
 
-  <button class="add-skin-btn" onclick="showAddSkin()">+ Добавить скин</button>
+  <div class="add-btns-row">
+    <button class="add-skin-btn" onclick="showAddSkin()">✏️ Вручную</button>
+    <button class="add-skin-btn photo-mode" onclick="triggerQuickPhoto()">📷 По фото</button>
+  </div>
+
+  <!-- Скрытый input для быстрого фото -->
+  <input type="file" id="quickPhotoInput" accept="image/*" style="display:none;" onchange="handleQuickPhoto(event)">
+
+  <!-- Карточка подтверждения распознанного скина -->
+  <div class="confirm-card" id="confirmCard">
+    <div class="cc-title">🎯 Распознано</div>
+    <div class="confirm-row"><span class="cr-label">Оружие</span><span class="cr-val" id="ccWeapon">—</span></div>
+    <div class="confirm-row"><span class="cr-label">Скин</span><span class="cr-val" id="ccSkin">—</span></div>
+    <div class="confirm-row"><span class="cr-label">Качество</span><span class="cr-val" id="ccQuality">—</span></div>
+
+    <div class="confirm-tb">
+      <div class="tb-label">Трейд-бан</div>
+      <div class="tb-row">
+        <div class="tb-btn selected" id="ccTbNo" onclick="selectConfirmTB(false)">✅ Нет</div>
+        <div class="tb-btn" id="ccTbYes" onclick="selectConfirmTB(true)">⏳ Есть</div>
+      </div>
+      <div class="days-grid" id="ccDaysGrid">
+        <div class="day-btn" onclick="selectConfirmDay(this)">1</div>
+        <div class="day-btn" onclick="selectConfirmDay(this)">2</div>
+        <div class="day-btn" onclick="selectConfirmDay(this)">3</div>
+        <div class="day-btn" onclick="selectConfirmDay(this)">4</div>
+        <div class="day-btn" onclick="selectConfirmDay(this)">5</div>
+        <div class="day-btn" onclick="selectConfirmDay(this)">6</div>
+        <div class="day-btn" onclick="selectConfirmDay(this)">7</div>
+        <div class="day-btn" onclick="selectConfirmDay(this)">8</div>
+      </div>
+    </div>
+
+    <div class="confirm-actions">
+      <button class="confirm-ok" onclick="confirmRecognized()">Добавить</button>
+      <button class="confirm-cancel" onclick="cancelConfirm()">Отмена</button>
+    </div>
+  </div>
 
   <div id="addForm" style="display:none; margin-top:14px;">
 
@@ -482,50 +461,20 @@
     <div class="card">
       <div class="card-title">Оружие</div>
       <div class="weapon-grid">
-        <div class="weapon-btn selected" onclick="selectWeapon(this,'ak47')">
-          <span class="icon">🔫</span>
-          <div class="name">AK-47</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'awp')">
-          <span class="icon">🎯</span>
-          <div class="name">AWP</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'knife')">
-          <span class="icon">⚔️</span>
-          <div class="name">Нож</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')">
-          <span class="icon">🔧</span>
-          <div class="name">M4A4</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')">
-          <span class="icon">💨</span>
-          <div class="name">M4A1-S</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')">
-          <span class="icon">🧤</span>
-          <div class="name">Перчи</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'usps')">
-          <span class="icon">🔰</span>
-          <div class="name">USP-S</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')">
-          <span class="icon">💥</span>
-          <div class="name">Desert Eagle</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'agent')">
-          <span class="icon">🕵️</span>
-          <div class="name">Агент</div>
-        </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'other')">
-          <span class="icon">🎱</span>
-          <div class="name">Другое</div>
-        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'ak47')"><span class="icon">🔫</span><div class="name">AK-47</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'awp')"><span class="icon">🎯</span><div class="name">AWP</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'knife')"><span class="icon">⚔️</span><div class="name">Нож</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')"><span class="icon">🔧</span><div class="name">M4A4</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')"><span class="icon">💨</span><div class="name">M4A1-S</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')"><span class="icon">🧤</span><div class="name">Перчи</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'usps')"><span class="icon">🔰</span><div class="name">USP-S</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')"><span class="icon">💥</span><div class="name">Desert Eagle</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'agent')"><span class="icon">🕵️</span><div class="name">Агент</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'other')"><span class="icon">🎱</span><div class="name">Другое</div></div>
       </div>
     </div>
 
-    <!-- Подтип: нож -->
+    <!-- Подтип нож -->
     <div class="card" id="knifeSubCard" style="display:none;">
       <div class="card-title">Тип ножа</div>
       <div class="weapon-grid">
@@ -552,13 +501,12 @@
       </div>
     </div>
 
-    <!-- Название скина ножа -->
     <div class="card" id="knifeNameCard" style="display:none;">
       <div class="card-title">Скин ножа</div>
-      <input class="skin-input" type="text" placeholder="Например: Fade, Doppler, Tiger Tooth...">
+      <input class="skin-input" id="knifeNameInput" type="text" placeholder="Например: Fade, Doppler, Tiger Tooth...">
     </div>
 
-    <!-- Подтип: перчатки -->
+    <!-- Подтип перчатки -->
     <div class="card" id="gloveSubCard" style="display:none;">
       <div class="card-title">Тип перчаток</div>
       <div class="weapon-grid">
@@ -573,158 +521,96 @@
       </div>
     </div>
 
-    <!-- Название скина перчаток -->
     <div class="card" id="gloveNameCard" style="display:none;">
       <div class="card-title">Скин перчаток</div>
-      <input class="skin-input" type="text" placeholder="Например: Pandora's Box, Crimson Weave...">
+      <input class="skin-input" id="gloveNameInput" type="text" placeholder="Например: Pandora's Box, Crimson Weave...">
     </div>
 
-    <!-- Подтип: агенты — фракция -->
+    <!-- Подтип агент -->
     <div class="card" id="agentSubCard" style="display:none;">
       <div class="card-title">Фракция агента</div>
       <div class="agent-list">
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">🎩</div>
-          <div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">🌿</div>
-          <div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">⭐</div>
-          <div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">🗡️</div>
-          <div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">🇧🇷</div>
-          <div><div class="ag-name">Brazilian 1st Battalion</div><div class="ag-team">T-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">🕵️</div>
-          <div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">🐸</div>
-          <div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">⚜️</div>
-          <div><div class="ag-name">Gendarmerie Nationale</div><div class="ag-team">CT-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">🛡️</div>
-          <div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div>
-        </div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
-          <div class="ag-icon">🌊</div>
-          <div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div>
-        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🎩</div><div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🌿</div><div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">⭐</div><div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🗡️</div><div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🇧🇷</div><div><div class="ag-name">Brazilian 1st Battalion</div><div class="ag-team">T-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🕵️</div><div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🐸</div><div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">⚜️</div><div><div class="ag-name">Gendarmerie Nationale</div><div class="ag-team">CT-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🛡️</div><div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div></div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🌊</div><div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div></div>
       </div>
     </div>
 
-    <!-- Поле имени агента -->
     <div class="card" id="agentNameCard" style="display:none;">
       <div class="card-title">Имя агента</div>
-      <input class="skin-input" type="text" placeholder="Например: Sir Bloody Loudmouth Darryl...">
+      <input class="skin-input" id="agentNameInput" type="text" placeholder="Например: Sir Bloody Loudmouth Darryl...">
     </div>
 
-    <!-- Поле "Другое" -->
+    <!-- Другое -->
     <div class="card" id="otherInputCard" style="display:none;">
       <div class="card-title">Название</div>
-      <input class="skin-input" type="text" placeholder="Введи название оружия...">
+      <input class="skin-input" id="otherNameInput" type="text" placeholder="Введи название оружия...">
     </div>
 
-    <!-- Качество (скрыто для агентов) -->
+    <!-- Качество -->
     <div class="card" id="qualityCard">
       <div class="card-title">Качество</div>
       <div class="quality-list">
-        <div class="quality-btn selected" onclick="selectQuality(this)">
-          <div class="quality-dot" style="background:#4be87a"></div>
-          <div class="q-name">Factory New</div><div class="q-abbr">FN</div>
-        </div>
-        <div class="quality-btn" onclick="selectQuality(this)">
-          <div class="quality-dot" style="background:#4b9ae8"></div>
-          <div class="q-name">Minimal Wear</div><div class="q-abbr">MW</div>
-        </div>
-        <div class="quality-btn" onclick="selectQuality(this)">
-          <div class="quality-dot" style="background:#e8b84b"></div>
-          <div class="q-name">Field-Tested</div><div class="q-abbr">FT</div>
-        </div>
-        <div class="quality-btn" onclick="selectQuality(this)">
-          <div class="quality-dot" style="background:#e87a4b"></div>
-          <div class="q-name">Well-Worn</div><div class="q-abbr">WW</div>
-        </div>
-        <div class="quality-btn" onclick="selectQuality(this)">
-          <div class="quality-dot" style="background:#e84b4b"></div>
-          <div class="q-name">Battle-Scarred</div><div class="q-abbr">BS</div>
-        </div>
+        <div class="quality-btn selected" onclick="selectQuality(this)"><div class="quality-dot" style="background:#4be87a"></div><div class="q-name">Factory New</div><div class="q-abbr">FN</div></div>
+        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#4b9ae8"></div><div class="q-name">Minimal Wear</div><div class="q-abbr">MW</div></div>
+        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e8b84b"></div><div class="q-name">Field-Tested</div><div class="q-abbr">FT</div></div>
+        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e87a4b"></div><div class="q-name">Well-Worn</div><div class="q-abbr">WW</div></div>
+        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e84b4b"></div><div class="q-name">Battle-Scarred</div><div class="q-abbr">BS</div></div>
       </div>
     </div>
 
-    <!-- Название скина -->
+    <!-- Название скина + загрузка скрина -->
     <div class="card" id="skinNameCard">
       <div class="card-title">Название скина</div>
-      <div class="input-wrap">
-        <input class="skin-input" type="text" placeholder="Например: Redline, Asiimov...">
-      </div>
-      <div class="photo-zone">
+      <input class="skin-input" id="skinNameInput" type="text" placeholder="Например: Redline, Asiimov...">
+
+      <!-- Зона загрузки скрина -->
+      <div class="photo-zone" id="photoZone" onclick="triggerFileInput()">
         <div class="ph-icon">📷</div>
-        <p>Отправить скрин для автораспознавания</p>
+        <p>Загрузить скрин для автораспознавания</p>
+        <p class="ph-status" id="photoStatus"></p>
       </div>
+      <input type="file" id="fileInput" accept="image/*" onchange="handlePhotoUpload(event)">
     </div>
 
-    <button class="nav-next" onclick="addSkin()" style="width:100%">Добавить в список</button>
-  </div>
-
-  <div class="nav-btns">
-    <button class="nav-next" id="s1Next" style="opacity:0.4;pointer-events:none;" onclick="goTo(2)">Далее →</button>
-  </div>
-</div>
-<div class="screen" id="s2">
-  <div class="step-title">Трейд-бан</div>
-  <div class="step-sub">Есть ли ограничение на передачу?</div>
-
-  <div class="payment-grid" style="margin-bottom:12px;">
-    <div class="payment-btn" id="tbNo" onclick="selectTB(false)">
-      <div class="p-icon">✅</div>
-      <div class="p-name">Нет</div>
-      <div class="p-sub">Можно передать сразу</div>
-    </div>
-    <div class="payment-btn" id="tbYes" onclick="selectTB(true)">
-      <div class="p-icon">⏳</div>
-      <div class="p-name">Да</div>
-      <div class="p-sub">Есть ограничение</div>
-    </div>
-  </div>
-
-  <div id="daysBlock" style="display:none;">
+    <!-- ── Трейд-бан (встроен в форму) ── -->
     <div class="card">
-      <div class="card-title">Количество дней</div>
-      <div class="days-grid">
-        <div class="day-btn" onclick="selectDay(this)">1</div>
-        <div class="day-btn" onclick="selectDay(this)">2</div>
-        <div class="day-btn" onclick="selectDay(this)">3</div>
-        <div class="day-btn" onclick="selectDay(this)">4</div>
-        <div class="day-btn" onclick="selectDay(this)">5</div>
-        <div class="day-btn" onclick="selectDay(this)">6</div>
-        <div class="day-btn" onclick="selectDay(this)">7</div>
-        <div class="day-btn" onclick="selectDay(this)">8</div>
+      <div class="card-title">Трейд-бан</div>
+      <div class="tb-row">
+        <div class="tb-btn selected" id="formTbNo" onclick="selectFormTB(false)">✅ Нет</div>
+        <div class="tb-btn" id="formTbYes" onclick="selectFormTB(true)">⏳ Есть</div>
+      </div>
+      <div class="days-grid" id="formDaysGrid">
+        <div class="day-btn" onclick="selectFormDay(this)">1</div>
+        <div class="day-btn" onclick="selectFormDay(this)">2</div>
+        <div class="day-btn" onclick="selectFormDay(this)">3</div>
+        <div class="day-btn" onclick="selectFormDay(this)">4</div>
+        <div class="day-btn" onclick="selectFormDay(this)">5</div>
+        <div class="day-btn" onclick="selectFormDay(this)">6</div>
+        <div class="day-btn" onclick="selectFormDay(this)">7</div>
+        <div class="day-btn" onclick="selectFormDay(this)">8</div>
       </div>
     </div>
+
+    <button class="nav-next" onclick="addSkin()" style="width:100%; margin-bottom:8px;">Добавить в список</button>
   </div>
 
   <div class="nav-btns">
-    <button class="nav-back" onclick="goTo(1)">← Назад</button>
-    <button class="nav-next" id="tbNext" style="opacity:0.4;pointer-events:none;" onclick="goTo(3)">Далее →</button>
+    <button class="nav-next" id="s1Next" disabled onclick="goTo(2)">Далее →</button>
   </div>
 </div>
 
-<!-- Экран 3: Оплата -->
-<div class="screen" id="s3">
+<!-- ═══════════════════════════════════════════════════════════
+     Экран 2: Оплата
+════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="s2">
   <div class="step-title">Способ оплаты</div>
   <div class="step-sub">Как хочешь получить деньги?</div>
 
@@ -742,117 +628,97 @@
   </div>
 
   <div class="nav-btns">
-    <button class="nav-back" onclick="goTo(2)">← Назад</button>
-    <button class="nav-next" id="s3Next" style="opacity:0.4;pointer-events:none;" onclick="goTo(4)">Далее →</button>
+    <button class="nav-back" onclick="goTo(1)">← Назад</button>
+    <button class="nav-next" id="s2Next" disabled onclick="goTo(3)">Далее →</button>
   </div>
 </div>
 
-<!-- Экран 4: Итог -->
-<div class="screen" id="s4">
+<!-- ═══════════════════════════════════════════════════════════
+     Экран 3: Итог
+════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="s3">
   <div class="step-title">Итоговая заявка</div>
   <div class="step-sub">Проверь данные перед отправкой</div>
 
-  <div class="summary">
-    <div class="summary-row">
-      <span class="s-label">Скины</span>
-      <span class="s-value">1 шт.</span>
-    </div>
-    <div class="summary-row">
-      <span class="s-label">AK-47 | Redline (FT)</span>
-      <span class="s-value">≈ 12.50 $</span>
-    </div>
-    <div class="summary-row">
-      <span class="s-label">Трейд-бан</span>
-      <span class="s-value">Нет</span>
-    </div>
-    <div class="summary-row">
-      <span class="s-label">Оплата</span>
-      <span class="s-value">Крипта</span>
-    </div>
-    <div class="summary-row total">
-      <span class="s-label">Предварительно</span>
-      <span class="s-value">≈ 12.50 $</span>
-    </div>
-  </div>
+  <div class="summary" id="summaryBlock"></div>
 
   <button class="submit-btn" onclick="submitOrder()">ОТПРАВИТЬ ЗАЯВКУ</button>
 
   <div class="nav-btns" style="margin-top:10px;">
-    <button class="nav-back" onclick="goTo(3)">← Назад</button>
+    <button class="nav-back" onclick="goTo(2)">← Назад</button>
   </div>
 </div>
 
 <script>
-  // ─── Telegram WebApp init ───────────────────────────────────────────────────
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    tg.ready();
-    tg.expand();
-  }
+  // ── КОНФИГ ──────────────────────────────────────────────────────────────────
+  // Замени на реальный URL своего Flask сервиса на Railway
+  const API_URL = 'https://YOUR-FLASK-SERVICE.railway.app/recognize';
 
-  // ─── Состояние приложения ───────────────────────────────────────────────────
+  // ── Telegram ─────────────────────────────────────────────────────────────────
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  // ── Состояние ────────────────────────────────────────────────────────────────
   const state = {
-    skins: [],        // [{weapon, subtype, skinName, quality}]
-    tradeBan: null,   // false | true
-    banDays: null,    // число
-    payment: null,    // 'Крипта' | 'Карта'
+    skins: [],    // [{weapon, skinName, quality, tradeBan, banDays}]
+    payment: null,
   };
 
-  // ─── Текущий выбор в форме добавления ──────────────────────────────────────
-  let currentWeaponType = null;
-  let currentWeaponLabel = null;
+  // ── Текущая форма ────────────────────────────────────────────────────────────
+  let formWeaponType   = null;
+  let formWeaponLabel  = null;
+  let formTradeBan     = false;
+  let formBanDays      = null;
 
-  // ─── Навигация ──────────────────────────────────────────────────────────────
+  // ── Навигация ────────────────────────────────────────────────────────────────
   function goTo(n) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('s'+n).classList.add('active');
-    document.querySelectorAll('.progress-step').forEach((p,i) => {
-      p.classList.remove('active','done');
-      if(i+1 < n) p.classList.add('done');
-      if(i+1 === n) p.classList.add('active');
+    document.getElementById('s' + n).classList.add('active');
+    document.querySelectorAll('.progress-step').forEach((p, i) => {
+      p.classList.remove('active', 'done');
+      if (i + 1 < n) p.classList.add('done');
+      if (i + 1 === n) p.classList.add('active');
     });
-    if (n === 4) renderSummary();
-    window.scrollTo(0,0);
+    if (n === 3) renderSummary();
+    window.scrollTo(0, 0);
   }
 
-  // ─── Экран 1: Оружие ────────────────────────────────────────────────────────
+  // ── Выбор оружия ─────────────────────────────────────────────────────────────
   function selectWeapon(el, type) {
     document.querySelectorAll('.weapon-btn:not(.sub-btn)').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
-    currentWeaponType = type;
-    currentWeaponLabel = el.querySelector('.name').textContent.trim();
+    formWeaponType  = type;
+    formWeaponLabel = el.querySelector('.name').textContent.trim();
 
-    ['knifeSubCard','knifeNameCard','gloveSubCard','gloveNameCard',
-     'agentSubCard','agentNameCard','otherInputCard'].forEach(id => {
-      document.getElementById(id).style.display = 'none';
-    });
-    document.getElementById('qualityCard').style.display = 'block';
+    const subCards = ['knifeSubCard','knifeNameCard','gloveSubCard','gloveNameCard','agentSubCard','agentNameCard','otherInputCard'];
+    subCards.forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById('qualityCard').style.display  = 'block';
     document.getElementById('skinNameCard').style.display = 'block';
     document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
 
     if (type === 'knife') {
-      document.getElementById('knifeSubCard').style.display = 'block';
-      document.getElementById('skinNameCard').style.display = 'none';
+      document.getElementById('knifeSubCard').style.display  = 'block';
+      document.getElementById('skinNameCard').style.display  = 'none';
     } else if (type === 'gloves') {
-      document.getElementById('gloveSubCard').style.display = 'block';
-      document.getElementById('skinNameCard').style.display = 'none';
+      document.getElementById('gloveSubCard').style.display  = 'block';
+      document.getElementById('skinNameCard').style.display  = 'none';
     } else if (type === 'agent') {
-      document.getElementById('agentSubCard').style.display = 'block';
-      document.getElementById('qualityCard').style.display = 'none';
-      document.getElementById('skinNameCard').style.display = 'none';
+      document.getElementById('agentSubCard').style.display  = 'block';
+      document.getElementById('qualityCard').style.display   = 'none';
+      document.getElementById('skinNameCard').style.display  = 'none';
     } else if (type === 'other') {
       document.getElementById('otherInputCard').style.display = 'block';
-      document.getElementById('skinNameCard').style.display = 'none';
+      document.getElementById('skinNameCard').style.display   = 'none';
     }
   }
 
   function selectSub(el, type) {
-    const cardId = type === 'knife' ? 'knifeSubCard' : type === 'glove' ? 'gloveSubCard' : 'agentSubCard';
-    document.querySelectorAll('#' + cardId + ' .sub-btn').forEach(b => b.classList.remove('selected'));
+    const cardMap = { knife: 'knifeSubCard', glove: 'gloveSubCard', agent: 'agentSubCard' };
+    document.querySelectorAll('#' + cardMap[type] + ' .sub-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
-    if (type === 'knife') document.getElementById('knifeNameCard').style.display = 'block';
-    if (type === 'glove') document.getElementById('gloveNameCard').style.display = 'block';
-    if (type === 'agent') document.getElementById('agentNameCard').style.display = 'block';
+    if (type === 'knife')  document.getElementById('knifeNameCard').style.display = 'block';
+    if (type === 'glove')  document.getElementById('gloveNameCard').style.display = 'block';
+    if (type === 'agent')  document.getElementById('agentNameCard').style.display = 'block';
   }
 
   function selectQuality(el) {
@@ -860,109 +726,235 @@
     el.classList.add('selected');
   }
 
+  // ── Форма: трейд-бан ─────────────────────────────────────────────────────────
+  function selectFormTB(hasTB) {
+    formTradeBan = hasTB;
+    formBanDays  = null;
+    document.getElementById('formTbNo').classList.toggle('selected', !hasTB);
+    document.getElementById('formTbYes').classList.toggle('selected', hasTB);
+    const grid = document.getElementById('formDaysGrid');
+    grid.classList.toggle('visible', hasTB);
+    document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+  }
+
+  function selectFormDay(el) {
+    document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    formBanDays = parseInt(el.textContent.trim());
+  }
+
+  // ── Загрузка скрина ───────────────────────────────────────────────────────────
+  function triggerFileInput() {
+    document.getElementById('fileInput').click();
+  }
+
+  async function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const zone     = document.getElementById('photoZone');
+    const status   = document.getElementById('photoStatus');
+    const nameInput = document.getElementById('skinNameInput');
+
+    zone.classList.add('loading');
+    zone.querySelector('.ph-icon').innerHTML = '<span class="spinner"></span>';
+    status.className = 'ph-status';
+    status.textContent = 'Распознаю скин...';
+
+    try {
+      // Конвертируем в base64
+      const base64 = await fileToBase64(file);
+      const mediaType = file.type || 'image/jpeg';
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, media_type: mediaType }),
+      });
+
+      if (!response.ok) throw new Error('Сервер вернул ошибку ' + response.status);
+
+      const data = await response.json();
+
+      if (data.error || !data.skin) {
+        throw new Error('Скин не распознан');
+      }
+
+      // Вставляем результат
+      nameInput.value = data.skin;
+
+      // Если оружие ещё не выбрано вручную — подсвечиваем что получили
+      const qualityMap = { FN: 0, MW: 1, FT: 2, WW: 3, BS: 4 };
+      if (data.quality && qualityMap[data.quality] !== undefined) {
+        const qBtns = document.querySelectorAll('.quality-btn');
+        qBtns.forEach(b => b.classList.remove('selected'));
+        qBtns[qualityMap[data.quality]].classList.add('selected');
+      }
+
+      zone.classList.remove('loading');
+      zone.classList.add('success');
+      zone.querySelector('.ph-icon').textContent = '✅';
+      status.className = 'ph-status ok';
+      status.textContent = `${data.weapon || ''} | ${data.skin} (${data.quality || ''})`;
+
+    } catch (err) {
+      zone.classList.remove('loading');
+      zone.classList.add('error');
+      zone.querySelector('.ph-icon').textContent = '❌';
+      status.className = 'ph-status err';
+      status.textContent = err.message || 'Ошибка распознавания';
+    }
+
+    // Сбрасываем input чтобы можно было загрузить снова
+    event.target.value = '';
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result); // data:image/...;base64,...
+      reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── Показать/скрыть форму добавления ─────────────────────────────────────────
   function showAddSkin() {
     const f = document.getElementById('addForm');
     const isHidden = f.style.display === 'none' || f.style.display === '';
     f.style.display = isHidden ? 'block' : 'none';
-    // Сброс формы
     if (isHidden) resetAddForm();
   }
 
   function resetAddForm() {
-    currentWeaponType = null;
-    currentWeaponLabel = null;
+    formWeaponType  = null;
+    formWeaponLabel = null;
+    formTradeBan    = false;
+    formBanDays     = null;
+
     document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('selected'));
     document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
+
     ['knifeSubCard','knifeNameCard','gloveSubCard','gloveNameCard',
      'agentSubCard','agentNameCard','otherInputCard'].forEach(id => {
       document.getElementById(id).style.display = 'none';
     });
-    document.getElementById('qualityCard').style.display = 'block';
+
+    document.getElementById('qualityCard').style.display  = 'block';
     document.getElementById('skinNameCard').style.display = 'block';
-    document.querySelectorAll('.skin-input').forEach(i => i.value = '');
-    document.querySelectorAll('.quality-btn').forEach((b,i) => {
+
+    // Сброс инпутов
+    ['skinNameInput','knifeNameInput','gloveNameInput','agentNameInput','otherNameInput'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    // Сброс качества
+    document.querySelectorAll('.quality-btn').forEach((b, i) => {
       b.classList.toggle('selected', i === 0);
     });
+
+    // Сброс ТБ
+    document.getElementById('formTbNo').classList.add('selected');
+    document.getElementById('formTbYes').classList.remove('selected');
+    document.getElementById('formDaysGrid').classList.remove('visible');
+    document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+
+    // Сброс фото зоны
+    const zone = document.getElementById('photoZone');
+    zone.className = 'photo-zone';
+    zone.querySelector('.ph-icon').textContent = '📷';
+    document.getElementById('photoStatus').textContent = '';
+    document.getElementById('fileInput').value = '';
   }
 
+  // ── Добавить скин в список ────────────────────────────────────────────────────
   function addSkin() {
-    // ── Собираем данные ──
-    const weaponEl = document.querySelector('.weapon-btn:not(.sub-btn).selected');
-    if (!weaponEl) { alert('Выбери оружие'); return; }
+    const type = formWeaponType;
 
-    const type = currentWeaponType;
-    let weapon = currentWeaponLabel;
+    if (!type) { alert('Выбери оружие'); return; }
+
+    let weapon   = formWeaponLabel;
     let skinName = '';
-    let quality = '';
+    let quality  = '';
 
     if (type === 'knife') {
       const subEl = document.querySelector('#knifeSubCard .sub-btn.selected');
       if (!subEl) { alert('Выбери тип ножа'); return; }
-      weapon = 'Нож: ' + subEl.querySelector('.name').textContent.trim();
-      const inp = document.querySelector('#knifeNameCard .skin-input');
-      skinName = inp ? inp.value.trim() : '';
+      weapon   = 'Нож: ' + subEl.querySelector('.name').textContent.trim();
+      skinName = document.getElementById('knifeNameInput').value.trim();
       if (!skinName) { alert('Введи название скина ножа'); return; }
-      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+
     } else if (type === 'gloves') {
       const subEl = document.querySelector('#gloveSubCard .sub-btn.selected');
       if (!subEl) { alert('Выбери тип перчаток'); return; }
-      weapon = 'Перчи: ' + subEl.querySelector('.name').textContent.trim();
-      const inp = document.querySelector('#gloveNameCard .skin-input');
-      skinName = inp ? inp.value.trim() : '';
+      weapon   = 'Перчи: ' + subEl.querySelector('.name').textContent.trim();
+      skinName = document.getElementById('gloveNameInput').value.trim();
       if (!skinName) { alert('Введи название скина перчаток'); return; }
-      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+
     } else if (type === 'agent') {
       const subEl = document.querySelector('#agentSubCard .sub-btn.selected');
       if (!subEl) { alert('Выбери фракцию агента'); return; }
-      const faction = subEl.querySelector('.ag-name').textContent.trim();
-      const inp = document.querySelector('#agentNameCard .skin-input');
-      skinName = inp ? inp.value.trim() : '';
+      weapon   = 'Агент (' + subEl.querySelector('.ag-name').textContent.trim() + ')';
+      skinName = document.getElementById('agentNameInput').value.trim();
       if (!skinName) { alert('Введи имя агента'); return; }
-      weapon = 'Агент (' + faction + ')';
-      quality = '—';
+      quality  = '—';
+
     } else if (type === 'other') {
-      const inp = document.querySelector('#otherInputCard .skin-input');
-      skinName = inp ? inp.value.trim() : '';
+      skinName = document.getElementById('otherNameInput').value.trim();
       if (!skinName) { alert('Введи название'); return; }
-      weapon = 'Другое';
+      weapon  = 'Другое';
       quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+
     } else {
-      // Обычное оружие
-      const inp = document.querySelector('#skinNameCard .skin-input');
-      skinName = inp ? inp.value.trim() : '';
+      skinName = document.getElementById('skinNameInput').value.trim();
       if (!skinName) { alert('Введи название скина'); return; }
-      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
     }
 
-    state.skins.push({ weapon, skinName, quality });
-    renderSkinsList();
+    // ТБ: если выбрано "Есть" — обязательно указать дни
+    if (formTradeBan && !formBanDays) {
+      alert('Выбери количество дней трейд-бана'); return;
+    }
 
+    state.skins.push({
+      weapon,
+      skinName,
+      quality,
+      tradeBan: formTradeBan,
+      banDays:  formBanDays,
+    });
+
+    renderSkinsList();
     document.getElementById('addForm').style.display = 'none';
-    document.getElementById('s1Next').style.opacity = '1';
-    document.getElementById('s1Next').style.pointerEvents = 'auto';
+    document.getElementById('s1Next').disabled = false;
   }
+
+  // ── Рендер списка скинов ──────────────────────────────────────────────────────
+  const qualityFullName = { FN:'Factory New', MW:'Minimal Wear', FT:'Field-Tested', WW:'Well-Worn', BS:'Battle-Scarred', '—':'—' };
 
   function renderSkinsList() {
     const list = document.getElementById('skinsList');
     list.innerHTML = '';
     state.skins.forEach((skin, idx) => {
-      const label = quality => ({FN:'Factory New',MW:'Minimal Wear',FT:'Field-Tested',WW:'Well-Worn',BS:'Battle-Scarred','—':'—'}[quality] || quality);
+      const tbText = skin.tradeBan ? `ТБ: ${skin.banDays} дн.` : 'Без ТБ';
+      const qualText = qualityFullName[skin.quality] || skin.quality;
       const div = document.createElement('div');
       div.className = 'skin-item';
       div.innerHTML = `
         <div class="si-info">
           <div class="si-name">${skin.weapon} | ${skin.skinName}</div>
-          <div class="si-quality">${label(skin.quality)}</div>
+          <div class="si-meta">${qualText} · ${tbText}</div>
         </div>
         <button class="si-remove" onclick="removeSkin(${idx})">✕</button>
       `;
       list.appendChild(div);
     });
 
-    // Если скинов нет — заблокировать "Далее"
     const hasAny = state.skins.length > 0;
-    document.getElementById('s1Next').style.opacity = hasAny ? '1' : '0.4';
-    document.getElementById('s1Next').style.pointerEvents = hasAny ? 'auto' : 'none';
+    document.getElementById('s1Next').disabled = !hasAny;
   }
 
   function removeSkin(idx) {
@@ -970,98 +962,192 @@
     renderSkinsList();
   }
 
-  // ─── Экран 2: Трейд-бан ─────────────────────────────────────────────────────
-  function selectTB(hasTB) {
-    state.tradeBan = hasTB;
-    document.getElementById('tbNo').classList.toggle('selected', !hasTB);
-    document.getElementById('tbYes').classList.toggle('selected', hasTB);
-    document.getElementById('daysBlock').style.display = hasTB ? 'block' : 'none';
-    if (!hasTB) {
-      state.banDays = null;
-      document.getElementById('tbNext').style.opacity = '1';
-      document.getElementById('tbNext').style.pointerEvents = 'auto';
-    } else {
-      // Ждём выбора дней
-      const daySelected = document.querySelector('.day-btn.selected');
-      const canProceed = !!daySelected;
-      document.getElementById('tbNext').style.opacity = canProceed ? '1' : '0.4';
-      document.getElementById('tbNext').style.pointerEvents = canProceed ? 'auto' : 'none';
-    }
-  }
-
-  function selectDay(el) {
-    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-    state.banDays = parseInt(el.textContent.trim());
-    document.getElementById('tbNext').style.opacity = '1';
-    document.getElementById('tbNext').style.pointerEvents = 'auto';
-  }
-
-  // ─── Экран 3: Оплата ────────────────────────────────────────────────────────
+  // ── Оплата ───────────────────────────────────────────────────────────────────
   function selectPayment(el) {
     document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
     state.payment = el.querySelector('.p-name').textContent.trim();
-    document.getElementById('s3Next').style.opacity = '1';
-    document.getElementById('s3Next').style.pointerEvents = 'auto';
+    document.getElementById('s2Next').disabled = false;
   }
 
-  // ─── Экран 4: Итог ──────────────────────────────────────────────────────────
+  // ── Итог ─────────────────────────────────────────────────────────────────────
   function renderSummary() {
-    const summaryEl = document.querySelector('.summary');
-    const banText = state.tradeBan
-      ? `Да, ${state.banDays} дн.`
-      : 'Нет';
+    const block = document.getElementById('summaryBlock');
 
-    const skinsHtml = state.skins.map(s => `
-      <div class="summary-row">
-        <span class="s-label">${s.weapon} | ${s.skinName}</span>
-        <span class="s-value">${s.quality}</span>
-      </div>
-    `).join('');
+    const skinsHtml = state.skins.map(s => {
+      const tbText  = s.tradeBan ? `ТБ ${s.banDays} дн.` : 'Без ТБ';
+      const qualAbbr = s.quality;
+      return `
+        <div class="summary-row">
+          <span class="s-label">${s.weapon} | ${s.skinName}</span>
+          <span class="s-value">${qualAbbr} · ${tbText}</span>
+        </div>
+      `;
+    }).join('');
 
-    summaryEl.innerHTML = `
+    block.innerHTML = `
       <div class="summary-row">
         <span class="s-label">Скинов</span>
         <span class="s-value">${state.skins.length} шт.</span>
       </div>
       ${skinsHtml}
       <div class="summary-row">
-        <span class="s-label">Трейд-бан</span>
-        <span class="s-value">${banText}</span>
-      </div>
-      <div class="summary-row">
         <span class="s-label">Оплата</span>
         <span class="s-value">${state.payment || '—'}</span>
       </div>
       <div class="summary-row total">
-        <span class="s-label">Заявка принята</span>
+        <span class="s-label">Статус</span>
         <span class="s-value">Ждите оценки</span>
       </div>
     `;
   }
 
-  // ─── Отправка ────────────────────────────────────────────────────────────────
+  // ── Быстрое добавление по фото ───────────────────────────────────────────────
+  let pendingRecognized = null; // { weapon, skinName, quality } — ждёт подтверждения
+  let confirmTradeBan = false;
+  let confirmBanDays  = null;
+
+  function triggerQuickPhoto() {
+    // Скрываем ручную форму если открыта
+    document.getElementById('addForm').style.display = 'none';
+    document.getElementById('quickPhotoInput').click();
+  }
+
+  async function handleQuickPhoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const card = document.getElementById('confirmCard');
+
+    // Показываем карточку в состоянии загрузки
+    card.classList.add('visible');
+    document.getElementById('ccWeapon').textContent  = '⏳ распознаю...';
+    document.getElementById('ccSkin').textContent    = '—';
+    document.getElementById('ccQuality').textContent = '—';
+    resetConfirmTB();
+
+    try {
+      const base64   = await fileToBase64(file);
+      const mediaType = file.type || 'image/jpeg';
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, media_type: mediaType }),
+      });
+
+      if (!response.ok) throw new Error('Ошибка сервера ' + response.status);
+
+      const data = await response.json();
+      if (data.error || !data.skin) throw new Error('Скин не распознан');
+
+      pendingRecognized = {
+        weapon:   data.weapon || 'Неизвестно',
+        skinName: data.skin,
+        quality:  data.quality || 'FN',
+      };
+
+      document.getElementById('ccWeapon').textContent  = pendingRecognized.weapon;
+      document.getElementById('ccSkin').textContent    = pendingRecognized.skinName;
+      document.getElementById('ccQuality').textContent = pendingRecognized.quality;
+
+    } catch (err) {
+      document.getElementById('ccWeapon').textContent  = '❌ ' + (err.message || 'Ошибка');
+      document.getElementById('ccSkin').textContent    = 'Попробуй ещё раз или добавь вручную';
+      document.getElementById('ccQuality').textContent = '—';
+      pendingRecognized = null;
+    }
+
+    event.target.value = '';
+  }
+
+  function selectConfirmTB(hasTB) {
+    confirmTradeBan = hasTB;
+    confirmBanDays  = null;
+    document.getElementById('ccTbNo').classList.toggle('selected', !hasTB);
+    document.getElementById('ccTbYes').classList.toggle('selected', hasTB);
+    const grid = document.getElementById('ccDaysGrid');
+    grid.classList.toggle('visible', hasTB);
+    document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+  }
+
+  function selectConfirmDay(el) {
+    document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    confirmBanDays = parseInt(el.textContent.trim());
+  }
+
+  function resetConfirmTB() {
+    confirmTradeBan = false;
+    confirmBanDays  = null;
+    document.getElementById('ccTbNo').classList.add('selected');
+    document.getElementById('ccTbYes').classList.remove('selected');
+    document.getElementById('ccDaysGrid').classList.remove('visible');
+    document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+  }
+
+  function confirmRecognized() {
+    if (!pendingRecognized) { cancelConfirm(); return; }
+    if (confirmTradeBan && !confirmBanDays) { alert('Выбери количество дней трейд-бана'); return; }
+
+    state.skins.push({
+      weapon:   pendingRecognized.weapon,
+      skinName: pendingRecognized.skinName,
+      quality:  pendingRecognized.quality,
+      tradeBan: confirmTradeBan,
+      banDays:  confirmBanDays,
+    });
+
+    renderSkinsList();
+    cancelConfirm();
+  }
+
+  function cancelConfirm() {
+    pendingRecognized = null;
+    document.getElementById('confirmCard').classList.remove('visible');
+    resetConfirmTB();
+  }
+
+  // ── Ctrl+V: вставка скрина из буфера ────────────────────────────────────────
+  document.addEventListener('paste', (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) return;
+        // Всегда идёт через быстрый путь с карточкой подтверждения
+        handleQuickPhoto({ target: { files: [file], value: '' } });
+        break;
+      }
+    }
+  });
+
+  // ── Отправка ─────────────────────────────────────────────────────────────────
   function submitOrder() {
-    if (state.skins.length === 0) { alert('Добавь хотя бы один скин'); return; }
-    if (state.tradeBan === null) { alert('Укажи трейд-бан'); return; }
-    if (!state.payment) { alert('Выбери способ оплаты'); return; }
+    if (!state.skins.length) { alert('Добавь хотя бы один скин'); return; }
+    if (!state.payment)      { alert('Выбери способ оплаты'); return; }
 
     const payload = {
-      skins: state.skins,
-      trade_ban: state.tradeBan,
-      ban_days: state.banDays,
+      skins: state.skins.map(s => ({
+        weapon:    s.weapon,
+        skin_name: s.skinName,
+        quality:   s.quality,
+        trade_ban: s.tradeBan,
+        ban_days:  s.banDays,
+      })),
       payment: state.payment,
     };
 
     const jsonStr = JSON.stringify(payload);
 
-    if (tg && tg.sendData) {
+    if (tg?.sendData) {
       tg.sendData(jsonStr);
     } else {
-      // Режим отладки вне Telegram
-      console.log('WebApp payload:', jsonStr);
-      alert('Данные подготовлены (отладка):\n' + jsonStr);
+      console.log('Payload:', jsonStr);
+      alert('Данные (отладка):\n' + jsonStr);
     }
   }
 </script>
