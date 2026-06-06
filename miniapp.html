@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Скупка скинов</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #e8b84b;
+    --accent2: #c49a2a;
+    --text: #e8e8f0;
+    --text2: #888899;
+    --danger: #e84b4b;
+    --success: #4be87a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .header-text h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+  }
+
+  .header-text p {
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+  }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+
+  .progress-step {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+
+  .progress-step.active { background: var(--accent); }
+  .progress-step.done { background: var(--accent2); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .weapon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .weapon-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .weapon-btn .icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .weapon-btn .icon img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    filter: brightness(0.9);
+  }
+
+  .weapon-btn .name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+  }
+
+  .weapon-btn.selected {
+    border-color: var(--accent);
+    background: rgba(232, 184, 75, 0.08);
+  }
+
+  .weapon-btn.selected .name { color: var(--accent); }
+  .weapon-btn:hover { border-color: var(--accent2); }
+
+  .quality-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .quality-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .quality-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .quality-btn .q-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .quality-btn .q-abbr { font-size: 11px; color: var(--text2); }
+  .quality-btn.selected { border-color: var(--accent); background: rgba(232, 184, 75, 0.08); }
+
+  .input-wrap { position: relative; }
+
+  .skin-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .skin-input:focus { border-color: var(--accent); }
+  .skin-input::placeholder { color: var(--text2); }
+
+  .photo-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+
+  .photo-zone:hover { border-color: var(--accent); }
+  .photo-zone .ph-icon { font-size: 28px; margin-bottom: 6px; }
+  .photo-zone p { font-size: 12px; color: var(--text2); }
+
+  .skins-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .skin-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .skin-item .si-info { flex: 1 }
+  .skin-item .si-name { font-size: 13px; font-weight: 500; }
+  .skin-item .si-quality { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .skin-item .si-remove {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+  }
+
+  .add-skin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    color: var(--text2);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .add-skin-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .payment-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .payment-btn .p-icon { font-size: 22px; margin-bottom: 4px; }
+  .payment-btn .p-name { font-size: 13px; font-weight: 500; }
+  .payment-btn .p-sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
+  .payment-btn.selected { border-color: var(--accent); background: rgba(232, 184, 75, 0.08); }
+
+  .summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+  }
+
+  .summary-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .summary-row .s-label { font-size: 12px; color: var(--text2); }
+  .summary-row .s-value { font-size: 13px; font-weight: 500; }
+  .summary-row.total .s-label { font-size: 13px; color: var(--text); }
+  .summary-row.total .s-value { font-size: 16px; color: var(--accent); font-weight: 700; font-family: 'Rajdhani', sans-serif; }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    color: #0a0a0f;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .submit-btn:hover { background: var(--accent2); }
+  .submit-btn:active { transform: scale(0.98); }
+
+  .nav-btns { display: flex; gap: 8px; margin-top: 16px; }
+
+  .nav-back {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    color: var(--text2);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .nav-next {
+    flex: 2;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    color: #0a0a0f;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+
+  .nav-next:active { transform: scale(0.98); }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+
+  .toggle-label { font-size: 13px; }
+  .toggle-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .toggle {
+    width: 44px;
+    height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle.on { background: var(--accent); }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: left 0.2s;
+  }
+
+  .toggle.on::after { left: 23px; }
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .day-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .day-btn.selected { border-color: var(--accent); background: rgba(232, 184, 75, 0.08); color: var(--accent); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .step-title { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .step-sub { font-size: 12px; color: var(--text2); margin-bottom: 20px; }
+
+  /* Агент список */
+  .agent-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .agent-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .agent-btn .ag-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .agent-btn .ag-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .agent-btn .ag-team { font-size: 10px; color: var(--text2); margin-top: 2px; }
+  .agent-btn.selected { border-color: var(--accent); background: rgba(232, 184, 75, 0.08); }
+
+  /* Поле для другого */
+  .other-input-wrap {
+    margin-top: 10px;
+    display: none;
+  }
+
+  .other-input-wrap.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">💎</div>
+  <div class="header-text">
+    <h1>ZEORGJARD SKUP</h1>
+    <p>Скупка CS2 скинов</p>
+  </div>
+</div>
+
+<div class="progress">
+  <div class="progress-step active" id="p1"></div>
+  <div class="progress-step" id="p2"></div>
+  <div class="progress-step" id="p3"></div>
+  <div class="progress-step" id="p4"></div>
+</div>
+
+<!-- Экран 1 -->
+<div class="screen active" id="s1">
+  <div class="step-title">Добавь скины</div>
+  <div class="step-sub">Выбери оружие и укажи название</div>
+
+  <div class="skins-list" id="skinsList">
+    <div class="skin-item">
+      <div class="si-info">
+        <div class="si-name">AK-47 | Redline</div>
+        <div class="si-quality">Field-Tested</div>
+      </div>
+      <button class="si-remove">✕</button>
+    </div>
+  </div>
+
+  <button class="add-skin-btn" onclick="showAddSkin()">+ Добавить скин</button>
+
+  <div id="addForm" style="display:none; margin-top:14px;">
+
+    <!-- Оружие -->
+    <div class="card">
+      <div class="card-title">Оружие</div>
+      <div class="weapon-grid">
+        <div class="weapon-btn selected" onclick="selectWeapon(this,'ak47')">
+          <span class="icon">🔫</span>
+          <div class="name">AK-47</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'awp')">
+          <span class="icon">🎯</span>
+          <div class="name">AWP</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'knife')">
+          <span class="icon">⚔️</span>
+          <div class="name">Нож</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')">
+          <span class="icon">🔧</span>
+          <div class="name">M4A4</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')">
+          <span class="icon">💨</span>
+          <div class="name">M4A1-S</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')">
+          <span class="icon">🧤</span>
+          <div class="name">Перчи</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'usps')">
+          <span class="icon">🔰</span>
+          <div class="name">USP-S</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')">
+          <span class="icon">💥</span>
+          <div class="name">Desert Eagle</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'agent')">
+          <span class="icon">🕵️</span>
+          <div class="name">Агент</div>
+        </div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'other')">
+          <span class="icon">🎱</span>
+          <div class="name">Другое</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Подтип: нож -->
+    <div class="card" id="knifeSubCard" style="display:none;">
+      <div class="card-title">Тип ножа</div>
+      <div class="weapon-grid">
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🦋</span><div class="name">Butterfly</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🔪</span><div class="name">Karambit</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🗡️</span><div class="name">M9 Bayonet</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">💀</span><div class="name">Skeleton</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🌀</span><div class="name">Stiletto</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🔱</span><div class="name">Talon</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">⚔️</span><div class="name">Bayonet</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🏹</span><div class="name">Huntsman</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🔄</span><div class="name">Flip Knife</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🐻</span><div class="name">Ursus</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🪝</span><div class="name">Gut Knife</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">💫</span><div class="name">Falchion</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🎯</span><div class="name">Classic</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🏕️</span><div class="name">Bowie</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🪢</span><div class="name">Paracord</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🌲</span><div class="name">Survival</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">👥</span><div class="name">Shadow Daggers</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🏜️</span><div class="name">Nomad</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">🗺️</span><div class="name">Navaja</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon">⚡</span><div class="name">Kukri</div></div>
+      </div>
+    </div>
+
+    <!-- Название скина ножа -->
+    <div class="card" id="knifeNameCard" style="display:none;">
+      <div class="card-title">Скин ножа</div>
+      <input class="skin-input" type="text" placeholder="Например: Fade, Doppler, Tiger Tooth...">
+    </div>
+
+    <!-- Подтип: перчатки -->
+    <div class="card" id="gloveSubCard" style="display:none;">
+      <div class="card-title">Тип перчаток</div>
+      <div class="weapon-grid">
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🧤</span><div class="name">Sport Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🏍️</span><div class="name">Moto Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🤜</span><div class="name">Hand Wraps</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🚗</span><div class="name">Driver Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🎖️</span><div class="name">Specialist</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🩸</span><div class="name">Bloodhound</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🐍</span><div class="name">Hydra Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🦷</span><div class="name">Broken Fang</div></div>
+      </div>
+    </div>
+
+    <!-- Название скина перчаток -->
+    <div class="card" id="gloveNameCard" style="display:none;">
+      <div class="card-title">Скин перчаток</div>
+      <input class="skin-input" type="text" placeholder="Например: Pandora's Box, Crimson Weave...">
+    </div>
+
+    <!-- Подтип: агенты — фракция -->
+    <div class="card" id="agentSubCard" style="display:none;">
+      <div class="card-title">Фракция агента</div>
+      <div class="agent-list">
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">🎩</div>
+          <div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">🌿</div>
+          <div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">⭐</div>
+          <div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">🗡️</div>
+          <div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">🇧🇷</div>
+          <div><div class="ag-name">Brazilian 1st Battalion</div><div class="ag-team">T-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">🕵️</div>
+          <div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">🐸</div>
+          <div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">⚜️</div>
+          <div><div class="ag-name">Gendarmerie Nationale</div><div class="ag-team">CT-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">🛡️</div>
+          <div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div>
+        </div>
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')">
+          <div class="ag-icon">🌊</div>
+          <div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Поле имени агента -->
+    <div class="card" id="agentNameCard" style="display:none;">
+      <div class="card-title">Имя агента</div>
+      <input class="skin-input" type="text" placeholder="Например: Sir Bloody Loudmouth Darryl...">
+    </div>
+
+    <!-- Поле "Другое" -->
+    <div class="card" id="otherInputCard" style="display:none;">
+      <div class="card-title">Название</div>
+      <input class="skin-input" type="text" placeholder="Введи название оружия...">
+    </div>
+
+    <!-- Качество (скрыто для агентов) -->
+    <div class="card" id="qualityCard">
+      <div class="card-title">Качество</div>
+      <div class="quality-list">
+        <div class="quality-btn selected" onclick="selectQuality(this)">
+          <div class="quality-dot" style="background:#4be87a"></div>
+          <div class="q-name">Factory New</div><div class="q-abbr">FN</div>
+        </div>
+        <div class="quality-btn" onclick="selectQuality(this)">
+          <div class="quality-dot" style="background:#4b9ae8"></div>
+          <div class="q-name">Minimal Wear</div><div class="q-abbr">MW</div>
+        </div>
+        <div class="quality-btn" onclick="selectQuality(this)">
+          <div class="quality-dot" style="background:#e8b84b"></div>
+          <div class="q-name">Field-Tested</div><div class="q-abbr">FT</div>
+        </div>
+        <div class="quality-btn" onclick="selectQuality(this)">
+          <div class="quality-dot" style="background:#e87a4b"></div>
+          <div class="q-name">Well-Worn</div><div class="q-abbr">WW</div>
+        </div>
+        <div class="quality-btn" onclick="selectQuality(this)">
+          <div class="quality-dot" style="background:#e84b4b"></div>
+          <div class="q-name">Battle-Scarred</div><div class="q-abbr">BS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Название скина -->
+    <div class="card" id="skinNameCard">
+      <div class="card-title">Название скина</div>
+      <div class="input-wrap">
+        <input class="skin-input" type="text" placeholder="Например: Redline, Asiimov...">
+      </div>
+      <div class="photo-zone">
+        <div class="ph-icon">📷</div>
+        <p>Отправить скрин для автораспознавания</p>
+      </div>
+    </div>
+
+    <button class="nav-next" onclick="addSkin()" style="width:100%">Добавить в список</button>
+  </div>
+
+  <div class="nav-btns">
+    <button class="nav-next" id="s1Next" style="opacity:0.4;pointer-events:none;" onclick="goTo(2)">Далее →</button>
+  </div>
+</div>
+<div class="screen" id="s2">
+  <div class="step-title">Трейд-бан</div>
+  <div class="step-sub">Есть ли ограничение на передачу?</div>
+
+  <div class="payment-grid" style="margin-bottom:12px;">
+    <div class="payment-btn" id="tbNo" onclick="selectTB(false)">
+      <div class="p-icon">✅</div>
+      <div class="p-name">Нет</div>
+      <div class="p-sub">Можно передать сразу</div>
+    </div>
+    <div class="payment-btn" id="tbYes" onclick="selectTB(true)">
+      <div class="p-icon">⏳</div>
+      <div class="p-name">Да</div>
+      <div class="p-sub">Есть ограничение</div>
+    </div>
+  </div>
+
+  <div id="daysBlock" style="display:none;">
+    <div class="card">
+      <div class="card-title">Количество дней</div>
+      <div class="days-grid">
+        <div class="day-btn" onclick="selectDay(this)">1</div>
+        <div class="day-btn" onclick="selectDay(this)">2</div>
+        <div class="day-btn" onclick="selectDay(this)">3</div>
+        <div class="day-btn" onclick="selectDay(this)">4</div>
+        <div class="day-btn" onclick="selectDay(this)">5</div>
+        <div class="day-btn" onclick="selectDay(this)">6</div>
+        <div class="day-btn" onclick="selectDay(this)">7</div>
+        <div class="day-btn" onclick="selectDay(this)">8</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="nav-back" onclick="goTo(1)">← Назад</button>
+    <button class="nav-next" id="tbNext" style="opacity:0.4;pointer-events:none;" onclick="goTo(3)">Далее →</button>
+  </div>
+</div>
+
+<!-- Экран 3: Оплата -->
+<div class="screen" id="s3">
+  <div class="step-title">Способ оплаты</div>
+  <div class="step-sub">Как хочешь получить деньги?</div>
+
+  <div class="payment-grid">
+    <div class="payment-btn" onclick="selectPayment(this)">
+      <div class="p-icon">₿</div>
+      <div class="p-name">Крипта</div>
+      <div class="p-sub">USDT, BTC и др.</div>
+    </div>
+    <div class="payment-btn" onclick="selectPayment(this)">
+      <div class="p-icon">💳</div>
+      <div class="p-name">Карта</div>
+      <div class="p-sub">от 2000₽</div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="nav-back" onclick="goTo(2)">← Назад</button>
+    <button class="nav-next" id="s3Next" style="opacity:0.4;pointer-events:none;" onclick="goTo(4)">Далее →</button>
+  </div>
+</div>
+
+<!-- Экран 4: Итог -->
+<div class="screen" id="s4">
+  <div class="step-title">Итоговая заявка</div>
+  <div class="step-sub">Проверь данные перед отправкой</div>
+
+  <div class="summary">
+    <div class="summary-row">
+      <span class="s-label">Скины</span>
+      <span class="s-value">1 шт.</span>
+    </div>
+    <div class="summary-row">
+      <span class="s-label">AK-47 | Redline (FT)</span>
+      <span class="s-value">≈ 12.50 $</span>
+    </div>
+    <div class="summary-row">
+      <span class="s-label">Трейд-бан</span>
+      <span class="s-value">Нет</span>
+    </div>
+    <div class="summary-row">
+      <span class="s-label">Оплата</span>
+      <span class="s-value">Крипта</span>
+    </div>
+    <div class="summary-row total">
+      <span class="s-label">Предварительно</span>
+      <span class="s-value">≈ 12.50 $</span>
+    </div>
+  </div>
+
+  <button class="submit-btn">ОТПРАВИТЬ ЗАЯВКУ</button>
+
+  <div class="nav-btns" style="margin-top:10px;">
+    <button class="nav-back" onclick="goTo(3)">← Назад</button>
+  </div>
+</div>
+
+<script>
+  function goTo(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('s'+n).classList.add('active');
+    document.querySelectorAll('.progress-step').forEach((p,i) => {
+      p.classList.remove('active','done');
+      if(i+1 < n) p.classList.add('done');
+      if(i+1 === n) p.classList.add('active');
+    });
+    window.scrollTo(0,0);
+  }
+
+  function selectWeapon(el, type) {
+    document.querySelectorAll('.weapon-btn:not(.sub-btn)').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+
+    // Скрыть все подтипы
+    document.getElementById('knifeSubCard').style.display = 'none';
+    document.getElementById('knifeNameCard').style.display = 'none';
+    document.getElementById('gloveSubCard').style.display = 'none';
+    document.getElementById('gloveNameCard').style.display = 'none';
+    document.getElementById('agentSubCard').style.display = 'none';
+    document.getElementById('agentNameCard').style.display = 'none';
+    document.getElementById('otherInputCard').style.display = 'none';
+    document.getElementById('qualityCard').style.display = 'block';
+    document.getElementById('skinNameCard').style.display = 'block';
+
+    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
+
+    if (type === 'knife') {
+      document.getElementById('knifeSubCard').style.display = 'block';
+      document.getElementById('qualityCard').style.display = 'block';
+      document.getElementById('skinNameCard').style.display = 'none';
+    } else if (type === 'gloves') {
+      document.getElementById('gloveSubCard').style.display = 'block';
+      document.getElementById('qualityCard').style.display = 'block';
+      document.getElementById('skinNameCard').style.display = 'none';
+    } else if (type === 'agent') {
+      document.getElementById('agentSubCard').style.display = 'block';
+      document.getElementById('qualityCard').style.display = 'none';
+      document.getElementById('skinNameCard').style.display = 'none';
+    }
+    if (type === 'other') {
+      document.getElementById('otherInputCard').style.display = 'block';
+    }
+  }
+
+  function selectSub(el, type) {
+    const cardId = type === 'knife' ? 'knifeSubCard' : type === 'glove' ? 'gloveSubCard' : 'agentSubCard';
+    document.querySelectorAll('#' + cardId + ' .sub-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    if (type === 'knife') document.getElementById('knifeNameCard').style.display = 'block';
+    if (type === 'glove') document.getElementById('gloveNameCard').style.display = 'block';
+    if (type === 'agent') document.getElementById('agentNameCard').style.display = 'block';
+  }
+
+  function selectQuality(el) {
+    document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function selectPayment(el) {
+    document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('s3Next').style.opacity = '1';
+    document.getElementById('s3Next').style.pointerEvents = 'auto';
+  }
+
+  function selectDay(el) {
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('tbNext').style.opacity = '1';
+    document.getElementById('tbNext').style.pointerEvents = 'auto';
+  }
+
+  function selectTB(hasTB) {
+    document.getElementById('tbNo').classList.toggle('selected', !hasTB);
+    document.getElementById('tbYes').classList.toggle('selected', hasTB);
+    document.getElementById('daysBlock').style.display = hasTB ? 'block' : 'none';
+    // Если выбрали "нет" или выбрали "да" и уже выбрали день — разблокировать кнопку
+    const daySelected = document.querySelector('.day-btn.selected');
+    const canProceed = !hasTB || daySelected;
+    document.getElementById('tbNext').style.opacity = canProceed ? '1' : '0.4';
+    document.getElementById('tbNext').style.pointerEvents = canProceed ? 'auto' : 'none';
+  }
+
+  function showAddSkin() {
+    const f = document.getElementById('addForm');
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function addSkin() {
+    document.getElementById('addForm').style.display = 'none';
+    document.getElementById('s1Next').style.opacity = '1';
+    document.getElementById('s1Next').style.pointerEvents = 'auto';
+  }
+</script>
+</body>
+</html>
