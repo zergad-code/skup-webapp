@@ -423,6 +423,19 @@
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
+  .agent-group-btn {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--accent2);
+    border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; transition: all 0.2s; color: var(--text);
+    font-family: 'Inter', sans-serif;
+  }
+  .agent-group-btn:hover { border-color: var(--accent); background: rgba(232,184,75,0.05); }
+  .agent-group-btn .ag-arrow { color: var(--accent); font-size: 10px; transition: transform 0.2s; }
+  .agent-group-btn.open .ag-arrow { transform: rotate(90deg); }
+  .agent-sublist { padding-left: 12px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+
 </style>
 </head>
 <body>
@@ -481,17 +494,17 @@
     <!-- Пикер оружия -->
     <div id="ccWeaponPicker" style="display:none; margin: 8px 0;">
       <div class="weapon-grid" style="margin-bottom:6px;">
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AK-47')"><span class="icon">🔫</span><div class="name">AK-47</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AWP')"><span class="icon">🎯</span><div class="name">AWP</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcKnife()"><span class="icon">⚔️</span><div class="name">Нож</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A4')"><span class="icon">🔧</span><div class="name">M4A4</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A1-S')"><span class="icon">💨</span><div class="name">M4A1-S</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcGlove()"><span class="icon">🧤</span><div class="name">Перчи</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'USP-S')"><span class="icon">🔰</span><div class="name">USP-S</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Desert Eagle')"><span class="icon">💥</span><div class="name">Desert Eagle</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcAgent()"><span class="icon">🕵️</span><div class="name">Агент</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Glock-18')"><span class="icon">🔫</span><div class="name">Glock-18</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Galil AR')"><span class="icon">⚙️</span><div class="name">Galil AR</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AK-47')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ak-47.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AK-47</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AWP')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AWP</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcKnife()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Нож</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A4</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A1-S')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A1-S</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcGlove()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Перчи</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'USP-S')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">USP-S</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Desert Eagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Desert Eagle</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcAgent()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The Professionals.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Агент</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Glock-18')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Glock-18</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Galil AR')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Galil AR</div></div>
         <div class="weapon-btn cc-wpn-btn" onclick="setCcWeaponCustom()"><span class="icon">🎱</span><div class="name">Другое</div></div>
       </div>
       <!-- Подпикер ножа -->
@@ -524,28 +537,28 @@
       <div id="ccGlovePicker" style="display:none;">
         <div class="card-title" style="font-size:11px;margin-bottom:6px;">Тип перчаток</div>
         <div class="weapon-grid">
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Sport Gloves')"><span class="icon">🧤</span><div class="name">Sport Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Moto Gloves')"><span class="icon">🏍️</span><div class="name">Moto Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hand Wraps')"><span class="icon">🤜</span><div class="name">Hand Wraps</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Driver Gloves')"><span class="icon">🚗</span><div class="name">Driver Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Specialist Gloves')"><span class="icon">🎖️</span><div class="name">Specialist</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bloodhound Gloves')"><span class="icon">🩸</span><div class="name">Bloodhound</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Sport Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sport Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Sport Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Moto Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Moto Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Moto Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hand Wraps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hand Wraps.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Hand Wraps</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Driver Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Driver Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Driver Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Specialist Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Specialist</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bloodhound Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Bloodhound Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Bloodhound</div></div>
           <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hydra Gloves')"><span class="icon">🐍</span><div class="name">Hydra Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Broken Fang Gloves')"><span class="icon">🦷</span><div class="name">Broken Fang</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Broken Fang Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Broken Fang Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Broken Fang</div></div>
         </div>
       </div>
       <!-- Подпикер агентов -->
       <div id="ccAgentPicker" style="display:none;">
         <div class="card-title" style="font-size:11px;margin-bottom:6px;">Фракция</div>
         <div class="agent-list">
-          <div class="agent-btn" onclick="setCcWeapon(this,'The Professionals')"><div class="ag-icon">🎩</div><div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn" onclick="setCcWeapon(this,'Guerrilla Warfare')"><div class="ag-icon">🌿</div><div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn" onclick="setCcWeapon(this,'Elite Crew')"><div class="ag-icon">⭐</div><div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn" onclick="setCcWeapon(this,'Sabre')"><div class="ag-icon">🗡️</div><div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn" onclick="setCcWeapon(this,'FBI')"><div class="ag-icon">🕵️</div><div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn" onclick="setCcWeapon(this,'SEAL Frogman')"><div class="ag-icon">🐸</div><div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn" onclick="setCcWeapon(this,'SWAT')"><div class="ag-icon">🛡️</div><div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn" onclick="setCcWeapon(this,'KSK')"><div class="ag-icon">🌊</div><div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'The Professionals')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The Professionals.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></div><div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'Guerrilla Warfare')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla Warfare.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></div><div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'Elite Crew')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Elite Crew.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></div><div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'Sabre')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></div><div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'FBI')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></div><div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'SEAL Frogman')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SEAL Frogman.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></div><div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'SWAT')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></div><div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'KSK')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/KSK.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></div><div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div></div>
         </div>
       </div>
       <!-- Кастомный инпут для "Другое" -->
@@ -606,17 +619,17 @@
     <div class="card">
       <div class="card-title">Оружие</div>
       <div class="weapon-grid">
-        <div class="weapon-btn" onclick="selectWeapon(this,'ak47')"><span class="icon">🔫</span><div class="name">AK-47</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'awp')"><span class="icon">🎯</span><div class="name">AWP</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'knife')"><span class="icon">⚔️</span><div class="name">Нож</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')"><span class="icon">🔧</span><div class="name">M4A4</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')"><span class="icon">💨</span><div class="name">M4A1-S</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')"><span class="icon">🧤</span><div class="name">Перчи</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'usps')"><span class="icon">🔰</span><div class="name">USP-S</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')"><span class="icon">💥</span><div class="name">Desert Eagle</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'agent')"><span class="icon">🕵️</span><div class="name">Агент</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'glock')"><span class="icon">🔫</span><div class="name">Glock-18</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'galil')"><span class="icon">⚙️</span><div class="name">Galil AR</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'ak47')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ak-47.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AK-47</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'awp')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AWP</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Нож</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A4</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A1-S</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Перчи</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'usps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">USP-S</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Desert Eagle</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'agent')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The Professionals.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Агент</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'glock')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Glock-18</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'galil')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Galil AR</div></div>
         <div class="weapon-btn" onclick="selectWeapon(this,'other')"><span class="icon">🎱</span><div class="name">Другое</div></div>
       </div>
     </div>
@@ -657,14 +670,14 @@
     <div class="card" id="gloveSubCard" style="display:none;">
       <div class="card-title">Тип перчаток</div>
       <div class="weapon-grid">
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🧤</span><div class="name">Sport Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🏍️</span><div class="name">Moto Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🤜</span><div class="name">Hand Wraps</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🚗</span><div class="name">Driver Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🎖️</span><div class="name">Specialist</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🩸</span><div class="name">Bloodhound</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sport Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Sport Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Moto Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Moto Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hand Wraps.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Hand Wraps</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Driver Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Driver Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Specialist</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Bloodhound Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Bloodhound</div></div>
         <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🐍</span><div class="name">Hydra Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon">🦷</span><div class="name">Broken Fang</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Broken Fang Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Broken Fang</div></div>
       </div>
     </div>
 
@@ -676,17 +689,64 @@
     <!-- Подтип агент -->
     <div class="card" id="agentSubCard" style="display:none;">
       <div class="card-title">Фракция агента</div>
-      <div class="agent-list">
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🎩</div><div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🌿</div><div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">⭐</div><div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🗡️</div><div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🇧🇷</div><div><div class="ag-name">Brazilian 1st Battalion</div><div class="ag-team">T-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🕵️</div><div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🐸</div><div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">⚜️</div><div><div class="ag-name">Gendarmerie Nationale</div><div class="ag-team">CT-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🛡️</div><div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div></div>
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')"><div class="ag-icon">🌊</div><div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div></div>
+            <div class="agent-list">
+
+        <!-- FBI group -->
+        <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpFBI')">
+          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:32px;height:32px;object-fit:contain;"></div>
+          <div style="flex:1"><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div>
+          <span class="ag-arrow" id="agGrpFBI-arrow">▶</span>
+        </div>
+        <div class="agent-sublist" id="agGrpFBI" style="display:none;">
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI SWAT</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI Sniper"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI Sniper.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI Sniper</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI HRT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI HRT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI HRT</div><div class="ag-team">CT-side</div></div></div>
+        </div>
+
+        <!-- SWAT/SAS/KSK group -->
+        <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpSWAT')">
+          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div>
+          <div style="flex:1"><div class="ag-name">SWAT / SAS / KSK</div><div class="ag-team">CT-side</div></div>
+          <span class="ag-arrow" id="agGrpSWAT-arrow">▶</span>
+        </div>
+        <div class="agent-sublist" id="agGrpSWAT" style="display:none;">
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SAS"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SAS.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SAS</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="KSK"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/KSK.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="NZSAS"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NZSAS.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">NZSAS</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="NSWC SEAL"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NSWC SEAL.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">NSWC SEAL</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SEAL Frogman"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SEAL Frogman.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Gendarmerie Nationale"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Gendarmerie Nationale.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Gendarmerie Nationale</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="TACP Cavalry"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/TACP Cavalry.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">TACP Cavalry</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="USAF TACP"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/USAF TACP.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">USAF TACP</div><div class="ag-team">CT-side</div></div></div>
+        </div>
+
+        <!-- The Professionals -->
+        <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpProf')">
+          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The Professionals.png" style="width:32px;height:32px;object-fit:contain;"></div>
+          <div style="flex:1"><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div>
+          <span class="ag-arrow" id="agGrpProf-arrow">▶</span>
+        </div>
+        <div class="agent-sublist" id="agGrpProf" style="display:none;">
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="The Professionals"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The Professionals.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div></div>
+        </div>
+
+        <!-- Guerrilla / Elite / Sabre / Phoenix -->
+        <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpT')">
+          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla Warfare.png" style="width:32px;height:32px;object-fit:contain;"></div>
+          <div style="flex:1"><div class="ag-name">Guerrilla / Elite / Sabre</div><div class="ag-team">T-side</div></div>
+          <span class="ag-arrow" id="agGrpT-arrow">▶</span>
+        </div>
+        <div class="agent-sublist" id="agGrpT" style="display:none;">
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Guerrilla Warfare"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla Warfare.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Elite Crew"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Elite Crew.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Sabre"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Sabre Footsoldier"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre Footsoldier.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Sabre Footsoldier</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Phoenix"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Phoenix.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Phoenix</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Brazilian 1st Battalion"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Brazilian 1st Battalion.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Brazilian 1st Battalion</div><div class="ag-team">T-side</div></div></div>
+        </div>
+
       </div>
     </div>
 
@@ -764,7 +824,7 @@
     <div class="payment-btn" onclick="selectPayment(this)">
       <div class="p-icon">💳</div>
       <div class="p-name">Карта</div>
-      <div class="p-sub">от 2000₽</div>
+
     </div>
   </div>
 
@@ -851,6 +911,17 @@
       document.getElementById('otherInputCard').style.display = 'block';
       document.getElementById('skinNameCard').style.display   = 'none';
     }
+  }
+
+  function toggleAgentGroup(groupId) {
+    const list = document.getElementById(groupId);
+    const arrow = document.getElementById(groupId + '-arrow');
+    const btn = list.previousElementSibling;
+    const isOpen = list.style.display !== 'none';
+    list.style.display = isOpen ? 'none' : 'flex';
+    list.style.flexDirection = 'column';
+    list.style.gap = '6px';
+    btn.classList.toggle('open', !isOpen);
   }
 
   function selectSub(el, type) {
@@ -1039,8 +1110,9 @@
 
     } else if (type === 'agent') {
       const subEl = document.querySelector('#agentSubCard .sub-btn.selected');
-      if (!subEl) { alert('Выбери фракцию агента'); return; }
-      weapon   = 'Агент (' + subEl.querySelector('.ag-name').textContent.trim() + ')';
+      if (!subEl) { alert('Выбери агента'); return; }
+      const faction = subEl.dataset.faction || subEl.querySelector('.ag-name').textContent.trim();
+      weapon   = 'Агент (' + faction + ')';
       skinName = document.getElementById('agentNameInput').value.trim();
       if (!skinName) { alert('Введи имя агента'); return; }
       quality  = '—';
