@@ -695,7 +695,11 @@
         <!-- FBI group -->
         <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpFBI')">
           <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div style="flex:1"><div class="ag-name">FBI</div><div class="ag-team">CT-side · 4 агента ▶</div></div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
+            <div class="ag-name">FBI</div>
+            <div class="ag-team">CT-side · 4 агента ▶</div>
+          </div>
         </div>
         <div class="agent-sublist" id="agGrpFBI" style="display:none;">
           <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI</div></div></div>
@@ -707,7 +711,11 @@
         <!-- SWAT/SAS/KSK group -->
         <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpSWAT')">
           <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div style="flex:1"><div class="ag-name">SWAT / SAS / KSK</div><div class="ag-team">CT-side · 9 агентов ▶</div></div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
+            <div class="ag-name">SWAT / SAS / KSK</div>
+            <div class="ag-team">CT-side · 9 агентов ▶</div>
+          </div>
         </div>
         <div class="agent-sublist" id="agGrpSWAT" style="display:none;">
           <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SWAT</div></div></div>
@@ -724,7 +732,11 @@
         <!-- Guerrilla / Elite / Sabre / Phoenix -->
         <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpT')">
           <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div style="flex:1"><div class="ag-name">Guerrilla / Elite / Sabre</div><div class="ag-team">T-side · 6 агентов ▶</div></div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
+            <div class="ag-name">Guerrilla / Elite / Sabre</div>
+            <div class="ag-team">T-side · 6 агентов ▶</div>
+          </div>
         </div>
         <div class="agent-sublist" id="agGrpT" style="display:none;">
           <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Guerrilla Warfare"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Guerrilla Warfare</div></div></div>
@@ -736,9 +748,13 @@
         </div>
 
         <!-- The Professionals — без стрелки, просто кнопка -->
-        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="The Professionals">
+        <div class="agent-group-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="The Professionals">
           <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
+            <div class="ag-name">The Professionals</div>
+            <div class="ag-team">T-side</div>
+          </div>
         </div>
 
       </div>
@@ -1225,8 +1241,9 @@
     const menu = document.getElementById('photoSubmenu');
     const btn  = document.getElementById('photoModeBtn');
     const isVisible = menu.classList.contains('visible');
-    // Скрываем ручную форму если открыта
     document.getElementById('addForm').style.display = 'none';
+    const manualBtn = document.querySelector('.add-skin-btn:not(.photo-mode)');
+    if (manualBtn) manualBtn.classList.remove('active');
     menu.classList.toggle('visible', !isVisible);
     btn.classList.toggle('active', !isVisible);
   }
