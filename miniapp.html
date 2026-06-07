@@ -232,6 +232,26 @@
   }
 
   .add-skin-btn.photo-mode:hover { border-color: var(--accent); }
+  .add-skin-btn.photo-mode.active { border-color: var(--accent); color: var(--accent); background: rgba(232,184,75,0.05); }
+
+  .photo-submenu {
+    display: none;
+    grid-template-columns: 1fr 1fr; gap: 6px;
+    margin-top: 6px;
+  }
+  .photo-submenu.visible { display: grid; }
+
+  .photo-sub-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    background: rgba(232,184,75,0.06);
+    border: 1px solid var(--accent2);
+    border-radius: 10px; padding: 12px 8px;
+    color: var(--accent); font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    width: 100%;
+  }
+  .photo-sub-btn:hover { background: rgba(232,184,75,0.12); border-color: var(--accent); }
+  .photo-sub-btn .psb-icon { font-size: 20px; }
 
   /* ── Карточка подтверждения после распознавания ── */
   .confirm-card {
@@ -418,10 +438,20 @@
 
   <div class="add-btns-row">
     <button class="add-skin-btn" onclick="showAddSkin()">✏️ Вручную</button>
-    <button class="add-skin-btn photo-mode" onclick="triggerQuickPhoto()">📷 По фото</button>
+    <button class="add-skin-btn photo-mode" id="photoModeBtn" onclick="togglePhotoMenu()">📷 По фото</button>
   </div>
 
-  <!-- Скрытый input для быстрого фото -->
+  <!-- Подменю выбора источника фото -->
+  <div class="photo-submenu" id="photoSubmenu">
+    <button class="photo-sub-btn" onclick="triggerMediaLibrary()">
+      <span class="psb-icon">🖼️</span>Медиатека
+    </button>
+    <button class="photo-sub-btn" onclick="pasteFromClipboard()">
+      <span class="psb-icon">📋</span>Вставить
+    </button>
+  </div>
+
+  <!-- Скрытый input для медиатеки -->
   <input type="file" id="quickPhotoInput" accept="image/*" style="display:none;" onchange="handleQuickPhoto(event)">
 
   <!-- Карточка подтверждения распознанного скина -->
@@ -434,7 +464,7 @@
     <div class="confirm-tb">
       <div class="tb-label">Трейд-бан</div>
       <div class="tb-row">
-        <div class="tb-btn selected" id="ccTbNo" onclick="selectConfirmTB(false)">✅ Нет</div>
+        <div class="tb-btn" id="ccTbNo" onclick="selectConfirmTB(false)">✅ Нет</div>
         <div class="tb-btn" id="ccTbYes" onclick="selectConfirmTB(true)">⏳ Есть</div>
       </div>
       <div class="days-grid" id="ccDaysGrid">
@@ -558,7 +588,7 @@
     <div class="card" id="qualityCard">
       <div class="card-title">Качество</div>
       <div class="quality-list">
-        <div class="quality-btn selected" onclick="selectQuality(this)"><div class="quality-dot" style="background:#4be87a"></div><div class="q-name">Factory New</div><div class="q-abbr">FN</div></div>
+        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#4be87a"></div><div class="q-name">Factory New</div><div class="q-abbr">FN</div></div>
         <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#4b9ae8"></div><div class="q-name">Minimal Wear</div><div class="q-abbr">MW</div></div>
         <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e8b84b"></div><div class="q-name">Field-Tested</div><div class="q-abbr">FT</div></div>
         <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e87a4b"></div><div class="q-name">Well-Worn</div><div class="q-abbr">WW</div></div>
@@ -584,7 +614,7 @@
     <div class="card">
       <div class="card-title">Трейд-бан</div>
       <div class="tb-row">
-        <div class="tb-btn selected" id="formTbNo" onclick="selectFormTB(false)">✅ Нет</div>
+        <div class="tb-btn" id="formTbNo" onclick="selectFormTB(false)">✅ Нет</div>
         <div class="tb-btn" id="formTbYes" onclick="selectFormTB(true)">⏳ Есть</div>
       </div>
       <div class="days-grid" id="formDaysGrid">
@@ -667,7 +697,7 @@
   // ── Текущая форма ────────────────────────────────────────────────────────────
   let formWeaponType   = null;
   let formWeaponLabel  = null;
-  let formTradeBan     = false;
+  let formTradeBan     = null;  // null = не выбрано
   let formBanDays      = null;
 
   // ── Навигация ────────────────────────────────────────────────────────────────
@@ -829,7 +859,7 @@
   function resetAddForm() {
     formWeaponType  = null;
     formWeaponLabel = null;
-    formTradeBan    = false;
+    formTradeBan    = null;  // null = не выбрано
     formBanDays     = null;
 
     document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('selected'));
@@ -849,13 +879,11 @@
       if (el) el.value = '';
     });
 
-    // Сброс качества
-    document.querySelectorAll('.quality-btn').forEach((b, i) => {
-      b.classList.toggle('selected', i === 0);
-    });
+    // Сброс качества — ничего не выбрано
+    document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('selected'));
 
-    // Сброс ТБ
-    document.getElementById('formTbNo').classList.add('selected');
+    // Сброс ТБ — ничего не выбрано
+    document.getElementById('formTbNo').classList.remove('selected');
     document.getElementById('formTbYes').classList.remove('selected');
     document.getElementById('formDaysGrid').classList.remove('visible');
     document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
@@ -884,7 +912,8 @@
       weapon   = 'Нож: ' + subEl.querySelector('.name').textContent.trim();
       skinName = document.getElementById('knifeNameInput').value.trim();
       if (!skinName) { alert('Введи название скина ножа'); return; }
-      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
+      if (!quality) { alert('Выбери качество'); return; }
 
     } else if (type === 'gloves') {
       const subEl = document.querySelector('#gloveSubCard .sub-btn.selected');
@@ -892,7 +921,8 @@
       weapon   = 'Перчи: ' + subEl.querySelector('.name').textContent.trim();
       skinName = document.getElementById('gloveNameInput').value.trim();
       if (!skinName) { alert('Введи название скина перчаток'); return; }
-      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
+      if (!quality) { alert('Выбери качество'); return; }
 
     } else if (type === 'agent') {
       const subEl = document.querySelector('#agentSubCard .sub-btn.selected');
@@ -906,18 +936,19 @@
       skinName = document.getElementById('otherNameInput').value.trim();
       if (!skinName) { alert('Введи название'); return; }
       weapon  = 'Другое';
-      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+      quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
+      if (!quality) { alert('Выбери качество'); return; }
 
     } else {
       skinName = document.getElementById('skinNameInput').value.trim();
       if (!skinName) { alert('Введи название скина'); return; }
-      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim() || 'FN';
+      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
+      if (!quality) { alert('Выбери качество'); return; }
     }
 
-    // ТБ: если выбрано "Есть" — обязательно указать дни
-    if (formTradeBan && !formBanDays) {
-      alert('Выбери количество дней трейд-бана'); return;
-    }
+    // ТБ: обязательно явно выбрать
+    if (formTradeBan === null) { alert('Укажи трейд-бан'); return; }
+    if (formTradeBan === true && !formBanDays) { alert('Выбери количество дней трейд-бана'); return; }
 
     state.skins.push({
       weapon,
@@ -1007,10 +1038,72 @@
   let confirmTradeBan = false;
   let confirmBanDays  = null;
 
-  function triggerQuickPhoto() {
+  function togglePhotoMenu() {
+    const menu = document.getElementById('photoSubmenu');
+    const btn  = document.getElementById('photoModeBtn');
+    const isVisible = menu.classList.contains('visible');
     // Скрываем ручную форму если открыта
     document.getElementById('addForm').style.display = 'none';
+    menu.classList.toggle('visible', !isVisible);
+    btn.classList.toggle('active', !isVisible);
+  }
+
+  function closePhotoMenu() {
+    document.getElementById('photoSubmenu').classList.remove('visible');
+    document.getElementById('photoModeBtn').classList.remove('active');
+  }
+
+  function triggerMediaLibrary() {
+    closePhotoMenu();
     document.getElementById('quickPhotoInput').click();
+  }
+
+  async function pasteFromClipboard() {
+    closePhotoMenu();
+    try {
+      const items = await navigator.clipboard.read();
+
+      for (const item of items) {
+        // Пробуем все типы подряд — Safari иногда отдаёт нестандартные
+        const preferredTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+        
+        // Сначала пробуем стандартные image/* типы
+        let blob = null;
+        let usedType = null;
+
+        for (const t of preferredTypes) {
+          if (item.types.includes(t)) {
+            blob = await item.getType(t);
+            usedType = t;
+            break;
+          }
+        }
+
+        // Если не нашли — берём любой тип из item и смотрим что внутри
+        if (!blob) {
+          for (const t of item.types) {
+            try {
+              const candidate = await item.getType(t);
+              if (candidate.size > 0) {
+                blob = candidate;
+                usedType = 'image/png'; // Safari screenshot всегда PNG по факту
+                break;
+              }
+            } catch(_) {}
+          }
+        }
+
+        if (blob && blob.size > 0) {
+          const file = new File([blob], 'paste.png', { type: usedType || 'image/png' });
+          handleQuickPhoto({ target: { files: [file], value: '' } });
+          return;
+        }
+      }
+
+      alert('В буфере обмена нет изображения. Сначала сделай скриншот.');
+    } catch (err) {
+      alert('Safari заблокировал доступ к буферу. Используй Ctrl+V или скопируй изображение и попробуй снова.');
+    }
   }
 
   async function handleQuickPhoto(event) {
@@ -1078,9 +1171,9 @@
   }
 
   function resetConfirmTB() {
-    confirmTradeBan = false;
+    confirmTradeBan = null;  // не выбрано — пользователь должен указать сам
     confirmBanDays  = null;
-    document.getElementById('ccTbNo').classList.add('selected');
+    document.getElementById('ccTbNo').classList.remove('selected');
     document.getElementById('ccTbYes').classList.remove('selected');
     document.getElementById('ccDaysGrid').classList.remove('visible');
     document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
@@ -1088,7 +1181,8 @@
 
   function confirmRecognized() {
     if (!pendingRecognized) { cancelConfirm(); return; }
-    if (confirmTradeBan && !confirmBanDays) { alert('Выбери количество дней трейд-бана'); return; }
+    if (confirmTradeBan === null) { alert('Укажи трейд-бан'); return; }
+    if (confirmTradeBan === true && !confirmBanDays) { alert('Выбери количество дней трейд-бана'); return; }
 
     state.skins.push({
       weapon:   pendingRecognized.weapon,
