@@ -226,12 +226,9 @@
 
   .add-skin-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  .add-skin-btn.photo-mode {
-    border-color: var(--accent2);
-    color: var(--accent);
-  }
+  .add-skin-btn.photo-mode { }
 
-  .add-skin-btn.photo-mode:hover { border-color: var(--accent); }
+  .add-skin-btn.photo-mode:hover { border-color: var(--accent); color: var(--accent); }
   .add-skin-btn.photo-mode.active { border-color: var(--accent); color: var(--accent); background: rgba(232,184,75,0.05); }
 
   .photo-submenu {
@@ -474,20 +471,109 @@
   <!-- Карточка подтверждения распознанного скина -->
   <div class="confirm-card" id="confirmCard">
     <div class="cc-title">🎯 Распознано</div>
+
+    <!-- Строка оружия -->
     <div class="confirm-row">
       <span class="cr-label">Оружие</span>
       <span class="cr-val" id="ccWeapon">—</span>
-      <button class="cr-edit-btn" onclick="editConfirmField('ccWeapon')" title="Редактировать">✏️</button>
+      <button class="cr-edit-btn" onclick="toggleCcWeaponPicker()" title="Изменить">✏️</button>
     </div>
+    <!-- Пикер оружия -->
+    <div id="ccWeaponPicker" style="display:none; margin: 8px 0;">
+      <div class="weapon-grid" style="margin-bottom:6px;">
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AK-47')"><span class="icon">🔫</span><div class="name">AK-47</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AWP')"><span class="icon">🎯</span><div class="name">AWP</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcKnife()"><span class="icon">⚔️</span><div class="name">Нож</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A4')"><span class="icon">🔧</span><div class="name">M4A4</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A1-S')"><span class="icon">💨</span><div class="name">M4A1-S</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcGlove()"><span class="icon">🧤</span><div class="name">Перчи</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'USP-S')"><span class="icon">🔰</span><div class="name">USP-S</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Desert Eagle')"><span class="icon">💥</span><div class="name">Desert Eagle</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcAgent()"><span class="icon">🕵️</span><div class="name">Агент</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Glock-18')"><span class="icon">🔫</span><div class="name">Glock-18</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Galil AR')"><span class="icon">⚙️</span><div class="name">Galil AR</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeaponCustom()"><span class="icon">🎱</span><div class="name">Другое</div></div>
+      </div>
+      <!-- Подпикер ножа -->
+      <div id="ccKnifePicker" style="display:none;">
+        <div class="card-title" style="font-size:11px;margin-bottom:6px;">Тип ножа</div>
+        <div class="weapon-grid">
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Butterfly Knife')"><span class="icon">🦋</span><div class="name">Butterfly</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Karambit')"><span class="icon">🔪</span><div class="name">Karambit</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ M9 Bayonet')"><span class="icon">🗡️</span><div class="name">M9 Bayonet</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Skeleton Knife')"><span class="icon">💀</span><div class="name">Skeleton</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Stiletto Knife')"><span class="icon">🌀</span><div class="name">Stiletto</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Talon Knife')"><span class="icon">🔱</span><div class="name">Talon</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bayonet')"><span class="icon">⚔️</span><div class="name">Bayonet</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Huntsman Knife')"><span class="icon">🏹</span><div class="name">Huntsman</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Flip Knife')"><span class="icon">🔄</span><div class="name">Flip Knife</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Ursus Knife')"><span class="icon">🐻</span><div class="name">Ursus</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Gut Knife')"><span class="icon">🪝</span><div class="name">Gut Knife</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Falchion Knife')"><span class="icon">💫</span><div class="name">Falchion</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Classic Knife')"><span class="icon">🎯</span><div class="name">Classic</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bowie Knife')"><span class="icon">🏕️</span><div class="name">Bowie</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Paracord Knife')"><span class="icon">🪢</span><div class="name">Paracord</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Survival Knife')"><span class="icon">🌲</span><div class="name">Survival</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Shadow Daggers')"><span class="icon">👥</span><div class="name">Shadow Daggers</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Nomad Knife')"><span class="icon">🏜️</span><div class="name">Nomad</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Navaja Knife')"><span class="icon">🗺️</span><div class="name">Navaja</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Kukri Knife')"><span class="icon">⚡</span><div class="name">Kukri</div></div>
+        </div>
+      </div>
+      <!-- Подпикер перчаток -->
+      <div id="ccGlovePicker" style="display:none;">
+        <div class="card-title" style="font-size:11px;margin-bottom:6px;">Тип перчаток</div>
+        <div class="weapon-grid">
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Sport Gloves')"><span class="icon">🧤</span><div class="name">Sport Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Moto Gloves')"><span class="icon">🏍️</span><div class="name">Moto Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hand Wraps')"><span class="icon">🤜</span><div class="name">Hand Wraps</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Driver Gloves')"><span class="icon">🚗</span><div class="name">Driver Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Specialist Gloves')"><span class="icon">🎖️</span><div class="name">Specialist</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bloodhound Gloves')"><span class="icon">🩸</span><div class="name">Bloodhound</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hydra Gloves')"><span class="icon">🐍</span><div class="name">Hydra Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Broken Fang Gloves')"><span class="icon">🦷</span><div class="name">Broken Fang</div></div>
+        </div>
+      </div>
+      <!-- Подпикер агентов -->
+      <div id="ccAgentPicker" style="display:none;">
+        <div class="card-title" style="font-size:11px;margin-bottom:6px;">Фракция</div>
+        <div class="agent-list">
+          <div class="agent-btn" onclick="setCcWeapon(this,'The Professionals')"><div class="ag-icon">🎩</div><div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'Guerrilla Warfare')"><div class="ag-icon">🌿</div><div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'Elite Crew')"><div class="ag-icon">⭐</div><div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'Sabre')"><div class="ag-icon">🗡️</div><div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'FBI')"><div class="ag-icon">🕵️</div><div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'SEAL Frogman')"><div class="ag-icon">🐸</div><div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'SWAT')"><div class="ag-icon">🛡️</div><div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn" onclick="setCcWeapon(this,'KSK')"><div class="ag-icon">🌊</div><div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div></div>
+        </div>
+      </div>
+      <!-- Кастомный инпут для "Другое" -->
+      <input class="skin-input" id="ccWeaponCustomInput" type="text" placeholder="Введи название оружия..." style="display:none; margin-top:6px;">
+    </div>
+
+    <!-- Строка скина -->
     <div class="confirm-row">
       <span class="cr-label">Скин</span>
       <span class="cr-val" id="ccSkin">—</span>
       <button class="cr-edit-btn" onclick="editConfirmField('ccSkin')" title="Редактировать">✏️</button>
     </div>
+
+    <!-- Строка качества -->
     <div class="confirm-row">
       <span class="cr-label">Качество</span>
       <span class="cr-val" id="ccQuality">—</span>
-      <button class="cr-edit-btn" onclick="editConfirmField('ccQuality')" title="Редактировать">✏️</button>
+      <button class="cr-edit-btn" onclick="toggleCcQualityPicker()" title="Изменить">✏️</button>
+    </div>
+    <!-- Пикер качества -->
+    <div id="ccQualityPicker" style="display:none; margin: 8px 0;">
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'FN')" style="flex:1;min-width:50px;">FN</div>
+        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'MW')" style="flex:1;min-width:50px;">MW</div>
+        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'FT')" style="flex:1;min-width:50px;">FT</div>
+        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'WW')" style="flex:1;min-width:50px;">WW</div>
+        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'BS')" style="flex:1;min-width:50px;">BS</div>
+      </div>
     </div>
 
     <div class="confirm-tb">
@@ -529,6 +615,8 @@
         <div class="weapon-btn" onclick="selectWeapon(this,'usps')"><span class="icon">🔰</span><div class="name">USP-S</div></div>
         <div class="weapon-btn" onclick="selectWeapon(this,'deagle')"><span class="icon">💥</span><div class="name">Desert Eagle</div></div>
         <div class="weapon-btn" onclick="selectWeapon(this,'agent')"><span class="icon">🕵️</span><div class="name">Агент</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'glock')"><span class="icon">🔫</span><div class="name">Glock-18</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'galil')"><span class="icon">⚙️</span><div class="name">Galil AR</div></div>
         <div class="weapon-btn" onclick="selectWeapon(this,'other')"><span class="icon">🎱</span><div class="name">Другое</div></div>
       </div>
     </div>
@@ -881,6 +969,8 @@
   function showAddSkin() {
     const f = document.getElementById('addForm');
     const isHidden = f.style.display === 'none' || f.style.display === '';
+    closePhotoMenu();
+    cancelConfirm();
     f.style.display = isHidden ? 'block' : 'none';
     if (isHidden) resetAddForm();
   }
@@ -1208,6 +1298,80 @@
     document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
   }
 
+  // ── Пикер оружия в карточке подтверждения ────────────────────────────────────
+  function toggleCcWeaponPicker() {
+    const picker = document.getElementById('ccWeaponPicker');
+    const isOpen = picker.style.display !== 'none';
+    picker.style.display = isOpen ? 'none' : 'block';
+    // Закрываем подпикеры
+    ['ccKnifePicker','ccGlovePicker','ccAgentPicker'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('ccWeaponCustomInput').style.display = 'none';
+  }
+
+  function openCcKnife() {
+    ['ccKnifePicker','ccGlovePicker','ccAgentPicker'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('ccKnifePicker').style.display = 'block';
+    document.getElementById('ccWeaponCustomInput').style.display = 'none';
+  }
+
+  function openCcGlove() {
+    ['ccKnifePicker','ccGlovePicker','ccAgentPicker'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('ccGlovePicker').style.display = 'block';
+    document.getElementById('ccWeaponCustomInput').style.display = 'none';
+  }
+
+  function openCcAgent() {
+    ['ccKnifePicker','ccGlovePicker','ccAgentPicker'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('ccAgentPicker').style.display = 'block';
+    document.getElementById('ccWeaponCustomInput').style.display = 'none';
+  }
+
+  function setCcWeaponCustom() {
+    ['ccKnifePicker','ccGlovePicker','ccAgentPicker'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    const inp = document.getElementById('ccWeaponCustomInput');
+    inp.style.display = 'block';
+    inp.focus();
+    inp.onblur = () => {
+      const val = inp.value.trim();
+      if (val) {
+        document.getElementById('ccWeapon').textContent = val;
+        if (pendingRecognized) pendingRecognized.weapon = val;
+        document.getElementById('ccWeaponPicker').style.display = 'none';
+      }
+    };
+    inp.onkeydown = (e) => { if (e.key === 'Enter') inp.blur(); };
+  }
+
+  function setCcWeapon(el, name) {
+    document.getElementById('ccWeapon').textContent = name;
+    if (pendingRecognized) pendingRecognized.weapon = name;
+    document.getElementById('ccWeaponPicker').style.display = 'none';
+  }
+
+  // ── Пикер качества в карточке подтверждения ──────────────────────────────────
+  function toggleCcQualityPicker() {
+    const picker = document.getElementById('ccQualityPicker');
+    picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function setCcQuality(el, q) {
+    document.querySelectorAll('.cc-q-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('ccQuality').textContent = q;
+    if (pendingRecognized) pendingRecognized.quality = q;
+    document.getElementById('ccQualityPicker').style.display = 'none';
+  }
+
   function editConfirmField(fieldId) {
     const span = document.getElementById(fieldId);
     if (!span) return;
@@ -1276,6 +1440,11 @@
     pendingRecognized = null;
     document.getElementById('confirmCard').classList.remove('visible');
     resetConfirmTB();
+    // Закрываем пикеры
+    const wp = document.getElementById('ccWeaponPicker');
+    const qp = document.getElementById('ccQualityPicker');
+    if (wp) wp.style.display = 'none';
+    if (qp) qp.style.display = 'none';
   }
 
   // ── Ctrl+V: вставка скрина из буфера ────────────────────────────────────────
