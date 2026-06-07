@@ -757,6 +757,8 @@
           </div>
         </div>
 
+        <div style="height:6px;"></div>
+
       </div>
     
 
@@ -914,9 +916,9 @@
       document.getElementById('gloveSubCard').style.display  = 'block';
       document.getElementById('skinNameCard').style.display  = 'none';
     } else if (type === 'agent') {
-      document.getElementById('agentSubCard').style.display  = 'block';
-      document.getElementById('qualityCard').style.display   = 'none';
-      document.getElementById('skinNameCard').style.display  = 'none';
+      const noName = ["FBI", "FBI SWAT", "FBI Sniper", "FBI HRT", "SAS", "KSK", "NZSAS", "USAF TACP", "TACP Cavalry"];
+      const faction = el.dataset.faction || '';
+      document.getElementById('agentNameCard').style.display = noName.includes(faction) ? 'none' : 'block';
     } else if (type === 'other') {
       document.getElementById('otherInputCard').style.display = 'block';
       document.getElementById('skinNameCard').style.display   = 'none';
@@ -940,193 +942,16 @@
     el.classList.add('selected');
     if (type === 'knife')  document.getElementById('knifeNameCard').style.display = 'block';
     if (type === 'glove')  document.getElementById('gloveNameCard').style.display = 'block';
-    if (type === 'agent')  document.getElementById('agentNameCard').style.display = 'block';
-  }
-
-  function selectQuality(el) {
-    document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-  }
-
-  // ── Форма: трейд-бан ─────────────────────────────────────────────────────────
-  function selectFormTB(hasTB) {
-    formTradeBan = hasTB;
-    formBanDays  = null;
-    document.getElementById('formTbNo').classList.toggle('selected', !hasTB);
-    document.getElementById('formTbYes').classList.toggle('selected', hasTB);
-    const grid = document.getElementById('formDaysGrid');
-    grid.classList.toggle('visible', hasTB);
-    document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
-  }
-
-  function selectFormDay(el) {
-    document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-    formBanDays = parseInt(el.textContent.trim());
-  }
-
-  // ── Загрузка скрина ───────────────────────────────────────────────────────────
-  function triggerFileInput() {
-    document.getElementById('fileInput').click();
-  }
-
-  async function handlePhotoUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const zone     = document.getElementById('photoZone');
-    const status   = document.getElementById('photoStatus');
-    const nameInput = document.getElementById('skinNameInput');
-
-    zone.classList.add('loading');
-    zone.querySelector('.ph-icon').innerHTML = '<span class="spinner"></span>';
-    status.className = 'ph-status';
-    status.textContent = 'Распознаю скин...';
-
-    try {
-      // Конвертируем в base64
-      const base64 = await fileToBase64(file);
-      const mediaType = file.type || 'image/jpeg';
-
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64, media_type: mediaType }),
-      });
-
-      if (!response.ok) throw new Error('Сервер вернул ошибку ' + response.status);
-
-      const data = await response.json();
-
-      if (data.error || !data.skin) {
-        throw new Error('Скин не распознан');
-      }
-
-      // Вставляем результат
-      nameInput.value = data.skin;
-
-      // Если оружие ещё не выбрано вручную — подсвечиваем что получили
-      const qualityMap = { FN: 0, MW: 1, FT: 2, WW: 3, BS: 4 };
-      if (data.quality && qualityMap[data.quality] !== undefined) {
-        const qBtns = document.querySelectorAll('.quality-btn');
-        qBtns.forEach(b => b.classList.remove('selected'));
-        qBtns[qualityMap[data.quality]].classList.add('selected');
-      }
-
-      zone.classList.remove('loading');
-      zone.classList.add('success');
-      zone.querySelector('.ph-icon').textContent = '✅';
-      status.className = 'ph-status ok';
-      status.textContent = `${data.weapon || ''} | ${data.skin} (${data.quality || ''})`;
-
-    } catch (err) {
-      zone.classList.remove('loading');
-      zone.classList.add('error');
-      zone.querySelector('.ph-icon').textContent = '❌';
-      status.className = 'ph-status err';
-      status.textContent = err.message || 'Ошибка распознавания';
-    }
-
-    // Сбрасываем input чтобы можно было загрузить снова
-    event.target.value = '';
-  }
-
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload  = () => resolve(reader.result); // data:image/...;base64,...
-      reader.onerror = () => reject(new Error('Ошибка чтения файла'));
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // ── Показать/скрыть форму добавления ─────────────────────────────────────────
-  function showAddSkin() {
-    const f = document.getElementById('addForm');
-    const isHidden = f.style.display === 'none' || f.style.display === '';
-    closePhotoMenu();
-    cancelConfirm();
-    f.style.display = isHidden ? 'block' : 'none';
-    const manualBtn = document.querySelector('.add-skin-btn:not(.photo-mode)');
-    if (manualBtn) manualBtn.classList.toggle('active', isHidden);
-    if (isHidden) resetAddForm();
-  }
-
-  function resetAddForm() {
-    formWeaponType  = null;
-    formWeaponLabel = null;
-    formTradeBan    = null;  // null = не выбрано
-    formBanDays     = null;
-
-    document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('selected'));
-    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
-
-    ['knifeSubCard','knifeNameCard','gloveSubCard','gloveNameCard',
-     'agentSubCard','agentNameCard','otherInputCard'].forEach(id => {
-      document.getElementById(id).style.display = 'none';
-    });
-
-    document.getElementById('qualityCard').style.display  = 'block';
-    document.getElementById('skinNameCard').style.display = 'block';
-
-    // Сброс инпутов
-    ['skinNameInput','knifeNameInput','gloveNameInput','agentNameInput','otherNameInput'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-
-    // Сброс качества — ничего не выбрано
-    document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('selected'));
-
-    // Сброс ТБ — ничего не выбрано
-    document.getElementById('formTbNo').classList.remove('selected');
-    document.getElementById('formTbYes').classList.remove('selected');
-    document.getElementById('formDaysGrid').classList.remove('visible');
-    document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
-
-    // Сброс фото зоны
-    const zone = document.getElementById('photoZone');
-    zone.className = 'photo-zone';
-    zone.querySelector('.ph-icon').textContent = '📷';
-    document.getElementById('photoStatus').textContent = '';
-    document.getElementById('fileInput').value = '';
-  }
-
-  // ── Добавить скин в список ────────────────────────────────────────────────────
-  function addSkin() {
-    const type = formWeaponType;
-
-    if (!type) { alert('Выбери оружие'); return; }
-
-    let weapon   = formWeaponLabel;
-    let skinName = '';
-    let quality  = '';
-
-    if (type === 'knife') {
-      const subEl = document.querySelector('#knifeSubCard .sub-btn.selected');
-      if (!subEl) { alert('Выбери тип ножа'); return; }
-      weapon   = 'Нож: ' + subEl.querySelector('.name').textContent.trim();
-      skinName = document.getElementById('knifeNameInput').value.trim();
-      if (!skinName) { alert('Введи название скина ножа'); return; }
-      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
-      if (!quality) { alert('Выбери качество'); return; }
-
-    } else if (type === 'gloves') {
-      const subEl = document.querySelector('#gloveSubCard .sub-btn.selected');
-      if (!subEl) { alert('Выбери тип перчаток'); return; }
-      weapon   = 'Перчи: ' + subEl.querySelector('.name').textContent.trim();
-      skinName = document.getElementById('gloveNameInput').value.trim();
-      if (!skinName) { alert('Введи название скина перчаток'); return; }
-      quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
-      if (!quality) { alert('Выбери качество'); return; }
-
-    } else if (type === 'agent') {
-      const subEl = document.querySelector('#agentSubCard .sub-btn.selected');
-      if (!subEl) { alert('Выбери агента'); return; }
-      const faction = subEl.dataset.faction || subEl.querySelector('.ag-name').textContent.trim();
+    if (type === 'agent') {
+      const noName = ["FBI", "FBI SWAT", "FBI Sniper", "FBI HRT", "SAS", "KSK", "NZSAS", "USAF TACP", "TACP Cavalry"];
       weapon   = 'Агент (' + faction + ')';
-      skinName = document.getElementById('agentNameInput').value.trim();
-      if (!skinName) { alert('Введи имя агента'); return; }
+      if (noName.includes(faction)) {
+        skinName = faction;
+      } else {
+        skinName = document.getElementById('agentNameInput').value.trim();
+        if (!skinName) { alert('Введи имя агента'); return; }
+      }
+      }
       quality  = '—';
 
     } else if (type === 'other') {
