@@ -280,6 +280,23 @@
   .confirm-row .cr-label { color: var(--text2); }
   .confirm-row .cr-val { font-weight: 500; }
 
+  .cr-edit-btn {
+    background: none; border: none;
+    color: var(--text2); cursor: pointer;
+    font-size: 14px; padding: 0 0 0 8px;
+    opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0;
+  }
+  .cr-edit-btn:hover { opacity: 1; color: var(--accent); }
+
+  .cr-edit-input {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 6px; padding: 4px 8px;
+    color: var(--text); font-family: 'Inter', sans-serif;
+    font-size: 13px; outline: none;
+    flex: 1; min-width: 0;
+  }
+
   .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
 
   .confirm-ok {
@@ -457,9 +474,21 @@
   <!-- Карточка подтверждения распознанного скина -->
   <div class="confirm-card" id="confirmCard">
     <div class="cc-title">🎯 Распознано</div>
-    <div class="confirm-row"><span class="cr-label">Оружие</span><span class="cr-val" id="ccWeapon">—</span></div>
-    <div class="confirm-row"><span class="cr-label">Скин</span><span class="cr-val" id="ccSkin">—</span></div>
-    <div class="confirm-row"><span class="cr-label">Качество</span><span class="cr-val" id="ccQuality">—</span></div>
+    <div class="confirm-row">
+      <span class="cr-label">Оружие</span>
+      <span class="cr-val" id="ccWeapon">—</span>
+      <button class="cr-edit-btn" onclick="editConfirmField('ccWeapon')" title="Редактировать">✏️</button>
+    </div>
+    <div class="confirm-row">
+      <span class="cr-label">Скин</span>
+      <span class="cr-val" id="ccSkin">—</span>
+      <button class="cr-edit-btn" onclick="editConfirmField('ccSkin')" title="Редактировать">✏️</button>
+    </div>
+    <div class="confirm-row">
+      <span class="cr-label">Качество</span>
+      <span class="cr-val" id="ccQuality">—</span>
+      <button class="cr-edit-btn" onclick="editConfirmField('ccQuality')" title="Редактировать">✏️</button>
+    </div>
 
     <div class="confirm-tb">
       <div class="tb-label">Трейд-бан</div>
@@ -682,7 +711,7 @@
 <script>
   // ── КОНФИГ ──────────────────────────────────────────────────────────────────
   // Замени на реальный URL своего Flask сервиса на Railway
-  const API_URL = 'https://motivated-gratitude-production-dddc.up.railway.app/recognize';
+  const API_URL = 'https://YOUR-FLASK-SERVICE.railway.app/recognize';
 
   // ── Telegram ─────────────────────────────────────────────────────────────────
   const tg = window.Telegram?.WebApp;
@@ -1177,6 +1206,53 @@
     document.getElementById('ccTbYes').classList.remove('selected');
     document.getElementById('ccDaysGrid').classList.remove('visible');
     document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+  }
+
+  function editConfirmField(fieldId) {
+    const span = document.getElementById(fieldId);
+    if (!span) return;
+
+    const currentVal = span.textContent.trim();
+    const btn = span.nextElementSibling;
+
+    // Создаём input
+    const input = document.createElement('input');
+    input.className = 'cr-edit-input';
+    input.value = currentVal;
+    input.type = 'text';
+
+    // Скрываем span и кнопку
+    span.style.display = 'none';
+    if (btn) btn.style.display = 'none';
+
+    // Вставляем input после span
+    span.parentNode.insertBefore(input, span.nextSibling);
+    input.focus();
+    input.select();
+
+    function saveEdit() {
+      const newVal = input.value.trim() || currentVal;
+      span.textContent = newVal;
+      span.style.display = '';
+      if (btn) btn.style.display = '';
+      input.remove();
+
+      // Обновляем pendingRecognized
+      if (!pendingRecognized) return;
+      if (fieldId === 'ccWeapon')  pendingRecognized.weapon   = newVal;
+      if (fieldId === 'ccSkin')    pendingRecognized.skinName = newVal;
+      if (fieldId === 'ccQuality') pendingRecognized.quality  = newVal;
+    }
+
+    input.addEventListener('blur', saveEdit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); saveEdit(); }
+      if (e.key === 'Escape') {
+        span.style.display = '';
+        if (btn) btn.style.display = '';
+        input.remove();
+      }
+    });
   }
 
   function confirmRecognized() {
