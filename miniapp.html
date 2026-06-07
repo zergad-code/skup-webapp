@@ -633,19 +633,6 @@
         <div class="weapon-btn" onclick="selectWeapon(this,'other')"><span class="icon">🎱</span><div class="name">Другое</div></div>
       </div>
     </div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'awp')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AWP</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Ножи</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A4</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A1-S</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Перчатки</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'usps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">USP-S</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Desert Eagle</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'agent')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Агенты</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'glock')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Glock-18</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'galil')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Galil AR</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'other')"><span class="icon">🎱</span><div class="name">Другое</div></div>
-      </div>
-    </div>
 
     <!-- Подтип нож -->
     <div class="card" id="knifeSubCard" style="display:none;">
@@ -775,7 +762,7 @@
     </div>
 
     <!-- Качество -->
-    <div class="card" id="qualityCard">
+    <div class="card" id="qualityCard" style="display:none;">
       <div class="card-title">Качество</div>
       <div class="quality-list">
         <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#4be87a"></div><div class="q-name">Factory New</div><div class="q-abbr">FN</div></div>
@@ -787,7 +774,7 @@
     </div>
 
     <!-- Название скина + загрузка скрина -->
-    <div class="card" id="skinNameCard">
+    <div class="card" id="skinNameCard" style="display:none;">
       <div class="card-title">Название скина</div>
       <input class="skin-input" id="skinNameInput" type="text" placeholder="Например: Redline, Asiimov...">
 
