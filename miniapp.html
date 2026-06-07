@@ -225,6 +225,7 @@
   }
 
   .add-skin-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .add-skin-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(232,184,75,0.05); }
 
   .add-skin-btn.photo-mode { }
 
@@ -426,12 +427,12 @@
   .agent-group-btn {
     display: flex; align-items: center; gap: 10px;
     background: var(--surface2);
-    border: 1px solid var(--accent2);
+    border: 1px dashed var(--border);
     border-radius: 10px; padding: 10px 12px;
     cursor: pointer; transition: all 0.2s; color: var(--text);
     font-family: 'Inter', sans-serif;
   }
-  .agent-group-btn:hover { border-color: var(--accent); background: rgba(232,184,75,0.05); }
+  .agent-group-btn:hover { border-color: var(--text2); background: rgba(255,255,255,0.03); }
   .agent-group-btn .ag-arrow { color: var(--accent); font-size: 10px; transition: transform 0.2s; }
   .agent-group-btn.open .ag-arrow { transform: rotate(90deg); }
   .agent-sublist { padding-left: 12px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
@@ -689,66 +690,59 @@
     <!-- Подтип агент -->
     <div class="card" id="agentSubCard" style="display:none;">
       <div class="card-title">Фракция агента</div>
-            <div class="agent-list">
+                  <div class="agent-list">
 
         <!-- FBI group -->
         <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpFBI')">
           <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div style="flex:1"><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div>
-          <span class="ag-arrow" id="agGrpFBI-arrow">▶</span>
+          <div style="flex:1"><div class="ag-name">FBI</div><div class="ag-team">CT-side · 4 агента ▶</div></div>
         </div>
         <div class="agent-sublist" id="agGrpFBI" style="display:none;">
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI SWAT</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI Sniper"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20Sniper.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI Sniper</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI HRT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20HRT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI HRT</div><div class="ag-team">CT-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI SWAT</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI Sniper"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20Sniper.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI Sniper</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI HRT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20HRT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">FBI HRT</div></div></div>
         </div>
 
         <!-- SWAT/SAS/KSK group -->
         <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpSWAT')">
           <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div style="flex:1"><div class="ag-name">SWAT / SAS / KSK</div><div class="ag-team">CT-side</div></div>
-          <span class="ag-arrow" id="agGrpSWAT-arrow">▶</span>
+          <div style="flex:1"><div class="ag-name">SWAT / SAS / KSK</div><div class="ag-team">CT-side · 9 агентов ▶</div></div>
         </div>
         <div class="agent-sublist" id="agGrpSWAT" style="display:none;">
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SWAT</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SAS"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SAS.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SAS</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="KSK"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/KSK.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">KSK</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="NZSAS"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NZSAS.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">NZSAS</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="NSWC SEAL"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NSWC%20SEAL.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">NSWC SEAL</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SEAL Frogman"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SEAL%20Frogman.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SEAL Frogman</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Gendarmerie Nationale"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Gendarmerie%20Nationale.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Gendarmerie Nationale</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="TACP Cavalry"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/TACP%20Cavalry.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">TACP Cavalry</div><div class="ag-team">CT-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="USAF TACP"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/USAF%20TACP.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">USAF TACP</div><div class="ag-team">CT-side</div></div></div>
-        </div>
-
-        <!-- The Professionals -->
-        <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpProf')">
-          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div style="flex:1"><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div>
-          <span class="ag-arrow" id="agGrpProf-arrow">▶</span>
-        </div>
-        <div class="agent-sublist" id="agGrpProf" style="display:none;">
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="The Professionals"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SWAT</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SAS"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SAS.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SAS</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="KSK"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/KSK.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">KSK</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="NZSAS"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NZSAS.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">NZSAS</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="NSWC SEAL"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NSWC%20SEAL.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">NSWC SEAL</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SEAL Frogman"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SEAL%20Frogman.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">SEAL Frogman</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Gendarmerie Nationale"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Gendarmerie%20Nationale.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Gendarmerie Nationale</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="TACP Cavalry"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/TACP%20Cavalry.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">TACP Cavalry</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="USAF TACP"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/USAF%20TACP.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">USAF TACP</div></div></div>
         </div>
 
         <!-- Guerrilla / Elite / Sabre / Phoenix -->
         <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpT')">
           <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div style="flex:1"><div class="ag-name">Guerrilla / Elite / Sabre</div><div class="ag-team">T-side</div></div>
-          <span class="ag-arrow" id="agGrpT-arrow">▶</span>
+          <div style="flex:1"><div class="ag-name">Guerrilla / Elite / Sabre</div><div class="ag-team">T-side · 6 агентов ▶</div></div>
         </div>
         <div class="agent-sublist" id="agGrpT" style="display:none;">
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Guerrilla Warfare"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Guerrilla Warfare</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Elite Crew"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Elite%20Crew.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Elite Crew</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Sabre"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Sabre</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Sabre Footsoldier"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre%20Footsoldier.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Sabre Footsoldier</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Phoenix"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Phoenix.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Phoenix</div><div class="ag-team">T-side</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Brazilian 1st Battalion"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Brazilian%201st%20Battalion.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Brazilian 1st Battalion</div><div class="ag-team">T-side</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Guerrilla Warfare"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Guerrilla Warfare</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Elite Crew"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Elite%20Crew.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Elite Crew</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Sabre"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Sabre</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Sabre Footsoldier"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre%20Footsoldier.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Sabre Footsoldier</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Phoenix"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Phoenix.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Phoenix</div></div></div>
+          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Brazilian 1st Battalion"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Brazilian%201st%20Battalion.png" style="width:32px;height:32px;object-fit:contain;"></div><div><div class="ag-name">Brazilian 1st Battalion</div></div></div>
+        </div>
+
+        <!-- The Professionals — без стрелки, просто кнопка -->
+        <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="The Professionals">
+          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;"></div>
+          <div><div class="ag-name">The Professionals</div><div class="ag-team">T-side</div></div>
         </div>
 
       </div>
-    </div>
+    
 
     <div class="card" id="agentNameCard" style="display:none;">
       <div class="card-title">Имя агента</div>
@@ -1037,6 +1031,8 @@
     closePhotoMenu();
     cancelConfirm();
     f.style.display = isHidden ? 'block' : 'none';
+    const manualBtn = document.querySelector('.add-skin-btn:not(.photo-mode)');
+    if (manualBtn) manualBtn.classList.toggle('active', isHidden);
     if (isHidden) resetAddForm();
   }
 
@@ -1146,6 +1142,8 @@
     renderSkinsList();
     document.getElementById('addForm').style.display = 'none';
     document.getElementById('s1Next').disabled = false;
+    const manualBtn = document.querySelector('.add-skin-btn:not(.photo-mode)');
+    if (manualBtn) manualBtn.classList.remove('active');
   }
 
   // ── Рендер списка скинов ──────────────────────────────────────────────────────
