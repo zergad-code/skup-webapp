@@ -1348,35 +1348,59 @@
     if (!file) return;
 
     const card = document.getElementById('confirmCard');
-
-    // Показываем карточку в состоянии загрузки
     card.classList.add('visible');
-    document.getElementById('ccWeapon').textContent  = '⏳ распознаю...';
-    document.getElementById('ccSkin').textContent    = '—';
+
+    // Инициализируем объект ожидания, даже если распознавание провалится
+    pendingRecognized = {
+        weapon: '',
+        skinName: '',
+        quality: '',
+        stattrak: false
+    };
+
+    document.getElementById('ccWeapon').textContent = '—';
+    document.getElementById('ccSkin').textContent = '—';
     document.getElementById('ccQuality').textContent = '—';
     resetConfirmTB();
 
     try {
-      const base64   = await fileToBase64(file);
-      const mediaType = file.type || 'image/jpeg';
+        // Показываем статус загрузки
+        document.getElementById('ccWeapon').textContent = '⏳ распознаю...';
+        
+        const base64 = await fileToBase64(file);
+        const mediaType = file.type || 'image/jpeg';
+        
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64, media_type: mediaType }),
+        });
 
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64, media_type: mediaType }),
-      });
+        if (!response.ok) throw new Error('Ошибка сервера');
+        const data = await response.json();
 
-      if (!response.ok) throw new Error('Ошибка сервера ' + response.status);
-
-      const data = await response.json();
-      if (data.error || !data.skin) throw new Error('Скин не распознан');
-
-      pendingRecognized = {
-        weapon:   data.weapon || 'Неизвестно',
-        skinName: data.skin,
-        quality:  data.quality || 'FN',
-        stattrak: data.stattrak || false,
-      };
+        if (data.skin) {
+            // Если распознали успешно
+            pendingRecognized = {
+                weapon: data.weapon,
+                skinName: data.skinName,
+                quality: data.quality,
+                stattrak: data.stattrak || false
+            };
+            document.getElementById('ccWeapon').textContent = data.weapon;
+            document.getElementById('ccSkin').textContent = data.skinName;
+            document.getElementById('ccQuality').textContent = data.quality;
+            selectCcST(data.stattrak || false);
+        } else {
+            throw new Error('Не распознано');
+        }
+    } catch (err) {
+        // Если не распознали — оставляем прочерки, пользователь заполнит их сам
+        console.warn('Распознавание не удалось:', err);
+        document.getElementById('ccWeapon').textContent = 'Не определено';
+        alert('Не удалось распознать скин автоматически. Заполни данные вручную в карточке.');
+    }
+  }
       // Отражаем StatTrak из Vision в переключателе
       selectCcST(data.stattrak || false);
 
@@ -1554,21 +1578,33 @@
   }
 
   function confirmRecognized() {
-    if (!pendingRecognized) { cancelConfirm(); return; }
-    if (confirmTradeBan === null) { alert('Укажи трейд-бан'); return; }
-    if (confirmTradeBan === true && !confirmBanDays) { alert('Выбери количество дней трейд-бана'); return; }
+    if (!pendingRecognized) {
+        cancelConfirm();
+        return;
+    }
+    if (confirmTradeBan === null) {
+        alert('Укажи трейд-бан');
+        return;
+    }
+    if (confirmTradeBan === true && !confirmBanDays) {
+        alert('Выбери количество дней трейд-бана');
+        return;
+    }
 
+    // Добавляем скин в состояние
     state.skins.push({
-      weapon:   pendingRecognized.weapon,
-      skinName: pendingRecognized.skinName,
-      quality:  pendingRecognized.quality,
-      tradeBan: confirmTradeBan,
-      banDays:  confirmBanDays,
-      stattrak: ccStatTrak,
+        weapon: pendingRecognized.weapon,
+        skinName: pendingRecognized.skinName,
+        quality: pendingRecognized.quality,
+        stattrak: pendingRecognized.stattrak, // Убедитесь, что это поле передается
+        tradeBan: confirmTradeBan,
+        banDays: confirmBanDays
     });
 
-    renderSkinsList();
-    cancelConfirm();
+    // --- ВАШИ ИСПРАВЛЕНИЯ ЗДЕСЬ ---
+    renderSkinsList();    // Обновляем визуальный список
+    cancelConfirm();      // Скрываем карточку подтверждения и сбрасываем состояние
+    // ------------------------------
   }
 
   function cancelConfirm() {
