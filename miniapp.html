@@ -6,29 +6,35 @@
 <title>Скупка скинов</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css');
 
   :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --surface2: #1a1a24;
-    --border: #2a2a3a;
-    --accent: #e8b84b;
-    --accent2: #c49a2a;
-    --text: #e8e8f0;
-    --text2: #888899;
-    --danger: #e84b4b;
-    --success: #4be87a;
+    --bg: #1a1a2e;
+    --bg2: #2b2b4d;
+    --surface: rgba(255,255,255,0.04);
+    --surface2: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.08);
+    --accent: #8b7fde;
+    --accent-light: #b8a9f0;
+    --accent-soft: rgba(167,139,250,0.16);
+    --accent2: #a78bfa;
+    --text: #ffffff;
+    --text2: #8888aa;
+    --text3: #7a7a9c;
+    --danger: #d4537e;
+    --success: #5dcaa5;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: var(--bg);
+    background: linear-gradient(165deg, #1a1a2e 0%, #2b2b4d 100%);
+    background-attachment: fixed;
     color: var(--text);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
-    padding: 16px;
+    padding: 18px;
   }
 
   .header {
@@ -40,35 +46,35 @@
 
   .logo {
     width: 36px; height: 36px;
-    background: var(--accent);
-    border-radius: 8px;
+    background: var(--accent-soft);
+    border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
+    font-size: 17px;
   }
 
   .header-text h1 {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 20px; font-weight: 700;
-    letter-spacing: 1px; color: var(--accent);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 18px; font-weight: 600;
+    letter-spacing: 0.3px; color: #fff;
   }
 
   .header-text p { font-size: 11px; color: var(--text2); letter-spacing: 0.5px; }
 
   .progress { display: flex; gap: 6px; margin-bottom: 24px; }
   .progress-step { flex: 1; height: 3px; background: var(--border); border-radius: 2px; transition: background 0.3s; }
-  .progress-step.active { background: var(--accent); }
-  .progress-step.done { background: var(--accent2); }
+  .progress-step.active { background: var(--accent2); }
+  .progress-step.done { background: var(--accent); }
 
   .card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 12px;
+    padding: 16px;
+    margin-bottom: 11px;
   }
 
   .card-title {
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     font-size: 13px; font-weight: 600;
     letter-spacing: 1.5px; color: var(--text2);
     text-transform: uppercase; margin-bottom: 14px;
@@ -78,49 +84,51 @@
 
   .weapon-btn {
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 6px;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 6px;
     cursor: pointer; text-align: center;
-    transition: all 0.2s; color: var(--text);
-    font-family: 'Inter', sans-serif;
+    transition: all 0.18s; color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
   }
 
-  .weapon-btn .icon { font-size: 20px; margin-bottom: 4px; display: block; }
-  .weapon-btn .name { font-size: 11px; font-weight: 500; color: var(--text2); }
-  .weapon-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); }
-  .weapon-btn.selected .name { color: var(--accent); }
-  .weapon-btn:hover { border-color: var(--accent2); }
+  .weapon-btn .icon { font-size: 19px; margin-bottom: 5px; display: block; }
+  .weapon-btn .name { font-size: 10px; font-weight: 500; color: var(--text2); }
+  .weapon-btn.selected { background: var(--accent-soft); }
+  .weapon-btn.selected .name { color: var(--accent-light); }
+  .weapon-btn:active { transform: scale(0.97); }
 
   .quality-list { display: flex; flex-direction: column; gap: 6px; }
 
   .quality-btn {
     display: flex; align-items: center; gap: 10px;
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px;
-    cursor: pointer; transition: all 0.2s; color: var(--text);
-    font-family: 'Inter', sans-serif;
+    border: none;
+    border-radius: 11px; padding: 11px 13px;
+    cursor: pointer; transition: all 0.18s; color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
   }
 
   .quality-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .quality-btn .q-name { font-size: 13px; font-weight: 500; flex: 1; }
   .quality-btn .q-abbr { font-size: 11px; color: var(--text2); }
-  .quality-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); }
+  .quality-btn.selected { background: var(--accent-soft); }
+  .quality-btn.selected .q-name { color: var(--accent-light); }
+  .quality-btn:active { transform: scale(0.99); }
 
   .skin-input {
     width: 100%;
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
+    border: none;
+    border-radius: 11px;
+    padding: 13px 14px;
     color: var(--text);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     font-size: 14px; outline: none;
-    transition: border-color 0.2s;
+    transition: background 0.2s;
   }
 
-  .skin-input:focus { border-color: var(--accent); }
+  .skin-input:focus { background: rgba(255,255,255,0.06); }
   .skin-input::placeholder { color: var(--text2); }
 
   /* ── Зона загрузки скрина ── */
@@ -153,7 +161,7 @@
   .tb-label {
     font-size: 12px; color: var(--text2);
     letter-spacing: 1px; text-transform: uppercase;
-    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    font-family: 'Inter', -apple-system, sans-serif; font-weight: 600;
     margin-bottom: 8px;
   }
 
@@ -161,14 +169,15 @@
 
   .tb-btn {
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px;
+    border: none;
+    border-radius: 11px; padding: 11px;
     cursor: pointer; text-align: center;
-    transition: all 0.2s; color: var(--text);
-    font-family: 'Inter', sans-serif; font-size: 13px;
+    transition: all 0.18s; color: var(--text2);
+    font-family: 'Inter', -apple-system, sans-serif; font-size: 13px;
   }
 
-  .tb-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); color: var(--accent); }
+  .tb-btn.selected { background: var(--accent-soft); color: var(--accent-light); }
+  .tb-btn:active { transform: scale(0.98); }
 
   .days-grid {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
@@ -179,14 +188,15 @@
 
   .day-btn {
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px;
+    border: none;
+    border-radius: 9px; padding: 9px;
     text-align: center; font-size: 13px;
-    cursor: pointer; color: var(--text);
-    font-family: 'Inter', sans-serif; transition: all 0.2s;
+    cursor: pointer; color: var(--text2);
+    font-family: 'Inter', -apple-system, sans-serif; transition: all 0.18s;
   }
 
-  .day-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); color: var(--accent); }
+  .day-btn.selected { background: var(--accent-soft); color: var(--accent-light); }
+  .day-btn:active { transform: scale(0.97); }
 
   /* ── Список скинов ── */
   .skins-list { display: flex; flex-direction: column; gap: 8px; }
@@ -194,8 +204,8 @@
   .skin-item {
     display: flex; align-items: flex-start; gap: 10px;
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px;
+    border: none;
+    border-radius: 13px; padding: 13px 15px;
   }
 
   .skin-item .si-info { flex: 1; }
@@ -214,23 +224,23 @@
   }
 
   .add-skin-btn {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    background: transparent;
-    border: 1px dashed var(--border);
-    border-radius: 10px; padding: 10px;
-    color: var(--text2);
-    font-family: 'Inter', sans-serif; font-size: 13px;
-    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    background: var(--surface2);
+    border: none;
+    border-radius: 12px; padding: 13px;
+    color: var(--accent-light);
+    font-family: 'Inter', -apple-system, sans-serif; font-size: 13px;
+    cursor: pointer; transition: all 0.18s;
     width: 100%;
   }
 
-  .add-skin-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .add-skin-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(232,184,75,0.05); }
+  .add-skin-btn:active { transform: scale(0.98); }
+  .add-skin-btn.active { background: var(--accent-soft); color: var(--accent-light); }
 
   .add-skin-btn.photo-mode { }
 
-  .add-skin-btn.photo-mode:hover { border-color: var(--accent); color: var(--accent); }
-  .add-skin-btn.photo-mode.active { border-color: var(--accent); color: var(--accent); background: rgba(232,184,75,0.05); }
+  .add-skin-btn.photo-mode:active { transform: scale(0.98); }
+  .add-skin-btn.photo-mode.active { background: var(--accent-soft); color: var(--accent-light); }
 
   .photo-submenu {
     display: none;
@@ -240,21 +250,21 @@
   .photo-submenu.visible { display: grid; }
 
   .photo-sub-btn {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    background: rgba(232,184,75,0.06);
-    border: 1px solid var(--accent2);
-    border-radius: 10px; padding: 12px 8px;
-    color: var(--accent); font-family: 'Inter', sans-serif;
-    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    background: var(--accent-soft);
+    border: none;
+    border-radius: 12px; padding: 13px 8px;
+    color: var(--accent-light); font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.18s;
     width: 100%;
   }
-  .photo-sub-btn:hover { background: rgba(232,184,75,0.12); border-color: var(--accent); }
+  .photo-sub-btn:active { transform: scale(0.98); }
   .photo-sub-btn .psb-icon { font-size: 20px; }
 
   /* ── Карточка подтверждения после распознавания ── */
   .confirm-card {
     background: var(--surface);
-    border: 1px solid var(--accent);
+    border: none;
     border-radius: 14px; padding: 16px;
     margin-top: 12px; display: none;
   }
@@ -262,7 +272,7 @@
   .confirm-card.visible { display: block; }
 
   .confirm-card .cc-title {
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     font-size: 13px; font-weight: 600;
     letter-spacing: 1.5px; color: var(--accent);
     text-transform: uppercase; margin-bottom: 12px;
@@ -271,7 +281,7 @@
   .confirm-row {
     display: flex; justify-content: space-between;
     padding: 5px 0; font-size: 13px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
   }
 
   .confirm-row:last-of-type { border-bottom: none; }
@@ -290,7 +300,7 @@
     background: var(--surface2);
     border: 1px solid var(--accent);
     border-radius: 6px; padding: 4px 8px;
-    color: var(--text); font-family: 'Inter', sans-serif;
+    color: var(--text); font-family: 'Inter', -apple-system, sans-serif;
     font-size: 13px; outline: none;
     flex: 1; min-width: 0;
   }
@@ -299,21 +309,21 @@
 
   .confirm-ok {
     background: var(--accent); border: none;
-    border-radius: 10px; padding: 11px;
-    color: #0a0a0f; font-family: 'Rajdhani', sans-serif;
+    border-radius: 12px; padding: 12px;
+    color: #fff; font-family: 'Inter', -apple-system, sans-serif;
     font-size: 14px; font-weight: 700; cursor: pointer;
   }
 
   .confirm-cancel {
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 11px;
-    color: var(--text2); font-family: 'Inter', sans-serif;
+    border: none;
+    border-radius: 12px; padding: 12px;
+    color: var(--text2); font-family: 'Inter', -apple-system, sans-serif;
     font-size: 13px; cursor: pointer;
   }
 
   .confirm-tb { margin-top: 12px; }
-  .confirm-tb .tb-label { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+  .confirm-tb .tb-label { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-family: 'Inter', -apple-system, sans-serif; font-weight: 600; }
   .confirm-tb .tb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
 
   /* ── Оплата ── */
@@ -321,22 +331,24 @@
 
   .payment-btn {
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px;
+    border: none;
+    border-radius: 14px; padding: 18px 14px;
     cursor: pointer; text-align: center;
-    transition: all 0.2s; color: var(--text);
-    font-family: 'Inter', sans-serif;
+    transition: all 0.18s; color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
   }
 
-  .payment-btn .p-icon { font-size: 22px; margin-bottom: 4px; }
-  .payment-btn .p-name { font-size: 13px; font-weight: 500; }
-  .payment-btn .p-sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
-  .payment-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); }
+  .payment-btn .p-icon { font-size: 24px; margin-bottom: 6px; }
+  .payment-btn .p-name { font-size: 14px; font-weight: 500; }
+  .payment-btn .p-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .payment-btn.selected { background: var(--accent-soft); }
+  .payment-btn.selected .p-name { color: var(--accent-light); }
+  .payment-btn:active { transform: scale(0.98); }
 
   /* ── Итог ── */
   .summary {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 14px; padding: 18px; margin-bottom: 16px;
   }
 
@@ -345,41 +357,41 @@
     padding: 7px 0;
   }
 
-  .summary-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .summary-row:not(:last-child) { border-bottom: 0.5px solid var(--border); }
   .summary-row .s-label { font-size: 12px; color: var(--text2); flex: 1; }
   .summary-row .s-value { font-size: 13px; font-weight: 500; text-align: right; }
   .summary-row.total .s-label { font-size: 13px; color: var(--text); }
-  .summary-row.total .s-value { font-size: 16px; color: var(--accent); font-weight: 700; font-family: 'Rajdhani', sans-serif; }
+  .summary-row.total .s-value { font-size: 16px; color: var(--accent); font-weight: 700; font-family: 'Inter', -apple-system, sans-serif; }
 
   .submit-btn {
     width: 100%;
-    background: var(--accent); border: none;
-    border-radius: 12px; padding: 16px;
-    color: #0a0a0f;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px; font-weight: 700; letter-spacing: 1px;
+    background: var(--accent2); border: none;
+    border-radius: 13px; padding: 16px;
+    color: #1a1a2e;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 16px; font-weight: 600; letter-spacing: 0.5px;
     cursor: pointer; transition: all 0.2s;
   }
 
-  .submit-btn:hover { background: var(--accent2); }
+  .submit-btn:hover { background: var(--accent-light); }
   .submit-btn:active { transform: scale(0.98); }
 
   .nav-btns { display: flex; gap: 8px; margin-top: 16px; }
 
   .nav-back {
     flex: 1; background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px;
-    color: var(--text2); font-family: 'Inter', sans-serif;
+    border: none;
+    border-radius: 12px; padding: 14px;
+    color: var(--text2); font-family: 'Inter', -apple-system, sans-serif;
     font-size: 13px; cursor: pointer;
   }
 
   .nav-next {
     flex: 2; background: var(--accent); border: none;
-    border-radius: 10px; padding: 12px;
-    color: #0a0a0f;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px; font-weight: 700; letter-spacing: 0.5px;
+    border-radius: 12px; padding: 14px;
+    color: #fff;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 15px; font-weight: 600; letter-spacing: 0.3px;
     cursor: pointer; transition: all 0.2s;
   }
 
@@ -389,17 +401,17 @@
   .screen { display: none; }
   .screen.active { display: block; }
 
-  .step-title { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .step-title { font-family: 'Inter', -apple-system, sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
   .step-sub { font-size: 12px; color: var(--text2); margin-bottom: 20px; }
 
   .agent-list { display: flex; flex-direction: column; gap: 6px; }
 
   .agent-btn {
     display: flex; align-items: center; gap: 10px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px;
-    cursor: pointer; transition: all 0.2s; color: var(--text);
-    font-family: 'Inter', sans-serif;
+    background: var(--surface2); border: none;
+    border-radius: 11px; padding: 11px 13px;
+    cursor: pointer; transition: all 0.18s; color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
   }
 
   .agent-btn .ag-icon {
@@ -411,7 +423,7 @@
 
   .agent-btn .ag-name { font-size: 13px; font-weight: 500; flex: 1; }
   .agent-btn .ag-team { font-size: 10px; color: var(--text2); margin-top: 2px; }
-  .agent-btn.selected { border-color: var(--accent); background: rgba(232,184,75,0.08); }
+  .agent-btn.selected { background: var(--accent-soft); }
 
   .spinner {
     display: inline-block;
@@ -428,8 +440,8 @@
   .stattrak-row {
     display: flex; align-items: center; justify-content: space-between;
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 14px;
+    border: none;
+    border-radius: 11px; padding: 11px 14px;
     margin-bottom: 0;
   }
 
@@ -438,9 +450,9 @@
   }
 
   .stattrak-toggle {
-    display: flex; gap: 0;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    display: flex; gap: 4px;
+    background: transparent;
+    border: none;
     border-radius: 8px; overflow: hidden;
   }
 
@@ -448,10 +460,11 @@
     padding: 6px 16px;
     font-size: 12px; font-weight: 500;
     cursor: pointer; border: none;
-    background: transparent;
+    background: var(--surface2);
     color: var(--text2);
-    font-family: 'Inter', sans-serif;
-    transition: all 0.2s;
+    border-radius: 8px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    transition: all 0.18s;
   }
 
   .st-btn.active {
@@ -465,22 +478,25 @@
     border: 1px dashed var(--border);
     border-radius: 10px; padding: 10px 12px;
     cursor: pointer; transition: all 0.2s; color: var(--text);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
   }
-  .agent-group-btn:hover { border-color: var(--text2); background: rgba(255,255,255,0.03); }
+  .agent-group-btn:active { transform: scale(0.99); }
   .agent-group-btn .ag-arrow { color: var(--accent); font-size: 10px; transition: transform 0.2s; }
   .agent-group-btn.open .ag-arrow { transform: rotate(90deg); }
   .agent-sublist { padding-left: 12px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 
+
+  .ti { font-family: 'tabler-icons' !important; font-style: normal; font-weight: normal; line-height: 1; -webkit-font-smoothing: antialiased; }
+  .ti-inline { font-size: 16px; vertical-align: -2px; margin-right: 6px; opacity: 0.85; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="logo">💎</div>
+  <div class="logo"><i class="ti ti-diamond" style="font-size:17px;color:var(--accent-light);"></i></div>
   <div class="header-text">
-    <h1>ZEORGJARD SKUP</h1>
-    <p>Скупка CS2 скинов</p>
+    <h1>ZEORGJARD</h1>
+    <p>by @zeorgjard</p>
   </div>
 </div>
 
@@ -497,80 +513,80 @@
   <div class="skins-list" id="skinsList"></div>
 
   <div class="add-btns-row">
-    <button class="add-skin-btn" onclick="showAddSkin()">✏️ Вручную</button>
-    <button class="add-skin-btn photo-mode" id="photoModeBtn" onclick="togglePhotoMenu()">📷 По фото</button>
+    <button class="add-skin-btn" onclick="showAddSkin()"><i class="ti ti-pencil ti-inline"></i>Вручную</button>
+    <button class="add-skin-btn photo-mode" id="photoModeBtn" onclick="togglePhotoMenu()"><i class="ti ti-camera ti-inline"></i>По фото</button>
   </div>
 
   <div class="photo-submenu" id="photoSubmenu">
     <button class="photo-sub-btn" onclick="triggerMediaLibrary()">
-      <span class="psb-icon">🖼️</span>Медиатека
+      <i class="ti ti-photo" style="font-size:20px;"></i>Медиатека
     </button>
     <button class="photo-sub-btn" onclick="pasteFromClipboard()">
-      <span class="psb-icon">📋</span>Вставить
+      <i class="ti ti-clipboard" style="font-size:20px;"></i>Вставить
     </button>
   </div>
 
   <input type="file" id="quickPhotoInput" accept="image/*" style="display:none;" onchange="handleQuickPhoto(event)">
 
   <div class="confirm-card" id="confirmCard">
-    <div class="cc-title">🎯 Распознано</div>
+    <div class="cc-title"><i class="ti ti-sparkles ti-inline"></i>Распознано</div>
 
     <div class="confirm-row">
       <span class="cr-label">Оружие</span>
       <span class="cr-val" id="ccWeapon">—</span>
-      <button class="cr-edit-btn" onclick="toggleCcWeaponPicker()" title="Изменить">✏️</button>
+      <button class="cr-edit-btn" onclick="toggleCcWeaponPicker()" title="Изменить"><i class="ti ti-pencil"></i></button>
     </div>
     <div id="ccWeaponPicker" style="display:none; margin: 8px 0;">
       <div class="weapon-grid" style="margin-bottom:6px;">
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AK-47')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ak-47.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AK-47</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AWP')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AWP</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Desert Eagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Desert Eagle</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Galil AR')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Galil AR</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Glock-18')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Glock-18</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A1-S')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A1-S</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A4</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'USP-S')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">USP-S</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcAgent()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Агенты</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcKnife()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Ножи</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcGlove()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Перчатки</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AK-47')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ak-47.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">AK-47</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AWP')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">AWP</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Desert Eagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Desert Eagle</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Galil AR')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Galil AR</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Glock-18')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Glock-18</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A1-S')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M4A1-S</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M4A4</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'USP-S')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">USP-S</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcAgent()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Агенты</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcKnife()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Ножи</div></div>
+        <div class="weapon-btn cc-wpn-btn" onclick="openCcGlove()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Перчатки</div></div>
         <div class="weapon-btn cc-wpn-btn" onclick="setCcWeaponCustom()"><span class="icon">🎱</span><div class="name">Другое</div></div>
       </div>
       <div id="ccKnifePicker" style="display:none;">
         <div class="card-title" style="font-size:11px;margin-bottom:6px;">Тип ножа</div>
         <div class="weapon-grid">
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Butterfly Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Butterfly</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Karambit')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/karambit.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Karambit</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ M9 Bayonet')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m9-bayonet.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M9 Bayonet</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Skeleton Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/skeleton-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Skeleton</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Stiletto Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/stiletto-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Stiletto</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Talon Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/talon-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Talon</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bayonet')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bayonet.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Bayonet</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Huntsman Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/huntsman-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Huntsman</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Flip Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/flip-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Flip Knife</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Ursus Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ursus-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Ursus</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Gut Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/gut-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Gut Knife</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Falchion Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/falchion-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Falchion</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Classic Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/classic-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Classic</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bowie Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bowie-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Bowie</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Paracord Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/paracord-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Paracord</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Survival Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/survival-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Survival</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Shadow Daggers')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/shadow-daggers.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Shadow Daggers</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Nomad Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/nomad-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Nomad</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Navaja Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/navaja-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Navaja</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Kukri Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/kukri-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Kukri</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Butterfly Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Butterfly</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Karambit')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/karambit.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Karambit</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ M9 Bayonet')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m9-bayonet.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M9 Bayonet</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Skeleton Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/skeleton-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Skeleton</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Stiletto Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/stiletto-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Stiletto</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Talon Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/talon-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Talon</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bayonet')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bayonet.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bayonet</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Huntsman Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/huntsman-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Huntsman</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Flip Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/flip-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Flip Knife</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Ursus Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ursus-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Ursus</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Gut Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/gut-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Gut Knife</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Falchion Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/falchion-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Falchion</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Classic Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/classic-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Classic</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bowie Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bowie-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bowie</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Paracord Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/paracord-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Paracord</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Survival Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/survival-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Survival</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Shadow Daggers')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/shadow-daggers.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Shadow Daggers</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Nomad Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/nomad-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Nomad</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Navaja Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/navaja-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Navaja</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Kukri Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/kukri-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Kukri</div></div>
         </div>
       </div>
       <div id="ccGlovePicker" style="display:none;">
         <div class="card-title" style="font-size:11px;margin-bottom:6px;">Тип перчаток</div>
         <div class="weapon-grid">
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Sport Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sport%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Sport Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Moto Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Moto%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Moto Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hand Wraps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hand%20Wraps.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Hand Wraps</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Driver Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Driver%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Driver Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Specialist Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Specialist</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bloodhound Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Bloodhound%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Bloodhound</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hydra Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hydra%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Hydra Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Broken Fang Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Broken%20Fang%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Broken Fang</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Sport Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sport%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Sport Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Moto Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Moto%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Moto Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hand Wraps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hand%20Wraps.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Hand Wraps</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Driver Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Driver%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Driver Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Specialist Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Specialist</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bloodhound Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Bloodhound%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bloodhound</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hydra Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hydra%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Hydra Gloves</div></div>
+          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Broken Fang Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Broken%20Fang%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Broken Fang</div></div>
         </div>
       </div>
       <div id="ccAgentPicker" style="display:none;">
@@ -646,13 +662,13 @@
     <div class="confirm-row">
       <span class="cr-label">Скин</span>
       <span class="cr-val" id="ccSkin">—</span>
-      <button class="cr-edit-btn" onclick="editConfirmField('ccSkin')" title="Редактировать">✏️</button>
+      <button class="cr-edit-btn" onclick="editConfirmField('ccSkin')" title="Редактировать"><i class="ti ti-pencil"></i></button>
     </div>
 
     <div class="confirm-row" id="ccQualityRow">
       <span class="cr-label">Качество</span>
       <span class="cr-val" id="ccQuality">—</span>
-      <button class="cr-edit-btn" onclick="toggleCcQualityPicker()" title="Изменить">✏️</button>
+      <button class="cr-edit-btn" onclick="toggleCcQualityPicker()" title="Изменить"><i class="ti ti-pencil"></i></button>
     </div>
     <div id="ccQualityPicker" style="display:none; margin: 8px 0;">
       <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -676,8 +692,8 @@
     <div class="confirm-tb">
       <div class="tb-label">Трейд-бан</div>
       <div class="tb-row">
-        <div class="tb-btn" id="ccTbNo" onclick="selectConfirmTB(false)">❌ Нет</div>
-        <div class="tb-btn" id="ccTbYes" onclick="selectConfirmTB(true)">⏳ Есть</div>
+        <div class="tb-btn" id="ccTbNo" onclick="selectConfirmTB(false)"><i class="ti ti-x ti-inline"></i>Нет</div>
+        <div class="tb-btn" id="ccTbYes" onclick="selectConfirmTB(true)"><i class="ti ti-clock ti-inline"></i>Есть</div>
       </div>
       <div class="days-grid" id="ccDaysGrid">
         <div class="day-btn" onclick="selectConfirmDay(this)">1</div>
@@ -702,17 +718,17 @@
     <div class="card">
       <div class="card-title">Оружие</div>
             <div class="weapon-grid">
-        <div class="weapon-btn" onclick="selectWeapon(this,'ak47')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ak-47.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AK-47</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'awp')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">AWP</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Desert Eagle</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'galil')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Galil AR</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'glock')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Glock-18</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A1-S</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M4A4</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'usps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">USP-S</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'agent')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Агенты</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Ножи</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Перчатки</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'ak47')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ak-47.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">AK-47</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'awp')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">AWP</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Desert Eagle</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'galil')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Galil AR</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'glock')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Glock-18</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M4A1-S</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M4A4</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'usps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">USP-S</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'agent')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Агенты</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Ножи</div></div>
+        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Перчатки</div></div>
         <div class="weapon-btn" onclick="selectWeapon(this,'other')"><span class="icon">🎱</span><div class="name">Другое</div></div>
       </div>
     </div>
@@ -720,26 +736,26 @@
     <div class="card" id="knifeSubCard" style="display:none;">
       <div class="card-title">Тип ножа</div>
       <div class="weapon-grid">
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bayonet.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Bayonet</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bowie-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Bowie</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Butterfly</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/classic-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Classic</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/falchion-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Falchion</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/flip-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Flip Knife</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/gut-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Gut Knife</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/huntsman-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Huntsman</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/karambit.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Karambit</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/kukri-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Kukri</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m9-bayonet.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">M9 Bayonet</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/navaja-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Navaja</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/nomad-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Nomad</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/paracord-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Paracord</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/shadow-daggers.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Shadow Daggers</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/skeleton-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Skeleton</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/stiletto-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Stiletto</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/survival-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Survival</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/talon-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Talon</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ursus-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Ursus</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bayonet.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bayonet</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bowie-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bowie</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Butterfly</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/classic-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Classic</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/falchion-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Falchion</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/flip-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Flip Knife</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/gut-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Gut Knife</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/huntsman-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Huntsman</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/karambit.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Karambit</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/kukri-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Kukri</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m9-bayonet.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M9 Bayonet</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/navaja-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Navaja</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/nomad-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Nomad</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/paracord-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Paracord</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/shadow-daggers.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Shadow Daggers</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/skeleton-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Skeleton</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/stiletto-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Stiletto</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/survival-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Survival</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/talon-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Talon</div></div>
+          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ursus-knife.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Ursus</div></div>
         </div>
       </div>
 
@@ -751,14 +767,14 @@
     <div class="card" id="gloveSubCard" style="display:none;">
       <div class="card-title">Тип перчаток</div>
       <div class="weapon-grid">
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Bloodhound%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Bloodhound</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Broken%20Fang%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Broken Fang</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Driver%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Driver Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hand%20Wraps.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Hand Wraps</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hydra%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Hydra Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Moto%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Moto Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Specialist</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sport%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(232,184,75,0.3));"></span><div class="name">Sport Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Bloodhound%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bloodhound</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Broken%20Fang%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Broken Fang</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Driver%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Driver Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hand%20Wraps.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Hand Wraps</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hydra%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Hydra Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Moto%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Moto Gloves</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Specialist</div></div>
+        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sport%20Gloves.png" style="width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Sport Gloves</div></div>
       </div>
     </div>
 
@@ -875,8 +891,8 @@
     <div class="card" id="tbCard">
       <div class="card-title">Трейд-бан</div>
       <div class="tb-row">
-        <div class="tb-btn" id="formTbNo" onclick="selectFormTB(false)">❌ Нет</div>
-        <div class="tb-btn" id="formTbYes" onclick="selectFormTB(true)">⏳ Есть</div>
+        <div class="tb-btn" id="formTbNo" onclick="selectFormTB(false)"><i class="ti ti-x ti-inline"></i>Нет</div>
+        <div class="tb-btn" id="formTbYes" onclick="selectFormTB(true)"><i class="ti ti-clock ti-inline"></i>Есть</div>
       </div>
       <div class="days-grid" id="formDaysGrid">
         <div class="day-btn" onclick="selectFormDay(this)">1</div>
@@ -905,12 +921,12 @@
 
   <div class="payment-grid">
     <div class="payment-btn" onclick="selectPayment(this)">
-      <div class="p-icon">₿</div>
+      <div class="p-icon"><i class="ti ti-currency-bitcoin"></i></div>
       <div class="p-name">Крипта</div>
       <div class="p-sub">USDT, BTC и др.</div>
     </div>
     <div class="payment-btn" onclick="selectPayment(this)">
-      <div class="p-icon">💳</div>
+      <div class="p-icon"><i class="ti ti-credit-card"></i></div>
       <div class="p-name">Карта</div>
       <div class="p-sub">RUB / UAH</div>
     </div>
@@ -1215,7 +1231,7 @@
           <div class="si-name">${stText}${skin.weapon} | ${skin.skinName}</div>
           <div class="si-meta">${qualText} · ${tbText}</div>
         </div>
-        <button class="si-remove" onclick="removeSkin(${idx})">✕</button>
+        <button class="si-remove" onclick="removeSkin(${idx})"><i class="ti ti-x"></i></button>
       `;
       list.appendChild(div);
     });
@@ -1360,7 +1376,7 @@
 
     // Показываем карточку в состоянии загрузки
     card.classList.add('visible');
-    document.getElementById('ccWeapon').textContent  = '⏳ распознаю...';
+    document.getElementById('ccWeapon').textContent  = 'распознаю...';
     document.getElementById('ccSkin').textContent    = '—';
     document.getElementById('ccQuality').textContent = '—';
     resetConfirmTB();
@@ -1417,7 +1433,7 @@
       document.getElementById('ccQuality').textContent = pendingRecognized.quality;
 
     } catch (err) {
-      document.getElementById('ccWeapon').textContent  = '❌ ' + (err.message || 'Ошибка');
+      document.getElementById('ccWeapon').textContent  = 'Ошибка: ' + (err.message || 'не распознано');
       document.getElementById('ccSkin').textContent    = 'Попробуй ещё раз или добавь вручную';
       document.getElementById('ccQuality').textContent = '—';
       pendingRecognized = null;
@@ -1639,7 +1655,7 @@
     const isGlove = document.getElementById('ccStRow').style.display === 'none' && !isAgent;
 
     // Оружие обязательно
-    if (!weapon || weapon === '—' || weapon.startsWith('❌') || weapon.startsWith('⏳')) {
+    if (!weapon || weapon === '—' || weapon.startsWith('Ошибка') || weapon.startsWith('распозна')) {
       flashCcRow('ccWeapon');
       return;
     }
