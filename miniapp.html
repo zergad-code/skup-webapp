@@ -847,6 +847,12 @@
       <input class="skin-input" id="otherNameInput" type="text" placeholder="Введи название оружия...">
     </div>
 
+    <div class="card" id="skinNameCard">
+      <div class="card-title">Название скина</div>
+      <input class="skin-input" id="skinNameInput" type="text" placeholder="Например: Redline, Asiimov...">
+
+
+    </div>
     <div class="card" id="qualityCard">
       <div class="card-title">Качество</div>
       <div class="quality-list">
@@ -856,7 +862,7 @@
         <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e87a4b"></div><div class="q-name">Well-Worn</div><div class="q-abbr">WW</div></div>
         <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e84b4b"></div><div class="q-name">Battle-Scarred</div><div class="q-abbr">BS</div></div>
       </div>
-      <div class="stattrak-row" style="margin-top:12px;">
+      <div class="stattrak-row" id="stattrakRow" style="margin-top:12px;">
         <span class="stattrak-label">StatTrak™</span>
         <div class="stattrak-toggle">
           <button class="st-btn active" id="stNo" onclick="selectST(false)">Нет</button>
@@ -865,14 +871,8 @@
       </div>
     </div>
 
-    <div class="card" id="skinNameCard">
-      <div class="card-title">Название скина</div>
-      <input class="skin-input" id="skinNameInput" type="text" placeholder="Например: Redline, Asiimov...">
 
-
-    </div>
-
-    <div class="card">
+    <div class="card" id="tbCard">
       <div class="card-title">Трейд-бан</div>
       <div class="tb-row">
         <div class="tb-btn" id="formTbNo" onclick="selectFormTB(false)">❌ Нет</div>
@@ -980,23 +980,36 @@
 
     const subCards = ['knifeSubCard','knifeNameCard','gloveSubCard','gloveNameCard','agentSubCard','agentNameCard','otherInputCard'];
     subCards.forEach(id => document.getElementById(id).style.display = 'none');
-    document.getElementById('qualityCard').style.display  = 'block';
-    document.getElementById('skinNameCard').style.display = 'block';
+    document.getElementById('qualityCard').style.display  = 'none';
+    document.getElementById('skinNameCard').style.display = 'none';
+    const tbCard = document.getElementById('tbCard');
+    if (tbCard) tbCard.style.display = 'none';
+    const stRow = document.getElementById('stattrakRow');
+    if (stRow) stRow.style.display = '';
     document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
 
     if (type === 'knife') {
       document.getElementById('knifeSubCard').style.display  = 'block';
       document.getElementById('skinNameCard').style.display  = 'none';
+      document.getElementById('qualityCard').style.display   = 'block';
     } else if (type === 'gloves') {
       document.getElementById('gloveSubCard').style.display  = 'block';
       document.getElementById('skinNameCard').style.display  = 'none';
+      document.getElementById('stattrakRow').style.display   = 'none';
     } else if (type === 'agent') {
       document.getElementById('agentSubCard').style.display  = 'block';
       document.getElementById('qualityCard').style.display   = 'none';
       document.getElementById('skinNameCard').style.display  = 'none';
+      // ТБ появится после выбора конкретного агента
     } else if (type === 'other') {
       document.getElementById('otherInputCard').style.display = 'block';
-      document.getElementById('skinNameCard').style.display   = 'none';
+      document.getElementById('qualityCard').style.display    = 'block';
+      document.getElementById('tbCard') && (document.getElementById('tbCard').style.display = 'block');
+    } else {
+      // Обычное оружие — показываем название, качество, ТБ
+      document.getElementById('skinNameCard').style.display = 'block';
+      document.getElementById('qualityCard').style.display  = 'block';
+      document.getElementById('tbCard').style.display       = 'block';
     }
   }
 
@@ -1015,12 +1028,21 @@
     const cardMap = { knife: 'knifeSubCard', glove: 'gloveSubCard', agent: 'agentSubCard' };
     document.querySelectorAll('#' + cardMap[type] + ' .sub-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
-    if (type === 'knife')  document.getElementById('knifeNameCard').style.display = 'block';
-    if (type === 'glove')  document.getElementById('gloveNameCard').style.display = 'block';
+    if (type === 'knife') {
+      document.getElementById('knifeNameCard').style.display = 'block';
+      document.getElementById('qualityCard').style.display   = 'block';
+      document.getElementById('tbCard') && (document.getElementById('tbCard').style.display = 'block');
+    }
+    if (type === 'glove') {
+      document.getElementById('gloveNameCard').style.display = 'block';
+      document.getElementById('qualityCard').style.display   = 'block';
+      document.getElementById('tbCard') && (document.getElementById('tbCard').style.display = 'block');
+    }
     if (type === 'agent') {
       const noName = ["FBI", "FBI SWAT", "FBI Sniper", "FBI HRT", "SAS", "KSK", "NZSAS", "USAF TACP", "TACP Cavalry"];
       const faction = el.dataset.faction || '';
       document.getElementById('agentNameCard').style.display = noName.includes(faction) ? 'none' : 'block';
+      document.getElementById('tbCard') && (document.getElementById('tbCard').style.display = 'block');
     }
   }
 
@@ -1050,8 +1072,12 @@
       document.getElementById(id).style.display = 'none';
     });
 
-    document.getElementById('qualityCard').style.display  = 'block';
-    document.getElementById('skinNameCard').style.display = 'block';
+    document.getElementById('qualityCard').style.display  = 'none';
+    document.getElementById('skinNameCard').style.display = 'none';
+    const tbCard = document.getElementById('tbCard');
+    if (tbCard) tbCard.style.display = 'none';
+    const stRow = document.getElementById('stattrakRow');
+    if (stRow) stRow.style.display = '';
 
     ['skinNameInput','knifeNameInput','gloveNameInput','agentNameInput','otherNameInput'].forEach(id => {
       const el = document.getElementById(id);
