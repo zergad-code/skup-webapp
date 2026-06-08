@@ -1394,6 +1394,24 @@
       const isGlove = detectGlove(pendingRecognized.weapon);
       applyConfirmModes(isAgent, isGlove);
 
+      // Если Vision распознал дату окончания ТБ — считаем дни и проставляем
+      if (data.trade_ban_until) {
+        const days = daysUntil(data.trade_ban_until);
+        if (days >= 1 && days <= 8) {
+          selectConfirmTB(true);
+          document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => {
+            if (parseInt(b.textContent.trim()) === days) {
+              b.classList.add('selected');
+              confirmBanDays = days;
+            }
+          });
+        } else if (days <= 0) {
+          // Бан уже прошёл — нет ТБ
+          selectConfirmTB(false);
+        }
+        // если days > 8 — оставляем выбор пользователю (защита обмена обсуждается отдельно)
+      }
+
       document.getElementById('ccWeapon').textContent  = pendingRecognized.weapon;
       document.getElementById('ccSkin').textContent    = pendingRecognized.skinName;
       document.getElementById('ccQuality').textContent = pendingRecognized.quality;
@@ -1586,6 +1604,14 @@
     // StatTrak: скрыт для агентов и перчаток
     if (stRow) stRow.style.display = (isAgent || isGlove) ? 'none' : '';
     if (isAgent) document.getElementById('ccQuality').textContent = '—';
+  }
+
+  // Считает дни от сегодня до даты (YYYY-MM-DD)
+  function daysUntil(dateStr) {
+    const target = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.round((target - today) / (1000 * 60 * 60 * 24));
   }
 
   // Определяем тип по названию оружия
