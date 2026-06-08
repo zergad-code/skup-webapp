@@ -424,6 +424,41 @@
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
+  /* ── StatTrak переключатель ── */
+  .stattrak-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px;
+    margin-bottom: 0;
+  }
+
+  .stattrak-label {
+    font-size: 13px; font-weight: 500; color: var(--text);
+  }
+
+  .stattrak-toggle {
+    display: flex; gap: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+  }
+
+  .st-btn {
+    padding: 6px 16px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; border: none;
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .st-btn.active {
+    background: var(--accent);
+    color: #0a0a0f;
+  }
+
   .agent-group-btn {
     display: flex; align-items: center; gap: 10px;
     background: var(--surface2);
@@ -629,6 +664,15 @@
       </div>
     </div>
 
+    <!-- StatTrak в карточке подтверждения -->
+    <div class="confirm-row" style="margin-top:4px;">
+      <span class="cr-label">StatTrak™</span>
+      <div class="stattrak-toggle">
+        <button class="st-btn active" id="ccStNo" onclick="selectCcST(false)">Нет</button>
+        <button class="st-btn" id="ccStYes" onclick="selectCcST(true)">Да</button>
+      </div>
+    </div>
+
     <div class="confirm-tb">
       <div class="tb-label">Трейд-бан</div>
       <div class="tb-row">
@@ -812,6 +856,13 @@
         <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e87a4b"></div><div class="q-name">Well-Worn</div><div class="q-abbr">WW</div></div>
         <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e84b4b"></div><div class="q-name">Battle-Scarred</div><div class="q-abbr">BS</div></div>
       </div>
+      <div class="stattrak-row" style="margin-top:12px;">
+        <span class="stattrak-label">StatTrak™</span>
+        <div class="stattrak-toggle">
+          <button class="st-btn active" id="stNo" onclick="selectST(false)">Нет</button>
+          <button class="st-btn" id="stYes" onclick="selectST(true)">Да</button>
+        </div>
+      </div>
     </div>
 
     <div class="card" id="skinNameCard">
@@ -861,7 +912,7 @@
     <div class="payment-btn" onclick="selectPayment(this)">
       <div class="p-icon">💳</div>
       <div class="p-name">Карта</div>
-
+      <div class="p-sub">RUB / UAH</div>
     </div>
   </div>
 
@@ -904,6 +955,8 @@
   let formWeaponLabel  = null;
   let formTradeBan     = null;  // null = не выбрано
   let formBanDays      = null;
+  let formStatTrak     = false; // StatTrak для ручной формы
+  let ccStatTrak       = false; // StatTrak для карточки подтверждения
 
   // ── Навигация ────────────────────────────────────────────────────────────────
   function goTo(n) {
@@ -1011,6 +1064,10 @@
     document.getElementById('formTbYes').classList.remove('selected');
     document.getElementById('formDaysGrid').classList.remove('visible');
     document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+    // Сброс StatTrak
+    formStatTrak = false;
+    document.getElementById('stNo').classList.add('active');
+    document.getElementById('stYes').classList.remove('active');
   }
 
   // ── Добавить скин в список ────────────────────────────────────────────────
@@ -1071,13 +1128,26 @@
     if (formTradeBan === null) { alert('Укажи трейд-бан'); return; }
     if (formTradeBan === true && !formBanDays) { alert('Выбери количество дней трейд-бана'); return; }
 
-    state.skins.push({ weapon, skinName, quality, tradeBan: formTradeBan, banDays: formBanDays });
+    state.skins.push({ weapon, skinName, quality, tradeBan: formTradeBan, banDays: formBanDays, stattrak: formStatTrak });
 
     renderSkinsList();
     document.getElementById('addForm').style.display = 'none';
     document.getElementById('s1Next').disabled = false;
     const manualBtn = document.querySelector('.add-skin-btn:not(.photo-mode)');
     if (manualBtn) manualBtn.classList.remove('active');
+  }
+
+  function selectST(val) {
+    formStatTrak = val;
+    document.getElementById('stNo').classList.toggle('active', !val);
+    document.getElementById('stYes').classList.toggle('active', val);
+  }
+
+  function selectCcST(val) {
+    ccStatTrak = val;
+    if (pendingRecognized) pendingRecognized.stattrak = val;
+    document.getElementById('ccStNo').classList.toggle('active', !val);
+    document.getElementById('ccStYes').classList.toggle('active', val);
   }
 
   function selectQuality(el) {
@@ -1110,12 +1180,13 @@
     list.innerHTML = '';
     state.skins.forEach((skin, idx) => {
       const tbText = skin.tradeBan ? `ТБ: ${skin.banDays} дн.` : 'Без ТБ';
+      const stText = skin.stattrak ? 'ST ' : '';
       const qualText = qualityFullName[skin.quality] || skin.quality;
       const div = document.createElement('div');
       div.className = 'skin-item';
       div.innerHTML = `
         <div class="si-info">
-          <div class="si-name">${skin.weapon} | ${skin.skinName}</div>
+          <div class="si-name">${stText}${skin.weapon} | ${skin.skinName}</div>
           <div class="si-meta">${qualText} · ${tbText}</div>
         </div>
         <button class="si-remove" onclick="removeSkin(${idx})">✕</button>
@@ -1278,7 +1349,10 @@
         weapon:   data.weapon || 'Неизвестно',
         skinName: data.skin,
         quality:  data.quality || 'FN',
+        stattrak: data.stattrak || false,
       };
+      // Отражаем StatTrak из Vision в переключателе
+      selectCcST(data.stattrak || false);
 
       document.getElementById('ccWeapon').textContent  = pendingRecognized.weapon;
       document.getElementById('ccSkin').textContent    = pendingRecognized.skinName;
@@ -1311,12 +1385,15 @@
   }
 
   function resetConfirmTB() {
-    confirmTradeBan = null;  // не выбрано — пользователь должен указать сам
+    confirmTradeBan = null;
     confirmBanDays  = null;
+    ccStatTrak = false;
     document.getElementById('ccTbNo').classList.remove('selected');
     document.getElementById('ccTbYes').classList.remove('selected');
     document.getElementById('ccDaysGrid').classList.remove('visible');
     document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('ccStNo').classList.add('active');
+    document.getElementById('ccStYes').classList.remove('active');
   }
 
   // ── Пикер оружия в карточке подтверждения ────────────────────────────────────
@@ -1461,6 +1538,7 @@
       quality:  pendingRecognized.quality,
       tradeBan: confirmTradeBan,
       banDays:  confirmBanDays,
+      stattrak: ccStatTrak,
     });
 
     renderSkinsList();
@@ -1507,6 +1585,7 @@
         quality:   s.quality,
         trade_ban: s.tradeBan,
         ban_days:  s.banDays,
+        stattrak:  s.stattrak || false,
       })),
       payment: state.payment,
     };
