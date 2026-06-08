@@ -649,7 +649,7 @@
       <button class="cr-edit-btn" onclick="editConfirmField('ccSkin')" title="Редактировать">✏️</button>
     </div>
 
-    <div class="confirm-row">
+    <div class="confirm-row" id="ccQualityRow">
       <span class="cr-label">Качество</span>
       <span class="cr-val" id="ccQuality">—</span>
       <button class="cr-edit-btn" onclick="toggleCcQualityPicker()" title="Изменить">✏️</button>
@@ -665,7 +665,7 @@
     </div>
 
     <!-- StatTrak в карточке подтверждения -->
-    <div class="confirm-row" style="margin-top:4px;">
+    <div class="confirm-row" id="ccStRow" style="margin-top:4px;">
       <span class="cr-label">StatTrak™</span>
       <div class="stattrak-toggle">
         <button class="st-btn active" id="ccStNo" onclick="selectCcST(false)">Нет</button>
@@ -1099,7 +1099,7 @@
   // ── Добавить скин в список ────────────────────────────────────────────────
   function addSkin() {
     const type = formWeaponType;
-    if (!type) { alert('Выбери оружие'); return; }
+    if (!type) { return; }
 
     let weapon   = formWeaponLabel;
     let skinName = '';
@@ -1107,25 +1107,25 @@
 
     if (type === 'knife') {
       const subEl = document.querySelector('#knifeSubCard .sub-btn.selected');
-      if (!subEl) { alert('Выбери тип ножа'); return; }
+      if (!subEl) { flashCard('knifeSubCard'); return; }
       weapon   = 'Нож: ' + subEl.querySelector('.name').textContent.trim();
       skinName = document.getElementById('knifeNameInput').value.trim();
-      if (!skinName) { alert('Введи название скина ножа'); return; }
+      if (!skinName) { flashCard('knifeNameCard'); return; }
       quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
-      if (!quality) { alert('Выбери качество'); return; }
+      if (!quality) { flashCard('qualityCard'); return; }
 
     } else if (type === 'gloves') {
       const subEl = document.querySelector('#gloveSubCard .sub-btn.selected');
-      if (!subEl) { alert('Выбери тип перчаток'); return; }
+      if (!subEl) { flashCard('gloveSubCard'); return; }
       weapon   = 'Перчи: ' + subEl.querySelector('.name').textContent.trim();
       skinName = document.getElementById('gloveNameInput').value.trim();
-      if (!skinName) { alert('Введи название скина перчаток'); return; }
+      if (!skinName) { flashCard('gloveNameCard'); return; }
       quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
-      if (!quality) { alert('Выбери качество'); return; }
+      if (!quality) { flashCard('qualityCard'); return; }
 
     } else if (type === 'agent') {
       const subEl = document.querySelector('#agentSubCard .sub-btn.selected');
-      if (!subEl) { alert('Выбери агента'); return; }
+      if (!subEl) { flashCard('agentSubCard'); return; }
       const faction = subEl.dataset.faction || subEl.querySelector('.ag-name').textContent.trim();
       const noName = ["FBI", "FBI SWAT", "FBI Sniper", "FBI HRT", "SAS", "KSK", "NZSAS", "USAF TACP", "TACP Cavalry"];
       weapon   = 'Агент (' + faction + ')';
@@ -1133,26 +1133,26 @@
         skinName = faction;
       } else {
         skinName = document.getElementById('agentNameInput').value.trim();
-        if (!skinName) { alert('Введи имя агента'); return; }
+        if (!skinName) { flashCard('agentNameCard'); return; }
       }
       quality  = '—';
 
     } else if (type === 'other') {
       skinName = document.getElementById('otherNameInput').value.trim();
-      if (!skinName) { alert('Введи название'); return; }
+      if (!skinName) { flashCard('otherInputCard'); return; }
       weapon  = 'Другое';
       quality = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
-      if (!quality) { alert('Выбери качество'); return; }
+      if (!quality) { flashCard('qualityCard'); return; }
 
     } else {
       skinName = document.getElementById('skinNameInput').value.trim();
-      if (!skinName) { alert('Введи название скина'); return; }
+      if (!skinName) { flashCard('skinNameCard'); return; }
       quality  = document.querySelector('.quality-btn.selected .q-abbr')?.textContent.trim();
-      if (!quality) { alert('Выбери качество'); return; }
+      if (!quality) { flashCard('qualityCard'); return; }
     }
 
-    if (formTradeBan === null) { alert('Укажи трейд-бан'); return; }
-    if (formTradeBan === true && !formBanDays) { alert('Выбери количество дней трейд-бана'); return; }
+    if (formTradeBan === null) { flashCard('tbCard'); return; }
+    if (formTradeBan === true && !formBanDays) { flashCard('tbCard'); return; }
 
     state.skins.push({ weapon, skinName, quality, tradeBan: formTradeBan, banDays: formBanDays, stattrak: formStatTrak });
 
@@ -1389,6 +1389,11 @@
       // Отражаем StatTrak из Vision в переключателе
       selectCcST(data.stattrak || false);
 
+      // Определяем агента и перчатки (по флагу Vision ИЛИ по названию)
+      const isAgent = data.is_agent === true || detectAgent(pendingRecognized.weapon);
+      const isGlove = detectGlove(pendingRecognized.weapon);
+      applyConfirmModes(isAgent, isGlove);
+
       document.getElementById('ccWeapon').textContent  = pendingRecognized.weapon;
       document.getElementById('ccSkin').textContent    = pendingRecognized.skinName;
       document.getElementById('ccQuality').textContent = pendingRecognized.quality;
@@ -1489,9 +1494,12 @@
     document.getElementById('ccWeapon').textContent = name;
     if (pendingRecognized) pendingRecognized.weapon = name;
     document.getElementById('ccWeaponPicker').style.display = 'none';
+    // Пересчитываем режимы качество/StatTrak
+    const isAgent = detectAgent(name);
+    const isGlove = detectGlove(name);
+    applyConfirmModes(isAgent, isGlove);
   }
 
-  // ── Пикер качества в карточке подтверждения ──────────────────────────────────
   function toggleCcAgentGroup(groupId) {
     const list = document.getElementById(groupId);
     const btn = list.previousElementSibling;
@@ -1570,31 +1578,113 @@
     });
   }
 
+  function applyConfirmModes(isAgent, isGlove) {
+    const qRow = document.getElementById('ccQualityRow');
+    const stRow = document.getElementById('ccStRow');
+    // Качество: скрыто для агентов
+    if (qRow) qRow.style.display = isAgent ? 'none' : '';
+    // StatTrak: скрыт для агентов и перчаток
+    if (stRow) stRow.style.display = (isAgent || isGlove) ? 'none' : '';
+    if (isAgent) document.getElementById('ccQuality').textContent = '—';
+  }
+
+  // Определяем тип по названию оружия
+  function detectAgent(weapon) {
+    if (!weapon) return false;
+    const agentMarkers = ['Агент', 'Agent', 'FBI', 'SAS', 'KSK', 'NZSAS', 'NSWC', 'SEAL',
+      'Gendarmerie', 'TACP', 'Professionals', 'Guerrilla', 'Elite Crew', 'Sabre',
+      'Phoenix', 'Brazilian', 'SWAT', 'Operator', 'Darryl', 'Ava', 'Number K',
+      'Slingshot', 'Crasswater', 'Getaway', 'Osiris', 'Rezan', 'Blackwolf',
+      'Lieutenant', 'Officer', 'Soldier', 'Trapper', 'Enforcer', 'Markus',
+      'Maximus', 'Cmd(', 'Col.', 'Sgt', 'Capt'];
+    return agentMarkers.some(m => weapon.includes(m));
+  }
+
+  function detectGlove(weapon) {
+    if (!weapon) return false;
+    return /\bGloves?\b|Перчатки|Перчи|Hand Wraps|Обмотки/i.test(weapon);
+  }
+
   function confirmRecognized() {
-    // Берём данные прямо из полей на экране
     const weapon  = document.getElementById('ccWeapon').textContent.trim();
     const skin    = document.getElementById('ccSkin').textContent.trim();
     const quality = document.getElementById('ccQuality').textContent.trim();
+    const isAgent = document.getElementById('ccQualityRow').style.display === 'none';
+    const isGlove = document.getElementById('ccStRow').style.display === 'none' && !isAgent;
 
-    // Базовая проверка — оружие и скин должны быть заполнены (не плейсхолдеры)
+    // Оружие обязательно
     if (!weapon || weapon === '—' || weapon.startsWith('❌') || weapon.startsWith('⏳')) {
+      flashCcRow('ccWeapon');
       return;
     }
+    // Скин обязателен
     if (!skin || skin === '—' || skin.startsWith('Попробуй')) {
+      flashCcRow('ccSkin');
+      return;
+    }
+    // Для не-агентов качество обязательно
+    if (!isAgent && (!quality || quality === '—')) {
+      flashCcRow('ccQuality');
+      return;
+    }
+    // ТБ обязателен
+    if (confirmTradeBan === null) {
+      flashTbButtons();
+      return;
+    }
+    if (confirmTradeBan === true && !confirmBanDays) {
+      flashDaysGrid();
       return;
     }
 
     state.skins.push({
       weapon:   weapon,
       skinName: skin,
-      quality:  (quality && quality !== '—') ? quality : '—',
+      quality:  isAgent ? '—' : quality,
       tradeBan: confirmTradeBan === true,
       banDays:  confirmBanDays,
-      stattrak: ccStatTrak,
+      stattrak: isAgent ? false : ccStatTrak,
     });
 
     renderSkinsList();
     cancelConfirm();
+  }
+
+  function flashTbButtons() {
+    const no = document.getElementById('ccTbNo');
+    const yes = document.getElementById('ccTbYes');
+    [no, yes].forEach(b => {
+      if (!b) return;
+      const orig = b.style.borderColor;
+      b.style.borderColor = 'var(--danger)';
+      setTimeout(() => { b.style.borderColor = orig; }, 1200);
+    });
+    no && no.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function flashDaysGrid() {
+    const grid = document.getElementById('ccDaysGrid');
+    if (!grid) return;
+    grid.style.outline = '1px solid var(--danger)';
+    setTimeout(() => { grid.style.outline = ''; }, 1200);
+  }
+
+  function flashCard(cardId) {
+    const el = document.getElementById(cardId);
+    if (!el) return;
+    const orig = el.style.borderColor;
+    el.style.borderColor = 'var(--danger)';
+    el.style.transition = 'border-color 0.2s';
+    setTimeout(() => { el.style.borderColor = orig; }, 1200);
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function flashCcRow(fieldId) {
+    const el = document.getElementById(fieldId);
+    if (!el) return;
+    const original = el.style.color;
+    el.style.color = 'var(--danger)';
+    setTimeout(() => { el.style.color = original; }, 1200);
   }
 
   function cancelConfirm() {
@@ -1608,6 +1698,8 @@
     if (qp) qp.style.display = 'none';
     // Сбрасываем выделение качества
     document.querySelectorAll('.cc-q-btn').forEach(b => b.classList.remove('selected'));
+    // Возвращаем видимость качества и StatTrak (на случай если был агент)
+    applyConfirmModes(false, false);
   }
 
   // ── Ctrl+V: вставка скрина из буфера ────────────────────────────────────────
