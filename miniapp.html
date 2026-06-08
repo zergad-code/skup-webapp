@@ -1662,5 +1662,38 @@
     }
   }
 </script>
+<script>
+  let state = { skins: [], payment: null };
+  let pendingRecognized = null;
+  let confirmTradeBan = null;
+  let confirmBanDays = null;
+
+  // Функция для открытия меню выбора способа добавления
+  function togglePhotoMenu() {
+    document.getElementById('photoSubmenu').classList.toggle('visible');
+  }
+
+  // Функция для открытия медиатеки
+  function triggerMediaLibrary() {
+    document.getElementById('quickPhotoInput').click();
+  }
+
+  // Заглушка для вставки из буфера
+  function pasteFromClipboard() {
+    alert('Используйте Ctrl+V для вставки фото');
+  }
+
+  // Функция ручного добавления (заглушка, замените на вашу логику)
+  function showAddSkin() {
+    alert('Функция ручного добавления в разработке');
+  }
+
+  // Функция обработки фото
+  function handleQuickPhoto(event) {
+    console.log('Фото выбрано:', event.target.files[0]);
+    // Тут должна быть логика отправки на сервер
+    document.getElementById('confirmCard').classList.add('visible');
+  }
+</script>
 </body>
 </html>
