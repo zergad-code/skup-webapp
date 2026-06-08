@@ -938,7 +938,7 @@
 <script>
   // ── КОНФИГ ──────────────────────────────────────────────────────────────────
   // Замени на реальный URL своего Flask сервиса на Railway
-  const API_URL = 'https://YOUR-FLASK-SERVICE.railway.app/recognize';
+  const API_URL = 'https://motivated-gratitude-production-dddc.up.railway.app/recognize';
 
   // ── Telegram ─────────────────────────────────────────────────────────────────
   const tg = window.Telegram?.WebApp;
@@ -1343,6 +1343,15 @@
     }
   }
 
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleQuickPhoto(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1495,7 +1504,15 @@
 
   function toggleCcQualityPicker() {
     const picker = document.getElementById('ccQualityPicker');
-    picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+    const opening = picker.style.display === 'none';
+    picker.style.display = opening ? 'block' : 'none';
+    if (opening) {
+      // Подсвечиваем только реально выбранное качество
+      const current = document.getElementById('ccQuality').textContent.trim();
+      document.querySelectorAll('.cc-q-btn').forEach(b => {
+        b.classList.toggle('selected', b.textContent.trim() === current);
+      });
+    }
   }
 
   function setCcQuality(el, q) {
@@ -1554,15 +1571,24 @@
   }
 
   function confirmRecognized() {
-    if (!pendingRecognized) { cancelConfirm(); return; }
-    if (confirmTradeBan === null) { alert('Укажи трейд-бан'); return; }
-    if (confirmTradeBan === true && !confirmBanDays) { alert('Выбери количество дней трейд-бана'); return; }
+    // Берём данные прямо из полей на экране
+    const weapon  = document.getElementById('ccWeapon').textContent.trim();
+    const skin    = document.getElementById('ccSkin').textContent.trim();
+    const quality = document.getElementById('ccQuality').textContent.trim();
+
+    // Базовая проверка — оружие и скин должны быть заполнены (не плейсхолдеры)
+    if (!weapon || weapon === '—' || weapon.startsWith('❌') || weapon.startsWith('⏳')) {
+      return;
+    }
+    if (!skin || skin === '—' || skin.startsWith('Попробуй')) {
+      return;
+    }
 
     state.skins.push({
-      weapon:   pendingRecognized.weapon,
-      skinName: pendingRecognized.skinName,
-      quality:  pendingRecognized.quality,
-      tradeBan: confirmTradeBan,
+      weapon:   weapon,
+      skinName: skin,
+      quality:  (quality && quality !== '—') ? quality : '—',
+      tradeBan: confirmTradeBan === true,
       banDays:  confirmBanDays,
       stattrak: ccStatTrak,
     });
@@ -1580,6 +1606,8 @@
     const qp = document.getElementById('ccQualityPicker');
     if (wp) wp.style.display = 'none';
     if (qp) qp.style.display = 'none';
+    // Сбрасываем выделение качества
+    document.querySelectorAll('.cc-q-btn').forEach(b => b.classList.remove('selected'));
   }
 
   // ── Ctrl+V: вставка скрина из буфера ────────────────────────────────────────
