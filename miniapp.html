@@ -235,7 +235,7 @@
   .day-btn:active { transform: scale(0.97); }
 
   /* ── Список скинов ── */
-  .skins-list { display: flex; flex-direction: column; gap: 8px; }
+  .skins-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
 
   /* ── Плашка добавления ── */
   .screen-pad { padding: 0 20px; }
@@ -271,6 +271,7 @@
     flex-shrink: 0;
   }
   .sc-icon i { font-size: 21px; color: var(--accent-light); }
+  .sc-icon img { width: 36px; height: 36px; object-fit: contain; }
 
   .sc-info { flex: 1; min-width: 0; }
   .sc-name { font-size: 13px; color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1339,14 +1340,62 @@
   // ── Рендер списка скинов ──────────────────────────────────────────────────────
   const qualityFullName = { FN:'Factory New', MW:'Minimal Wear', FT:'Field-Tested', WW:'Well-Worn', BS:'Battle-Scarred', '—':'—' };
 
-  function skinIcon(weapon) {
+  const ICONS_BASE = 'https://zergad-code.github.io/skup-webapp/icons/';
+
+  // Подбирает PNG-иконку по названию оружия/предмета
+  function skinIconImg(weapon) {
     const w = (weapon || '').toLowerCase();
-    if (detectAgent(weapon)) return 'ti-user';
-    if (detectGlove(weapon)) return 'ti-hand-finger';
-    if (w.includes('нож') || w.includes('knife') || w.includes('bayonet') || w.includes('karambit') ||
-        w.includes('★') || w.includes('dagger') || w.includes('talon') || w.includes('falchion')) return 'ti-blade';
-    if (w.includes('awp') || w.includes('ssg') || w.includes('scar') || w.includes('g3sg')) return 'ti-target';
-    return 'ti-crosshair';
+
+    // Карта известных оружий → файл
+    const map = {
+      'ak-47': 'ak-47.png', 'ak 47': 'ak-47.png', 'калаш': 'ak-47.png',
+      'awp': 'awp.png',
+      'm4a4': 'm4a4.png', 'm4a1-s': 'm4a1-s.png', 'm4a1': 'm4a1-s.png',
+      'desert eagle': 'desert-eagle.png', 'deagle': 'desert-eagle.png', 'дигл': 'desert-eagle.png',
+      'galil': 'galil-ar.png', 'galil ar': 'galil-ar.png',
+      'glock': 'glock.png', 'glock-18': 'glock.png',
+      'usp': 'usp.png', 'usp-s': 'usp.png',
+      // ножи
+      'bayonet': 'bayonet.png', 'штык': 'bayonet.png',
+      'm9 bayonet': 'm9-bayonet.png', 'm9': 'm9-bayonet.png',
+      'karambit': 'karambit.png', 'керамбит': 'karambit.png',
+      'butterfly': 'butterfly-knife.png', 'butterfly knife': 'butterfly-knife.png', 'бабочка': 'butterfly-knife.png',
+      'talon': 'talon-knife.png', 'talon knife': 'talon-knife.png',
+      'skeleton': 'skeleton-knife.png', 'skeleton knife': 'skeleton-knife.png',
+      'stiletto': 'stiletto-knife.png', 'flip': 'flip-knife.png',
+      'huntsman': 'huntsman-knife.png', 'falchion': 'falchion-knife.png',
+      'survival': 'survival-knife.png', 'нож выживания': 'survival-knife.png',
+      'nomad': 'nomad-knife.png', 'gut': 'gut-knife.png', 'shadow daggers': 'shadow-daggers.png',
+      // перчатки
+      'sport gloves': 'Sport Gloves.png', 'driver gloves': 'Driver Gloves.png',
+      'moto gloves': 'Moto Gloves.png', 'specialist gloves': 'Specialist Gloves.png',
+      'hand wraps': 'Hand Wraps.png', 'bloodhound gloves': 'Bloodhound Gloves.png',
+      'hydra gloves': 'Hydra Gloves.png', 'broken fang gloves': 'Broken Fang Gloves.png'
+    };
+
+    // Чистим название от ★, StatTrak, скобок
+    let clean = w.replace('★','').replace('stattrak™','').replace('stattrak','').replace('souvenir','').trim();
+    // Берём часть до |
+    const weaponPart = clean.split('|')[0].trim();
+
+    // Прямое совпадение
+    for (const key in map) {
+      if (weaponPart === key || weaponPart.startsWith(key + ' ') || weaponPart === key) {
+        return ICONS_BASE + encodeURIComponent(map[key]);
+      }
+    }
+    // Частичное вхождение
+    for (const key in map) {
+      if (weaponPart.includes(key)) {
+        return ICONS_BASE + encodeURIComponent(map[key]);
+      }
+    }
+    // Перчатки по маркеру
+    if (detectGlove(weapon)) return ICONS_BASE + encodeURIComponent('Specialist Gloves.png');
+    // Агент по маркеру
+    if (detectAgent(weapon)) return ICONS_BASE + encodeURIComponent('The Professionals.png');
+
+    return null; // не нашли — покажем запасную иконку
   }
 
   function renderSkinsList() {
@@ -1355,7 +1404,7 @@
     state.skins.forEach((skin, idx) => {
       const qualText = qualityFullName[skin.quality] || skin.quality;
       const isAgent = detectAgent(skin.weapon);
-      const icon = skinIcon(skin.weapon);
+      const iconUrl = skinIconImg(skin.weapon);
 
       // Чипы
       let chips = '';
@@ -1375,7 +1424,7 @@
       div.className = 'skin-card anim-card';
       div.style.animationDelay = `${0.05 + idx * 0.06}s`;
       div.innerHTML = `
-        <div class="sc-icon"><i class="ti ${icon}"></i></div>
+        <div class="sc-icon">${iconUrl ? `<img src="${iconUrl}" alt="">` : `<i class="ti ti-cube"></i>`}</div>
         <div class="sc-info">
           <div class="sc-name">${skin.weapon} | ${skin.skinName}</div>
           <div class="sc-chips">${chips}</div>
