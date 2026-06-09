@@ -6,62 +6,92 @@
 <title>Скупка скинов</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap');
   @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css');
 
   :root {
-    --bg: #1a1a2e;
-    --bg2: #2b2b4d;
-    --surface: rgba(255,255,255,0.04);
-    --surface2: rgba(255,255,255,0.03);
+    --bg: #16162a;
+    --bg2: #22223f;
+    --card: #1c1c2e;
+    --card2: #222238;
+    --surface: rgba(255,255,255,0.035);
+    --surface2: rgba(255,255,255,0.05);
     --border: rgba(255,255,255,0.08);
+    --border-accent: rgba(167,139,250,0.12);
     --accent: #8b7fde;
     --accent-light: #b8a9f0;
-    --accent-soft: rgba(167,139,250,0.16);
+    --accent-soft: rgba(167,139,250,0.15);
     --accent2: #a78bfa;
+    --gold: #e8b84b;
+    --gold-soft: rgba(232,184,75,0.15);
     --text: #ffffff;
     --text2: #8888aa;
     --text3: #7a7a9c;
+    --text-dim: #5a5a78;
     --danger: #d4537e;
     --success: #5dcaa5;
+    --shadow-card: 0 2px 10px rgba(0,0,0,0.25);
+    --shadow-btn: 0 4px 16px rgba(139,127,222,0.4);
+    --ease: cubic-bezier(0.22,1,0.36,1);
   }
+
+  /* ── Анимации ── */
+  @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: linear-gradient(165deg, #1a1a2e 0%, #2b2b4d 100%);
+    background: linear-gradient(165deg, #16162a 0%, #22223f 100%);
     background-attachment: fixed;
     color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
     min-height: 100vh;
-    padding: 18px;
+    padding: 0;
   }
+  .app-wrap { padding: 0 0 24px; }
 
   .header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 24px;
+    justify-content: space-between;
+    padding: 22px 20px 20px;
+    background: linear-gradient(135deg, rgba(139,127,222,0.12), rgba(167,139,250,0.04));
+    margin-bottom: 20px;
+    animation: fadeIn 0.6s ease;
   }
+  .header-left { display: flex; align-items: center; gap: 11px; }
+  .header-history {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: transform 0.18s var(--ease);
+    border: none; color: var(--text2);
+  }
+  .header-history:active { transform: scale(0.92); }
 
   .logo {
-    width: 36px; height: 36px;
-    background: var(--accent-soft);
-    border-radius: 10px;
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #8b7fde, #a78bfa);
+    border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 17px;
+    font-size: 19px;
+    box-shadow: 0 4px 12px rgba(139,127,222,0.35);
+    transition: transform 0.3s var(--ease);
   }
+  .logo:active { transform: rotate(15deg) scale(1.1); }
 
   .header-text h1 {
-    font-family: 'Inter', -apple-system, sans-serif;
-    font-size: 18px; font-weight: 600;
-    letter-spacing: 0.3px; color: #fff;
+    font-family: 'Onest', -apple-system, sans-serif;
+    font-size: 16px; font-weight: 600;
+    letter-spacing: 0.2px; color: #fff;
   }
 
   .header-text p { font-size: 11px; color: var(--text2); letter-spacing: 0.5px; }
 
-  .progress { display: flex; gap: 6px; margin-bottom: 24px; }
-  .progress-step { flex: 1; height: 3px; background: var(--border); border-radius: 2px; transition: background 0.3s; }
+  .progress { display: flex; gap: 5px; padding: 0 20px; margin-bottom: 20px; }
+  .progress-step { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
   .progress-step.active { background: var(--accent2); }
   .progress-step.done { background: var(--accent); }
 
@@ -74,7 +104,7 @@
   }
 
   .card-title {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
     font-size: 13px; font-weight: 600;
     letter-spacing: 1.5px; color: var(--text2);
     text-transform: uppercase; margin-bottom: 14px;
@@ -89,7 +119,7 @@
     padding: 11px 6px;
     cursor: pointer; text-align: center;
     transition: all 0.18s; color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
   }
 
   .weapon-btn .icon {
@@ -112,7 +142,7 @@
     border: none;
     border-radius: 11px; padding: 11px 13px;
     cursor: pointer; transition: all 0.18s; color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
   }
 
   .quality-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -129,7 +159,7 @@
     border-radius: 11px;
     padding: 13px 14px;
     color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
     font-size: 14px; outline: none;
     transition: background 0.2s;
   }
@@ -167,7 +197,7 @@
   .tb-label {
     font-size: 12px; color: var(--text2);
     letter-spacing: 1px; text-transform: uppercase;
-    font-family: 'Inter', -apple-system, sans-serif; font-weight: 600;
+    font-family: 'Onest', -apple-system, sans-serif; font-weight: 600;
     margin-bottom: 8px;
   }
 
@@ -179,7 +209,7 @@
     border-radius: 11px; padding: 11px;
     cursor: pointer; text-align: center;
     transition: all 0.18s; color: var(--text2);
-    font-family: 'Inter', -apple-system, sans-serif; font-size: 13px;
+    font-family: 'Onest', -apple-system, sans-serif; font-size: 13px;
   }
 
   .tb-btn.selected { background: var(--accent-soft); color: var(--accent-light); }
@@ -198,7 +228,7 @@
     border-radius: 9px; padding: 9px;
     text-align: center; font-size: 13px;
     cursor: pointer; color: var(--text2);
-    font-family: 'Inter', -apple-system, sans-serif; transition: all 0.18s;
+    font-family: 'Onest', -apple-system, sans-serif; transition: all 0.18s;
   }
 
   .day-btn.selected { background: var(--accent-soft); color: var(--accent-light); }
@@ -206,6 +236,60 @@
 
   /* ── Список скинов ── */
   .skins-list { display: flex; flex-direction: column; gap: 8px; }
+
+  /* ── Плашка добавления ── */
+  .screen-pad { padding: 0 20px; }
+  .add-plate {
+    padding: 16px; border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border-accent);
+    margin-bottom: 18px;
+    animation: slideUp 0.4s var(--ease) backwards;
+  }
+  .add-plate-title {
+    font-size: 13px; color: var(--accent-light); font-weight: 500;
+    margin-bottom: 13px; text-align: center;
+  }
+
+  /* ── Кнопки навигации/добавления премиум ── */
+
+  /* ── Премиум карточка скина ── */
+  .skin-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; border-radius: 16px;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+    transition: all 0.25s var(--ease);
+  }
+  .skin-card:active { transform: scale(0.98); background: var(--card2); }
+  .anim-card { animation: slideUp 0.4s var(--ease) backwards; }
+
+  .sc-icon {
+    width: 44px; height: 44px; border-radius: 11px;
+    background: rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .sc-icon i { font-size: 21px; color: var(--accent-light); }
+
+  .sc-info { flex: 1; min-width: 0; }
+  .sc-name { font-size: 13px; color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-chips { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+
+  .chip { font-size: 10px; padding: 2px 8px; border-radius: 6px; animation: fadeIn 0.5s ease backwards; }
+  .chip-q { background: var(--accent-soft); color: var(--accent-light); }
+  .chip-st { background: var(--gold-soft); color: var(--gold); }
+  .chip-tb { background: var(--gold-soft); color: var(--gold); }
+  .chip-neutral { background: rgba(255,255,255,0.06); color: var(--text2); }
+
+  .sc-remove {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-dim); padding: 4px;
+    transition: transform 0.2s var(--ease);
+    display: flex; align-items: center;
+  }
+  .sc-remove i { font-size: 15px; }
+  .sc-remove:active { transform: scale(0.8) rotate(90deg); }
 
   .skin-item {
     display: flex; align-items: flex-start; gap: 10px;
@@ -224,24 +308,21 @@
     font-size: 16px; padding: 2px 6px; flex-shrink: 0;
   }
 
-  .add-btns-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    margin-top: 8px;
-  }
+  .add-btns-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 
   .add-skin-btn {
-    display: flex; align-items: center; justify-content: center; gap: 7px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px; border-radius: 12px;
     background: var(--surface2);
     border: none;
-    border-radius: 12px; padding: 13px;
-    color: var(--accent-light);
-    font-family: 'Inter', -apple-system, sans-serif; font-size: 13px;
-    cursor: pointer; transition: all 0.18s;
-    width: 100%;
+    color: #fff;
+    font-family: 'Onest', -apple-system, sans-serif;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s var(--ease);
   }
-
-  .add-skin-btn:active { transform: scale(0.98); }
-  .add-skin-btn.active { background: var(--accent-soft); color: var(--accent-light); }
+  .add-skin-btn i { font-size: 16px; color: var(--accent-light); }
+  .add-skin-btn:active { transform: scale(0.95); }
+  .add-skin-btn.active { background: var(--accent-soft); }
 
   .add-skin-btn.photo-mode { }
 
@@ -260,7 +341,7 @@
     background: var(--accent-soft);
     border: none;
     border-radius: 12px; padding: 13px 8px;
-    color: var(--accent-light); font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--accent-light); font-family: 'Onest', -apple-system, sans-serif;
     font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.18s;
     width: 100%;
   }
@@ -269,16 +350,18 @@
 
   /* ── Карточка подтверждения после распознавания ── */
   .confirm-card {
-    background: var(--surface);
+    background: var(--card);
     border: none;
-    border-radius: 14px; padding: 16px;
+    border-radius: 16px; padding: 16px;
     margin-top: 12px; display: none;
+    box-shadow: var(--shadow-card);
+    animation: scaleIn 0.3s var(--ease);
   }
 
   .confirm-card.visible { display: block; }
 
   .confirm-card .cc-title {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
     font-size: 13px; font-weight: 600;
     letter-spacing: 1.5px; color: var(--accent);
     text-transform: uppercase; margin-bottom: 12px;
@@ -306,7 +389,7 @@
     background: var(--surface2);
     border: 1px solid var(--accent);
     border-radius: 6px; padding: 4px 8px;
-    color: var(--text); font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--text); font-family: 'Onest', -apple-system, sans-serif;
     font-size: 13px; outline: none;
     flex: 1; min-width: 0;
   }
@@ -316,7 +399,7 @@
   .confirm-ok {
     background: var(--accent); border: none;
     border-radius: 12px; padding: 12px;
-    color: #fff; font-family: 'Inter', -apple-system, sans-serif;
+    color: #fff; font-family: 'Onest', -apple-system, sans-serif;
     font-size: 14px; font-weight: 700; cursor: pointer;
   }
 
@@ -324,38 +407,43 @@
     background: var(--surface2);
     border: none;
     border-radius: 12px; padding: 12px;
-    color: var(--text2); font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--text2); font-family: 'Onest', -apple-system, sans-serif;
     font-size: 13px; cursor: pointer;
   }
 
   .confirm-tb { margin-top: 12px; }
-  .confirm-tb .tb-label { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-family: 'Inter', -apple-system, sans-serif; font-weight: 600; }
+  .confirm-tb .tb-label { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-family: 'Onest', -apple-system, sans-serif; font-weight: 600; }
   .confirm-tb .tb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
 
   /* ── Оплата ── */
   .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
   .payment-btn {
-    background: var(--surface2);
+    background: var(--card);
     border: none;
-    border-radius: 14px; padding: 18px 14px;
+    border-radius: 16px; padding: 20px 14px;
     cursor: pointer; text-align: center;
-    transition: all 0.18s; color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    transition: all 0.2s var(--ease); color: var(--text);
+    font-family: 'Onest', -apple-system, sans-serif;
+    box-shadow: var(--shadow-card);
   }
-
-  .payment-btn .p-icon { font-size: 24px; margin-bottom: 6px; }
+  .payment-btn .p-icon { font-size: 26px; margin-bottom: 8px; color: var(--text2); }
   .payment-btn .p-name { font-size: 14px; font-weight: 500; }
   .payment-btn .p-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
-  .payment-btn.selected { background: var(--accent-soft); }
+  .payment-btn.selected { background: var(--accent-soft); box-shadow: 0 4px 16px rgba(139,127,222,0.25); }
+  .payment-btn.selected .p-icon { color: var(--accent-light); }
+  .payment-btn.selected .p-name { color: var(--accent-light); }
+  .payment-btn:active { transform: scale(0.97); }
   .payment-btn.selected .p-name { color: var(--accent-light); }
   .payment-btn:active { transform: scale(0.98); }
 
   /* ── Итог ── */
   .summary {
-    background: var(--surface);
+    background: var(--card);
     border: none;
-    border-radius: 14px; padding: 18px; margin-bottom: 16px;
+    border-radius: 16px; padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
   }
 
   .summary-row {
@@ -367,19 +455,20 @@
   .summary-row .s-label { font-size: 12px; color: var(--text2); flex: 1; }
   .summary-row .s-value { font-size: 13px; font-weight: 500; text-align: right; }
   .summary-row.total .s-label { font-size: 13px; color: var(--text); }
-  .summary-row.total .s-value { font-size: 16px; color: var(--accent); font-weight: 700; font-family: 'Inter', -apple-system, sans-serif; }
+  .summary-row.total .s-value { font-size: 16px; color: var(--accent); font-weight: 700; font-family: 'Onest', -apple-system, sans-serif; }
 
   .submit-btn {
     width: 100%;
-    background: var(--accent2); border: none;
-    border-radius: 13px; padding: 16px;
-    color: #1a1a2e;
-    font-family: 'Inter', -apple-system, sans-serif;
-    font-size: 16px; font-weight: 600; letter-spacing: 0.5px;
-    cursor: pointer; transition: all 0.2s;
+    background: linear-gradient(135deg, #8b7fde, #a78bfa); border: none;
+    border-radius: 14px; padding: 17px;
+    color: #fff;
+    font-family: 'Onest', -apple-system, sans-serif;
+    font-size: 15px; font-weight: 600; letter-spacing: 0.3px;
+    cursor: pointer; transition: all 0.2s var(--ease);
+    box-shadow: var(--shadow-btn);
   }
 
-  .submit-btn:hover { background: var(--accent-light); }
+  .submit-btn:active { transform: scale(0.98); }
   .submit-btn:active { transform: scale(0.98); }
 
   .nav-btns { display: flex; gap: 8px; margin-top: 16px; }
@@ -387,28 +476,39 @@
   .nav-back {
     flex: 1; background: var(--surface);
     border: none;
-    border-radius: 12px; padding: 14px;
-    color: var(--text2); font-family: 'Inter', -apple-system, sans-serif;
+    border-radius: 14px; padding: 16px;
+    color: var(--text2); font-family: 'Onest', -apple-system, sans-serif;
     font-size: 13px; cursor: pointer;
+    transition: all 0.18s var(--ease);
   }
+  .nav-back:active { transform: scale(0.97); }
 
   .nav-next {
-    flex: 2; background: var(--accent); border: none;
-    border-radius: 12px; padding: 14px;
+    flex: 2; background: linear-gradient(135deg, #8b7fde, #a78bfa); border: none;
+    border-radius: 14px; padding: 16px;
     color: #fff;
-    font-family: 'Inter', -apple-system, sans-serif;
-    font-size: 15px; font-weight: 600; letter-spacing: 0.3px;
-    cursor: pointer; transition: all 0.2s;
+    font-family: 'Onest', -apple-system, sans-serif;
+    font-size: 15px; font-weight: 600; letter-spacing: 0.2px;
+    cursor: pointer; transition: all 0.2s var(--ease);
+    box-shadow: var(--shadow-btn);
   }
 
-  .nav-next:disabled { opacity: 0.4; pointer-events: none; }
+  .nav-next:disabled { opacity: 0.4; box-shadow: none; cursor: default; }
   .nav-next:active { transform: scale(0.98); }
 
-  .screen { display: none; }
-  .screen.active { display: block; }
+  .screen { display: none; padding: 0 20px; }
+  .screen.active { display: block; animation: fadeIn 0.35s ease; }
 
-  .step-title { font-family: 'Inter', -apple-system, sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-  .step-sub { font-size: 12px; color: var(--text2); margin-bottom: 20px; }
+  .step-title {
+    font-family: 'Onest', -apple-system, sans-serif;
+    font-size: 24px; font-weight: 600;
+    color: #fff; letter-spacing: -0.3px;
+    margin-bottom: 3px;
+  }
+  .step-sub {
+    font-size: 13px; color: var(--text3);
+    margin-bottom: 20px;
+  }
 
   .agent-list { display: flex; flex-direction: column; gap: 6px; }
 
@@ -417,7 +517,7 @@
     background: var(--surface2); border: none;
     border-radius: 11px; padding: 11px 13px;
     cursor: pointer; transition: all 0.18s; color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
   }
 
   .agent-btn .ag-icon {
@@ -469,7 +569,7 @@
     background: var(--surface2);
     color: var(--text2);
     border-radius: 8px;
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
     transition: all 0.18s;
   }
 
@@ -484,7 +584,7 @@
     border: 1px dashed var(--border);
     border-radius: 10px; padding: 10px 12px;
     cursor: pointer; transition: all 0.2s; color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Onest', -apple-system, sans-serif;
   }
   .agent-group-btn:active { transform: scale(0.99); }
   .agent-group-btn .ag-arrow { color: var(--accent); font-size: 10px; transition: transform 0.2s; }
@@ -499,10 +599,12 @@
 <body>
 
 <div class="header">
-  <div class="logo"><i class="ti ti-diamond" style="font-size:17px;color:var(--accent-light);"></i></div>
-  <div class="header-text">
-    <h1>ZEORGJARD</h1>
-    <p><a href="https://t.me/zeorgjard" onclick="openTgLink(event, 'zeorgjard')" style="color:var(--accent-light); text-decoration:none;">by @zeorgjard</a></p>
+  <div class="header-left">
+    <div class="logo"><i class="ti ti-diamond" style="font-size:19px;color:#fff;"></i></div>
+    <div class="header-text">
+      <h1>ZEORGJARD</h1>
+      <p><a href="https://t.me/zeorgjard" onclick="openTgLink(event, 'zeorgjard')" style="color:var(--text2); text-decoration:none;">by @zeorgjard</a></p>
+    </div>
   </div>
 </div>
 
@@ -513,14 +615,17 @@
 </div>
 
 <div class="screen active" id="s1">
-  <div class="step-title">Добавь скины</div>
-  <div class="step-sub">Выбери оружие и укажи название</div>
+  <div class="step-title">Корзина</div>
+  <div class="step-sub" id="skinCounter">Корзина пуста</div>
 
   <div class="skins-list" id="skinsList"></div>
 
-  <div class="add-btns-row">
-    <button class="add-skin-btn" onclick="showAddSkin()"><i class="ti ti-pencil ti-inline"></i>Вручную</button>
-    <button class="add-skin-btn photo-mode" id="photoModeBtn" onclick="togglePhotoMenu()"><i class="ti ti-camera ti-inline"></i>По фото</button>
+  <div class="add-plate">
+    <div class="add-plate-title">Добавить скин</div>
+    <div class="add-btns-row">
+      <button class="add-skin-btn" onclick="showAddSkin()"><i class="ti ti-pencil"></i>Вручную</button>
+      <button class="add-skin-btn photo-mode" id="photoModeBtn" onclick="togglePhotoMenu()"><i class="ti ti-camera"></i>По фото</button>
+    </div>
   </div>
 
   <div class="photo-submenu" id="photoSubmenu">
@@ -1234,27 +1339,62 @@
   // ── Рендер списка скинов ──────────────────────────────────────────────────────
   const qualityFullName = { FN:'Factory New', MW:'Minimal Wear', FT:'Field-Tested', WW:'Well-Worn', BS:'Battle-Scarred', '—':'—' };
 
+  function skinIcon(weapon) {
+    const w = (weapon || '').toLowerCase();
+    if (detectAgent(weapon)) return 'ti-user';
+    if (detectGlove(weapon)) return 'ti-hand-finger';
+    if (w.includes('нож') || w.includes('knife') || w.includes('bayonet') || w.includes('karambit') ||
+        w.includes('★') || w.includes('dagger') || w.includes('talon') || w.includes('falchion')) return 'ti-blade';
+    if (w.includes('awp') || w.includes('ssg') || w.includes('scar') || w.includes('g3sg')) return 'ti-target';
+    return 'ti-crosshair';
+  }
+
   function renderSkinsList() {
     const list = document.getElementById('skinsList');
     list.innerHTML = '';
     state.skins.forEach((skin, idx) => {
-      const tbText = skin.tradeBan ? `ТБ: ${skin.banDays} дн.` : 'Без ТБ';
-      const stText = skin.stattrak ? 'ST ' : '';
       const qualText = qualityFullName[skin.quality] || skin.quality;
+      const isAgent = detectAgent(skin.weapon);
+      const icon = skinIcon(skin.weapon);
+
+      // Чипы
+      let chips = '';
+      if (!isAgent && skin.quality && skin.quality !== '—') {
+        chips += `<span class="chip chip-q">${skin.quality}</span>`;
+      }
+      if (skin.stattrak) {
+        chips += `<span class="chip chip-st">ST™</span>`;
+      }
+      if (skin.tradeBan) {
+        chips += `<span class="chip chip-tb">${skin.banDays} дн.</span>`;
+      } else {
+        chips += `<span class="chip chip-neutral">без ТБ</span>`;
+      }
+
       const div = document.createElement('div');
-      div.className = 'skin-item';
+      div.className = 'skin-card anim-card';
+      div.style.animationDelay = `${0.05 + idx * 0.06}s`;
       div.innerHTML = `
-        <div class="si-info">
-          <div class="si-name">${stText}${skin.weapon} | ${skin.skinName}</div>
-          <div class="si-meta">${qualText} · ${tbText}</div>
+        <div class="sc-icon"><i class="ti ${icon}"></i></div>
+        <div class="sc-info">
+          <div class="sc-name">${skin.weapon} | ${skin.skinName}</div>
+          <div class="sc-chips">${chips}</div>
         </div>
-        <button class="si-remove" onclick="removeSkin(${idx})"><i class="ti ti-x"></i></button>
+        <button class="sc-remove" onclick="removeSkin(${idx})"><i class="ti ti-x"></i></button>
       `;
       list.appendChild(div);
     });
 
     const hasAny = state.skins.length > 0;
     document.getElementById('s1Next').disabled = !hasAny;
+
+    // Обновляем счётчик в подзаголовке
+    const counter = document.getElementById('skinCounter');
+    if (counter) {
+      const n = state.skins.length;
+      counter.textContent = n === 0 ? 'Корзина пуста' :
+        `${n} ${n===1?'скин':(n<5?'скина':'скинов')} ${n===1?'готов':'готовы'} к оценке`;
+    }
   }
 
   function removeSkin(idx) {
