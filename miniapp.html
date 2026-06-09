@@ -596,6 +596,93 @@
 
   .ti { font-family: 'tabler-icons' !important; font-style: normal; font-weight: normal; line-height: 1; -webkit-font-smoothing: antialiased; }
   .ti-inline { font-size: 16px; vertical-align: -2px; margin-right: 6px; opacity: 0.85; }
+
+  /* ── Кнопка: блик один раз + свечение ── */
+  @keyframes btnShineOnce {
+    0% { left: -60%; }
+    100% { left: 130%; }
+  }
+  @keyframes btnBreathe {
+    0%, 100% { box-shadow: 0 4px 16px rgba(139,127,222,0.4); }
+    50% { box-shadow: 0 4px 24px rgba(139,127,222,0.6); }
+  }
+  .shine-btn { position: relative; overflow: hidden; animation: btnBreathe 3s ease-in-out infinite; }
+  .shine-btn::after {
+    content: ''; position: absolute; top: 0; left: -60%;
+    width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-20deg);
+    animation: btnShineOnce 1.2s ease-out 0.4s 1;
+  }
+
+  /* ── Экран успеха (Apple Pay стиль) ── */
+  .success-overlay {
+    display: none; position: fixed; inset: 0;
+    background: linear-gradient(165deg, #16162a 0%, #22223f 100%);
+    z-index: 200;
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px;
+  }
+  .success-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+
+  .success-check { width: 90px; height: 90px; margin-bottom: 24px; }
+  .success-check circle {
+    fill: none; stroke: #5dcaa5; stroke-width: 4;
+    stroke-dasharray: 283; stroke-dashoffset: 283;
+    animation: drawCircle 0.5s ease-out forwards;
+  }
+  .success-check path {
+    fill: none; stroke: #5dcaa5; stroke-width: 5;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 60; stroke-dashoffset: 60;
+    animation: drawCheck 0.35s ease-out 0.45s forwards;
+  }
+  @keyframes drawCircle { to { stroke-dashoffset: 0; } }
+  @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+  .success-title {
+    font-size: 22px; font-weight: 600; color: #fff;
+    opacity: 0; animation: fadeInUp 0.4s ease 0.7s forwards;
+  }
+  .success-sub {
+    font-size: 14px; color: var(--text2); margin-top: 8px; text-align: center;
+    opacity: 0; animation: fadeInUp 0.4s ease 0.85s forwards;
+  }
+  .success-links {
+    margin-top: 28px; display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 280px;
+    opacity: 0; animation: fadeInUp 0.4s ease 1s forwards;
+  }
+  .success-link {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px; border-radius: 13px;
+    background: var(--surface2); color: #fff;
+    font-size: 14px; font-weight: 500; text-decoration: none;
+    border: none; cursor: pointer; font-family: 'Onest', sans-serif;
+    transition: transform 0.18s var(--ease);
+  }
+  .success-link:active { transform: scale(0.97); }
+  .success-link.primary { background: linear-gradient(135deg, #8b7fde, #a78bfa); }
+  .success-link i { font-size: 17px; }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+
+  /* ── Бейдж-счётчик скинов ── */
+  .skin-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 24px; height: 24px; padding: 0 8px;
+    margin-left: 10px; vertical-align: middle;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #8b7fde, #a78bfa);
+    color: #fff; font-size: 13px; font-weight: 600;
+    animation: badgePop 0.4s var(--ease);
+  }
+  @keyframes badgePop {
+    0% { opacity: 0; transform: scale(0.5); }
+    60% { transform: scale(1.15); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
 </style>
 </head>
 <body>
@@ -617,7 +704,7 @@
 </div>
 
 <div class="screen active" id="s1">
-  <div class="step-title">Узнай цену скинов</div>
+  <div class="step-title">Узнай цену скинов<span class="skin-badge" id="skinBadge" style="display:none;">0</span></div>
   <div class="step-sub">Добавь и получи оценку сразу</div>
 
   <div class="skins-list" id="skinsList"></div>
@@ -1057,7 +1144,7 @@
 
   <div class="summary" id="summaryBlock"></div>
 
-  <button class="submit-btn" onclick="submitOrder()">ОТПРАВИТЬ ЗАЯВКУ</button>
+  <button class="submit-btn shine-btn" onclick="submitOrder()">Отправить заявку</button>
 
   <div class="nav-btns" style="margin-top:10px;">
     <button class="nav-back" onclick="goTo(2)">← Назад</button>
@@ -1107,7 +1194,22 @@
       if (i + 1 < n) p.classList.add('done');
       if (i + 1 === n) p.classList.add('active');
     });
-    if (n === 3) renderSummary();
+    if (n === 3) {
+      renderSummary();
+      // Перезапускаем блик кнопки отправки
+      const sb = document.querySelector('.shine-btn');
+      if (sb) {
+        sb.style.animation = 'none';
+        const after = sb.querySelector('::after');
+        // Форсируем reflow и перезапуск
+        void sb.offsetWidth;
+        sb.style.animation = '';
+        // Перезапуск псевдоэлемента через переключение класса
+        sb.classList.remove('shine-btn');
+        void sb.offsetWidth;
+        sb.classList.add('shine-btn');
+      }
+    }
     window.scrollTo(0, 0);
   }
 
@@ -1438,12 +1540,24 @@
     const hasAny = state.skins.length > 0;
     document.getElementById('s1Next').disabled = !hasAny;
 
-    // Обновляем счётчик в подзаголовке
-    const counter = document.getElementById('skinCounter');
-    if (counter) {
-      const n = state.skins.length;
-      counter.textContent = n === 0 ? 'Корзина пуста' :
-        `${n} ${n===1?'скин':(n<5?'скина':'скинов')} ${n===1?'готов':'готовы'} к оценке`;
+    // Динамический отступ: мал когда пусто, больше когда есть скины
+    list.style.marginBottom = hasAny ? '18px' : '0';
+    const sub = document.querySelector('#s1 .step-sub');
+    if (sub) sub.style.marginBottom = hasAny ? '16px' : '1px';
+
+    // Бейдж-счётчик
+    const badge = document.getElementById('skinBadge');
+    if (badge) {
+      if (hasAny) {
+        badge.textContent = state.skins.length;
+        badge.style.display = 'inline-flex';
+        // Перезапуск анимации pop
+        badge.style.animation = 'none';
+        void badge.offsetWidth;
+        badge.style.animation = '';
+      } else {
+        badge.style.display = 'none';
+      }
     }
   }
 
@@ -1987,13 +2101,37 @@
 
     const jsonStr = JSON.stringify(payload);
 
+    // Показываем красивый экран успеха с анимацией
+    const overlay = document.getElementById('successOverlay');
+    overlay.classList.add('show');
+
+    // Отправляем данные боту (но не закрываем сразу — даём увидеть галочку)
     if (tg?.sendData) {
-      tg.sendData(jsonStr);
+      // Небольшая задержка чтобы анимация галочки проигралась
+      setTimeout(() => { tg.sendData(jsonStr); }, 2200);
     } else {
       console.log('Payload:', jsonStr);
-      alert('Данные (отладка):\n' + jsonStr);
     }
   }
 </script>
+
+<!-- Экран успеха (Apple Pay стиль) -->
+<div class="success-overlay" id="successOverlay">
+  <svg class="success-check" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="45"/>
+    <path d="M30 52 L44 66 L72 36"/>
+  </svg>
+  <div class="success-title">Заявка отправлена!</div>
+  <div class="success-sub" id="successSub">Роман скоро свяжется с тобой</div>
+  <div class="success-links">
+    <button class="success-link primary" onclick="openTgLink(event,'zeorgjard')">
+      <i class="ti ti-brand-telegram"></i>Написать Роману
+    </button>
+    <button class="success-link" onclick="openTgLink(event,'zeorgjardskup')">
+      <i class="ti ti-star"></i>Отзывы
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
