@@ -502,7 +502,7 @@
   <div class="logo"><i class="ti ti-diamond" style="font-size:17px;color:var(--accent-light);"></i></div>
   <div class="header-text">
     <h1>ZEORGJARD</h1>
-    <p>by @zeorgjard</p>
+    <p><a href="https://t.me/zeorgjard" onclick="openTgLink(event, 'zeorgjard')" style="color:var(--accent-light); text-decoration:none;">by @zeorgjard</a></p>
   </div>
 </div>
 
@@ -965,6 +965,17 @@
   // ── Telegram ─────────────────────────────────────────────────────────────────
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.ready(); tg.expand(); }
+
+  // Открытие Telegram-ссылок (ЛС, канал) изнутри Mini App
+  function openTgLink(event, username) {
+    event.preventDefault();
+    const url = 'https://t.me/' + username;
+    if (tg && tg.openTelegramLink) {
+      tg.openTelegramLink(url);
+    } else {
+      window.open(url, '_blank');
+    }
+  }
 
   // ── Состояние ────────────────────────────────────────────────────────────────
   const state = {
