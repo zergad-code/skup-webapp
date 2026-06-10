@@ -294,6 +294,7 @@
   .chip { font-size: 10px; padding: 2px 8px; border-radius: 6px; animation: fadeIn 0.5s ease backwards; }
   .chip-q { background: var(--accent-soft); color: var(--accent-light); }
   .chip-st { background: var(--gold-soft); color: var(--gold); }
+  .chip-sv { background: rgba(251,146,60,0.12); color: #fb923c; }
   .chip-tb { background: var(--gold-soft); color: var(--gold); }
   .chip-neutral { background: rgba(255,255,255,0.06); color: var(--text2); }
 
@@ -891,6 +892,14 @@
         <button class="st-btn" id="ccStYes" onclick="selectCcST(true)">Да</button>
       </div>
     </div>
+    <!-- Сувенир в карточке подтверждения -->
+    <div class="confirm-row" id="ccSvRow" style="margin-top:4px;">
+      <span class="cr-label">Souvenir</span>
+      <div class="stattrak-toggle">
+        <button class="st-btn active" id="ccSvNo" onclick="selectCcSV(false)">Нет</button>
+        <button class="st-btn" id="ccSvYes" onclick="selectCcSV(true)">Да</button>
+      </div>
+    </div>
 
     <div class="confirm-tb">
       <div class="tb-label">Трейд-бан</div>
@@ -1088,6 +1097,13 @@
           <button class="st-btn" id="stYes" onclick="selectST(true)">Да</button>
         </div>
       </div>
+      <div class="stattrak-row" id="souvenirRow" style="margin-top:8px;">
+        <span class="stattrak-label">Souvenir</span>
+        <div class="stattrak-toggle">
+          <button class="st-btn active" id="svNo" onclick="selectSV(false)">Нет</button>
+          <button class="st-btn" id="svYes" onclick="selectSV(true)">Да</button>
+        </div>
+      </div>
     </div>
 
 
@@ -1187,6 +1203,8 @@
   let formBanDays      = null;
   let formStatTrak     = false; // StatTrak для ручной формы
   let ccStatTrak       = false; // StatTrak для карточки подтверждения
+  let formSouvenir     = false; // Сувенир для ручной формы
+  let ccSouvenir       = false; // Сувенир для карточки подтверждения
 
   // ── Навигация ────────────────────────────────────────────────────────────────
   function goTo(n) {
@@ -1231,20 +1249,26 @@
     if (tbCard) tbCard.style.display = 'none';
     const stRow = document.getElementById('stattrakRow');
     if (stRow) stRow.style.display = '';
+    const svRow = document.getElementById('souvenirRow');
+    if (svRow) svRow.style.display = '';
     document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
 
     if (type === 'knife') {
       document.getElementById('knifeSubCard').style.display  = 'block';
       document.getElementById('skinNameCard').style.display  = 'none';
       document.getElementById('qualityCard').style.display   = 'block';
+      document.getElementById('souvenirRow').style.display   = 'none';
     } else if (type === 'gloves') {
       document.getElementById('gloveSubCard').style.display  = 'block';
       document.getElementById('skinNameCard').style.display  = 'none';
       document.getElementById('stattrakRow').style.display   = 'none';
+      document.getElementById('souvenirRow').style.display   = 'none';
     } else if (type === 'agent') {
       document.getElementById('agentSubCard').style.display  = 'block';
       document.getElementById('qualityCard').style.display   = 'none';
       document.getElementById('skinNameCard').style.display  = 'none';
+      document.getElementById('stattrakRow').style.display   = 'none';
+      document.getElementById('souvenirRow').style.display   = 'none';
       // ТБ появится после выбора конкретного агента
     } else if (type === 'other') {
       document.getElementById('otherInputCard').style.display = 'block';
@@ -1337,6 +1361,12 @@
     document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
     // Сброс StatTrak
     formStatTrak = false;
+    document.getElementById('stNo')?.classList.add('active');
+    document.getElementById('stYes')?.classList.remove('active');
+    // Сброс Сувенир
+    formSouvenir = false;
+    document.getElementById('svNo')?.classList.add('active');
+    document.getElementById('svYes')?.classList.remove('active');
     document.getElementById('stNo').classList.add('active');
     document.getElementById('stYes').classList.remove('active');
   }
@@ -1399,7 +1429,7 @@
     if (formTradeBan === null) { flashCard('tbCard'); return; }
     if (formTradeBan === true && !formBanDays) { flashCard('tbCard'); return; }
 
-    state.skins.push({ weapon, skinName, quality, tradeBan: formTradeBan, banDays: formBanDays, stattrak: formStatTrak });
+    state.skins.push({ weapon, skinName, quality, tradeBan: formTradeBan, banDays: formBanDays, stattrak: formStatTrak, souvenir: formSouvenir });
 
     renderSkinsList();
     document.getElementById('addForm').style.display = 'none';
@@ -1414,11 +1444,24 @@
     document.getElementById('stYes').classList.toggle('active', val);
   }
 
+  function selectSV(val) {
+    formSouvenir = val;
+    document.getElementById('svNo').classList.toggle('active', !val);
+    document.getElementById('svYes').classList.toggle('active', val);
+  }
+
   function selectCcST(val) {
     ccStatTrak = val;
     if (pendingRecognized) pendingRecognized.stattrak = val;
     document.getElementById('ccStNo').classList.toggle('active', !val);
     document.getElementById('ccStYes').classList.toggle('active', val);
+  }
+
+  function selectCcSV(val) {
+    ccSouvenir = val;
+    if (pendingRecognized) pendingRecognized.souvenir = val;
+    document.getElementById('ccSvNo').classList.toggle('active', !val);
+    document.getElementById('ccSvYes').classList.toggle('active', val);
   }
 
   function selectQuality(el) {
@@ -1519,6 +1562,9 @@
       }
       if (skin.stattrak) {
         chips += `<span class="chip chip-st">ST™</span>`;
+      }
+      if (skin.souvenir) {
+        chips += `<span class="chip chip-sv">SV</span>`;
       }
       if (skin.tradeBan) {
         chips += `<span class="chip chip-tb">${skin.banDays} дн.</span>`;
@@ -1732,7 +1778,8 @@
       // Определяем агента и перчатки (по флагу Vision ИЛИ по названию)
       const isAgent = data.is_agent === true || detectAgent(pendingRecognized.weapon);
       const isGlove = detectGlove(pendingRecognized.weapon);
-      applyConfirmModes(isAgent, isGlove);
+      const isKnifeW = detectKnife(pendingRecognized.weapon);
+      applyConfirmModes(isAgent, isGlove, isKnifeW);
 
       // Если Vision распознал дату окончания ТБ — считаем дни и проставляем
       if (data.trade_ban_until) {
@@ -1786,12 +1833,15 @@
     confirmTradeBan = null;
     confirmBanDays  = null;
     ccStatTrak = false;
+    ccSouvenir = false;
     document.getElementById('ccTbNo').classList.remove('selected');
     document.getElementById('ccTbYes').classList.remove('selected');
     document.getElementById('ccDaysGrid').classList.remove('visible');
     document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('ccStNo').classList.add('active');
     document.getElementById('ccStYes').classList.remove('active');
+    document.getElementById('ccSvNo').classList.add('active');
+    document.getElementById('ccSvYes').classList.remove('active');
   }
 
   // ── Пикер оружия в карточке подтверждения ────────────────────────────────────
@@ -1855,7 +1905,8 @@
     // Пересчитываем режимы качество/StatTrak
     const isAgent = detectAgent(name);
     const isGlove = detectGlove(name);
-    applyConfirmModes(isAgent, isGlove);
+    const isKnifeW = detectKnife(name);
+    applyConfirmModes(isAgent, isGlove, isKnifeW);
   }
 
   function toggleCcAgentGroup(groupId) {
@@ -1936,13 +1987,16 @@
     });
   }
 
-  function applyConfirmModes(isAgent, isGlove) {
+  function applyConfirmModes(isAgent, isGlove, isKnife = false) {
     const qRow = document.getElementById('ccQualityRow');
     const stRow = document.getElementById('ccStRow');
     // Качество: скрыто для агентов
     if (qRow) qRow.style.display = isAgent ? 'none' : '';
     // StatTrak: скрыт для агентов и перчаток
     if (stRow) stRow.style.display = (isAgent || isGlove) ? 'none' : '';
+    // Сувенир: скрыт для агентов, перчаток и ножей
+    const svRow2 = document.getElementById('ccSvRow');
+    if (svRow2) svRow2.style.display = (isAgent || isGlove || isKnife) ? 'none' : '';
     if (isAgent) document.getElementById('ccQuality').textContent = '—';
   }
 
@@ -1969,6 +2023,11 @@
   function detectGlove(weapon) {
     if (!weapon) return false;
     return /\bGloves?\b|Перчатки|Перчи|Hand Wraps|Обмотки/i.test(weapon);
+  }
+
+  function detectKnife(weapon) {
+    if (!weapon) return false;
+    return /★|Knife|Нож|Karambit|Bayonet|Butterfly|Falchion|Flip|Gut|Huntsman|M9|Navaja|Nomad|Paracord|Shadow|Skeleton|Stiletto|Survival|Talon|Ursus/i.test(weapon);
   }
 
   function confirmRecognized() {
@@ -2010,6 +2069,7 @@
       tradeBan: confirmTradeBan === true,
       banDays:  confirmBanDays,
       stattrak: isAgent ? false : ccStatTrak,
+      souvenir: (isAgent || isGlove) ? false : ccSouvenir,
     });
 
     renderSkinsList();
@@ -2098,6 +2158,7 @@
         trade_ban: s.tradeBan,
         ban_days:  s.banDays,
         stattrak:  s.stattrak || false,
+        souvenir:  s.souvenir || false,
       })),
       payment: state.payment,
     };
