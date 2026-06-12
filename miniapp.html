@@ -1821,9 +1821,11 @@
         skinName: data.skin,
         quality:  data.quality || 'FN',
         stattrak: data.stattrak || false,
+        souvenir: data.souvenir || false,
       };
-      // Отражаем StatTrak из Vision в переключателе
+      // Отражаем StatTrak и Souvenir из Vision в переключателях
       selectCcST(data.stattrak || false);
+      selectCcSV(data.souvenir || false);
 
       // Определяем агента и перчатки (по флагу Vision ИЛИ по названию)
       const isAgent  = data.is_agent === true || detectAgent(pendingRecognized.weapon);
