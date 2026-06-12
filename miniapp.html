@@ -2,681 +2,753 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Скупка скинов</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0d0d1c">
+<title>ZEORGJARD — скупка скинов</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Onest:wght@400;500;600;700&display=swap');
   @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css');
 
   :root {
-    --bg: #16162a;
-    --bg2: #22223f;
-    --card: #1c1c2e;
-    --card2: #222238;
-    --surface: rgba(255,255,255,0.035);
-    --surface2: rgba(255,255,255,0.05);
-    --border: rgba(255,255,255,0.08);
-    --border-accent: rgba(167,139,250,0.12);
+    --bg0: #0d0d1c;
+    --bg1: #15152a;
+    --card: #1a1a31;
+    --card2: #20203c;
+    --surface: rgba(255,255,255,0.04);
+    --surface2: rgba(255,255,255,0.055);
+    --line: rgba(255,255,255,0.07);
+    --line2: rgba(255,255,255,0.12);
+    --line-accent: rgba(167,139,250,0.28);
     --accent: #8b7fde;
-    --accent-light: #b8a9f0;
-    --accent-soft: rgba(167,139,250,0.15);
     --accent2: #a78bfa;
+    --accent-light: #c4b5fd;
+    --accent-soft: rgba(159,139,250,0.14);
     --gold: #e8b84b;
-    --gold-soft: rgba(232,184,75,0.15);
-    --text: #ffffff;
-    --text2: #8888aa;
-    --text3: #7a7a9c;
-    --text-dim: #5a5a78;
-    --danger: #d4537e;
-    --success: #5dcaa5;
-    --shadow-card: 0 2px 10px rgba(0,0,0,0.25);
-    --shadow-btn: 0 4px 16px rgba(139,127,222,0.4);
+    --gold-soft: rgba(232,184,75,0.14);
+    --orange: #fb923c;
+    --orange-soft: rgba(251,146,60,0.13);
+    --text: #f2f1ff;
+    --t2: #9d9cc4;
+    --t3: #6e6e94;
+    --danger: #ef6a96;
+    --success: #5fd6ab;
+    --grad-accent: linear-gradient(135deg, #8b7fde, #a78bfa);
+    /* Спектр редкости CS2: Mil-Spec → Restricted → Classified → Covert → ★ */
+    --rar-blue: #4b69ff; --rar-purple: #8847ff; --rar-pink: #d32ce6;
+    --rar-red: #eb4b4b; --rar-gold: #e8b84b;
+    --grad-rarity: linear-gradient(90deg, #4b69ff, #8847ff 30%, #d32ce6 55%, #eb4b4b 78%, #e8b84b);
+    --grad-gold: linear-gradient(180deg, #f3cf73, #d9a83e);
+    --shadow-card: 0 10px 30px rgba(6,6,18,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+    --shadow-btn: 0 6px 22px rgba(139,127,222,0.38), inset 0 1px 0 rgba(255,255,255,0.22);
+    --r-s: 11px; --r-m: 14px; --r-l: 18px;
+    --font-ui: 'Onest', -apple-system, sans-serif;
+    --font-display: 'Unbounded', 'Onest', sans-serif;
     --ease: cubic-bezier(0.22,1,0.36,1);
   }
 
   /* ── Анимации ── */
   @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
   @keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+  @keyframes spin    { to { transform: rotate(360deg); } }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+  html { background: var(--bg0); }
   body {
-    background: linear-gradient(165deg, #16162a 0%, #22223f 100%);
-    background-attachment: fixed;
+    background: linear-gradient(170deg, var(--bg0) 0%, var(--bg1) 100%);
     color: var(--text);
-    font-family: 'Onest', -apple-system, sans-serif;
+    font-family: var(--font-ui);
     min-height: 100vh;
-    padding: 0;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    overflow-x: hidden;
   }
-  .app-wrap { padding: 0 0 24px; }
 
+  /* ── Фон: аврора + зерно ── */
+  .aurora {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(620px 420px at 12% -6%, rgba(139,127,222,0.20), transparent 62%),
+      radial-gradient(720px 520px at 108% 28%, rgba(167,139,250,0.11), transparent 60%),
+      radial-gradient(540px 420px at 50% 112%, rgba(111,95,208,0.10), transparent 62%),
+      radial-gradient(420px 300px at 92% 102%, rgba(232,184,75,0.055), transparent 65%);
+  }
+  .grain {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .app { position: relative; z-index: 1; }
+
+  /* ── Шапка ── */
   .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 22px 20px 20px;
-    background: linear-gradient(135deg, rgba(139,127,222,0.12), rgba(167,139,250,0.04));
-    margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 20px 14px;
     animation: fadeIn 0.6s ease;
   }
-  .header-left { display: flex; align-items: center; gap: 11px; }
-  .header-history {
-    width: 34px; height: 34px; border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: transform 0.18s var(--ease);
-    border: none; color: var(--text2);
+  /* Шкала редкости — подпись инвентаря, видимая каждому игроку */
+  .rarity-line {
+    height: 2px; margin: 0 20px 16px;
+    border-radius: 2px; opacity: 0.55;
+    background: var(--grad-rarity);
   }
-  .header-history:active { transform: scale(0.92); }
+  .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+  .logo {
+    width: 44px; height: 44px; flex-shrink: 0;
+    background: var(--grad-accent);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(139,127,222,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: transform 0.3s var(--ease);
+  }
+  .logo i { font-size: 21px; color: #fff; }
+  .logo:active { transform: rotate(12deg) scale(1.08); }
+
+  .header-text h1 {
+    font-family: var(--font-display);
+    font-size: 14px; font-weight: 600;
+    letter-spacing: 0.08em; color: #fff;
+  }
+  .header-text p { font-size: 11px; color: var(--t2); letter-spacing: 0.3px; margin-top: 2px; }
+  .header-text a { color: var(--t2); text-decoration: none; }
 
   .header-contact-btn {
-    display: flex; align-items: center; gap: 6px;
-    padding: 8px 13px; border-radius: 10px;
-    background: linear-gradient(135deg, #8b7fde, #a78bfa);
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    padding: 9px 14px; border-radius: 12px;
+    background: var(--grad-accent);
     border: none; color: #fff;
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: all 0.18s var(--ease);
-    box-shadow: 0 3px 10px rgba(139,127,222,0.35);
+    font-family: var(--font-ui);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: transform 0.18s var(--ease);
+    box-shadow: 0 4px 14px rgba(139,127,222,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
     white-space: nowrap;
   }
   .header-contact-btn i { font-size: 16px; }
   .header-contact-btn:active { transform: scale(0.94); }
 
-  .logo {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, #8b7fde, #a78bfa);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 19px;
-    box-shadow: 0 4px 12px rgba(139,127,222,0.35);
-    transition: transform 0.3s var(--ease);
+  /* ── Прогресс ── */
+  .progress { display: flex; gap: 6px; padding: 0 20px; margin-bottom: 22px; }
+  .progress-step {
+    flex: 1; height: 4px; border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden; position: relative;
+    transition: background 0.3s;
   }
-  .logo:active { transform: rotate(15deg) scale(1.1); }
-
-  .header-text h1 {
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 16px; font-weight: 600;
-    letter-spacing: 0.2px; color: #fff;
-  }
-
-  .header-text p { font-size: 11px; color: var(--text2); letter-spacing: 0.5px; }
-
-  .progress { display: flex; gap: 5px; padding: 0 20px; margin-bottom: 20px; }
-  .progress-step { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
-  .progress-step.active { background: var(--accent2); }
   .progress-step.done { background: var(--accent); }
-
-  .card {
-    background: var(--surface);
-    border: none;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 11px;
+  .progress-step.active { background: rgba(167,139,250,0.25); }
+  .progress-step.active::after {
+    content: ''; position: absolute; inset: 0;
+    background: var(--grad-accent);
+    border-radius: 3px;
+    transform-origin: left;
+    animation: progFill 0.5s var(--ease) forwards;
   }
+  @keyframes progFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
+  /* ── Экраны и заголовки ── */
+  .screen { display: none; padding: 0 20px; }
+  .screen.active { display: block; animation: screenIn 0.34s var(--ease); }
+  @keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .step-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--t3); margin-bottom: 8px;
+  }
+  .step-eyebrow b { color: var(--accent2); font-weight: 600; }
+  .step-title {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 600;
+    color: #fff; letter-spacing: 0.01em; line-height: 1.25;
+    margin-bottom: 6px;
+  }
+  .step-sub { font-size: 13px; color: var(--t2); line-height: 1.4; margin-bottom: 16px; }
+
+  /* ── Карточки ── */
+  .card {
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line);
+    border-radius: var(--r-l);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-card);
+  }
   .card-title {
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 13px; font-weight: 600;
-    letter-spacing: 1.5px; color: var(--text2);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.12em; color: var(--t2);
     text-transform: uppercase; margin-bottom: 14px;
   }
 
+  /* ── Сетка оружия ── */
   .weapon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
   .weapon-btn {
-    background: var(--surface2);
-    border: none;
-    border-radius: 12px;
-    padding: 11px 6px;
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-radius: 13px;
+    padding: 10px 6px;
     cursor: pointer; text-align: center;
-    transition: all 0.18s; color: var(--text);
-    font-family: 'Onest', -apple-system, sans-serif;
+    transition: background 0.18s, border-color 0.18s, transform 0.12s;
+    color: var(--text); font-family: var(--font-ui);
   }
-
   .weapon-btn .icon {
-    font-size: 19px; margin-bottom: 5px; display: flex;
-    align-items: center; justify-content: center;
-    height: 48px; border-radius: 10px;
-    background: rgba(0,0,0,0.22);
+    display: flex; align-items: center; justify-content: center;
+    height: 50px; margin-bottom: 6px; border-radius: 10px;
+    background: radial-gradient(circle at 50% 28%, rgba(167,139,250,0.13), rgba(0,0,0,0.26) 75%);
   }
-  .weapon-btn .icon img { border-radius: 6px; }
-  .weapon-btn .name { font-size: 10px; font-weight: 500; color: var(--text2); }
-  .weapon-btn.selected { background: var(--accent-soft); }
+  .weapon-btn .icon img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 2px 5px rgba(167,139,250,0.3)); }
+  .weapon-btn .icon .emoji { font-size: 22px; }
+  .weapon-btn .name { font-size: 10px; font-weight: 500; color: var(--t2); }
+  .weapon-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); box-shadow: 0 0 0 1px rgba(167,139,250,0.1), 0 4px 14px rgba(139,127,222,0.18); }
   .weapon-btn.selected .name { color: var(--accent-light); }
-  .weapon-btn:active { transform: scale(0.97); }
+  .weapon-btn:active { transform: scale(0.96); }
 
-  .quality-list { display: flex; flex-direction: column; gap: 6px; }
-
+  /* ── Качество ── */
+  .quality-list { display: flex; flex-direction: column; gap: 7px; }
   .quality-btn {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--surface2);
-    border: none;
-    border-radius: 11px; padding: 11px 13px;
-    cursor: pointer; transition: all 0.18s; color: var(--text);
-    font-family: 'Onest', -apple-system, sans-serif;
+    display: flex; align-items: center; gap: 11px;
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-radius: var(--r-s); padding: 12px 14px;
+    cursor: pointer; transition: background 0.18s, border-color 0.18s;
+    color: var(--text); font-family: var(--font-ui);
   }
-
-  .quality-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  /* Шкала флоата — сегменты как в инспекторе износа, маркер на середине диапазона */
+  .q-gauge {
+    width: 52px; height: 5px; border-radius: 4px; flex-shrink: 0;
+    position: relative; opacity: 0.92;
+    background: linear-gradient(90deg,
+      #4be87a 0%, #4be87a 7%,
+      #9be84b 7%, #9be84b 15%,
+      #e8b84b 15%, #e8b84b 38%,
+      #e87a4b 38%, #e87a4b 45%,
+      #e84b4b 45%, #e84b4b 100%);
+  }
+  .q-gauge i {
+    position: absolute; top: 50%; transform: translate(-50%, -50%);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #fff; border: 2.5px solid var(--bg0);
+    box-shadow: 0 0 6px rgba(255,255,255,0.45);
+  }
   .quality-btn .q-name { font-size: 13px; font-weight: 500; flex: 1; }
-  .quality-btn .q-abbr { font-size: 11px; color: var(--text2); }
-  .quality-btn.selected { background: var(--accent-soft); }
+  .quality-btn .q-abbr { font-size: 11px; color: var(--t3); font-weight: 600; letter-spacing: 0.04em; }
+  .quality-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); }
   .quality-btn.selected .q-name { color: var(--accent-light); }
   .quality-btn:active { transform: scale(0.99); }
 
+  /* ── Инпуты ── */
   .skin-input {
     width: 100%;
-    background: var(--surface2);
-    border: none;
-    border-radius: 11px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-s);
     padding: 13px 14px;
-    color: var(--text);
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 14px; outline: none;
-    transition: background 0.2s;
+    color: var(--text); font-family: var(--font-ui);
+    font-size: 16px; outline: none;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
   }
+  .skin-input:focus { background: rgba(255,255,255,0.06); border-color: var(--line-accent); box-shadow: 0 0 0 3px rgba(167,139,250,0.12); }
+  .skin-input::placeholder { color: var(--t3); }
 
-  .skin-input:focus { background: rgba(255,255,255,0.06); }
-  .skin-input::placeholder { color: var(--text2); }
-
-  /* ── Зона загрузки скрина ── */
-  .photo-zone {
-    border: 1.5px dashed var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 10px;
-    position: relative;
-  }
-
-  .photo-zone:hover { border-color: var(--accent); }
-  .photo-zone.loading { border-color: var(--accent); opacity: 0.7; pointer-events: none; }
-  .photo-zone.success { border-color: var(--success); background: rgba(75,232,122,0.05); }
-  .photo-zone.error { border-color: var(--danger); background: rgba(232,75,75,0.05); }
-
-  .photo-zone .ph-icon { font-size: 24px; margin-bottom: 4px; }
-  .photo-zone p { font-size: 12px; color: var(--text2); }
-  .photo-zone p.ph-status { margin-top: 4px; font-size: 11px; }
-  .photo-zone p.ph-status.ok { color: var(--success); }
-  .photo-zone p.ph-status.err { color: var(--danger); }
-
-  #fileInput { display: none; }
-
-  /* ── ТБ в форме скина ── */
-  .tb-section { margin-top: 10px; }
+  /* ── Трейд-бан ── */
   .tb-label {
-    font-size: 12px; color: var(--text2);
-    letter-spacing: 1px; text-transform: uppercase;
-    font-family: 'Onest', -apple-system, sans-serif; font-weight: 600;
-    margin-bottom: 8px;
+    font-size: 11px; color: var(--t2);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 8px;
   }
-
   .tb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-
   .tb-btn {
-    background: var(--surface2);
-    border: none;
-    border-radius: 11px; padding: 11px;
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-radius: var(--r-s); padding: 12px;
     cursor: pointer; text-align: center;
-    transition: all 0.18s; color: var(--text2);
-    font-family: 'Onest', -apple-system, sans-serif; font-size: 13px;
+    transition: background 0.18s, border-color 0.18s;
+    color: var(--t2); font-family: var(--font-ui); font-size: 13px; font-weight: 500;
   }
-
-  .tb-btn.selected { background: var(--accent-soft); color: var(--accent-light); }
+  .tb-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); color: var(--accent-light); }
   .tb-btn:active { transform: scale(0.98); }
 
-  .days-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
-    margin-top: 8px; display: none;
-  }
-
+  .days-grid { display: none; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
   .days-grid.visible { display: grid; }
-
   .day-btn {
-    background: var(--surface2);
-    border: none;
-    border-radius: 9px; padding: 9px;
-    text-align: center; font-size: 13px;
-    cursor: pointer; color: var(--text2);
-    font-family: 'Onest', -apple-system, sans-serif; transition: all 0.18s;
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-radius: 10px; padding: 10px;
+    text-align: center; font-size: 13px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer; color: var(--t2);
+    font-family: var(--font-ui); transition: background 0.18s, border-color 0.18s;
   }
-
-  .day-btn.selected { background: var(--accent-soft); color: var(--accent-light); }
-  .day-btn:active { transform: scale(0.97); }
+  .day-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); color: var(--accent-light); }
+  .day-btn:active { transform: scale(0.96); }
 
   /* ── Список скинов ── */
-  .skins-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .skins-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 4px; }
 
-  /* ── Плашка добавления ── */
-  .screen-pad { padding: 0 20px; }
-  .add-plate {
-    padding: 16px; border-radius: 16px;
-    background: var(--surface);
-    border: 1px solid var(--border-accent);
-    margin-top: 20px;
-    margin-bottom: 28px;
-    animation: slideUp 0.4s var(--ease) backwards;
+  .empty-state {
+    border: 1.5px dashed var(--line2);
+    border-radius: var(--r-l);
+    padding: 26px 16px;
+    text-align: center;
   }
-  .add-plate-title {
-    font-size: 13px; color: var(--accent-light); font-weight: 500;
-    margin-bottom: 13px; text-align: center;
+  .empty-state .es-icon {
+    width: 46px; height: 46px; margin: 0 auto 10px;
+    border-radius: 14px; background: var(--accent-soft);
+    display: flex; align-items: center; justify-content: center;
   }
+  .empty-state .es-icon i { font-size: 23px; color: var(--accent-light); }
+  .empty-state .es-t { font-size: 14px; font-weight: 600; color: var(--text); }
+  .empty-state .es-s { font-size: 12px; color: var(--t3); margin-top: 4px; line-height: 1.45; }
 
-  /* ── Кнопки навигации/добавления премиум ── */
-
-  /* ── Премиум карточка скина ── */
   .skin-card {
     display: flex; align-items: center; gap: 12px;
-    padding: 14px; border-radius: 16px;
-    background: var(--card);
+    padding: 13px 14px 13px 17px; border-radius: var(--r-l);
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line);
     box-shadow: var(--shadow-card);
-    transition: all 0.25s var(--ease);
+    transition: transform 0.2s var(--ease), background 0.2s;
+    position: relative;
   }
-  .skin-card:active { transform: scale(0.98); background: var(--card2); }
+  /* Edge редкости: фиолетовый по умолчанию, золото для ★-предметов */
+  .skin-card::before {
+    content: ''; position: absolute; left: 0; top: 13px; bottom: 13px;
+    width: 3px; border-radius: 0 3px 3px 0;
+    background: var(--grad-accent); opacity: 0.9;
+  }
+  .skin-card.rar-gold::before {
+    background: var(--grad-gold);
+    box-shadow: 0 0 9px rgba(232,184,75,0.4);
+  }
+  .skin-card.rar-gold .sc-icon { border-color: rgba(232,184,75,0.25); }
+  .skin-card:active { transform: scale(0.98); }
   .anim-card { animation: slideUp 0.4s var(--ease) backwards; }
 
   .sc-icon {
-    width: 44px; height: 44px; border-radius: 11px;
-    background: rgba(0,0,0,0.3);
+    width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+    background: radial-gradient(circle at 50% 28%, rgba(167,139,250,0.16), rgba(0,0,0,0.3) 78%);
+    border: 1px solid var(--line);
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
   }
   .sc-icon i { font-size: 21px; color: var(--accent-light); }
-  .sc-icon img { width: 36px; height: 36px; object-fit: contain; }
+  .sc-icon img { width: 36px; height: 36px; object-fit: contain; filter: drop-shadow(0 2px 5px rgba(167,139,250,0.35)); }
 
   .sc-info { flex: 1; min-width: 0; }
-  .sc-name { font-size: 13px; color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-chips { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+  .sc-name { font-size: 13.5px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-chips { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
 
-  .chip { font-size: 10px; padding: 2px 8px; border-radius: 6px; animation: fadeIn 0.5s ease backwards; }
-  .chip-q { background: var(--accent-soft); color: var(--accent-light); }
+  .chip {
+    font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+    letter-spacing: 0.02em; font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    animation: fadeIn 0.5s ease backwards;
+  }
+  .chip-q  { background: var(--accent-soft); color: var(--accent-light); }
   .chip-st { background: var(--gold-soft); color: var(--gold); }
-  .chip-sv { background: rgba(251,146,60,0.12); color: #fb923c; }
+  .chip-sv { background: var(--orange-soft); color: var(--orange); }
   .chip-tb { background: var(--gold-soft); color: var(--gold); }
-  .chip-neutral { background: rgba(255,255,255,0.06); color: var(--text2); }
+  .chip-neutral { background: rgba(255,255,255,0.06); color: var(--t2); }
 
   .sc-remove {
     background: none; border: none; cursor: pointer;
-    color: var(--text-dim); padding: 4px;
-    transition: transform 0.2s var(--ease);
-    display: flex; align-items: center;
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    color: var(--t3);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s var(--ease), background 0.2s, color 0.2s;
   }
   .sc-remove i { font-size: 15px; }
-  .sc-remove:active { transform: scale(0.8) rotate(90deg); }
+  .sc-remove:active { transform: scale(0.82) rotate(90deg); background: rgba(239,106,150,0.12); color: var(--danger); }
 
-  .skin-item {
-    display: flex; align-items: flex-start; gap: 10px;
-    background: var(--surface2);
-    border: none;
-    border-radius: 13px; padding: 13px 15px;
+  /* ── Плашка добавления ── */
+  .add-plate {
+    padding: 15px; border-radius: var(--r-l);
+    background: var(--surface);
+    border: 1px solid rgba(167,139,250,0.14);
+    margin-top: 16px; margin-bottom: 10px;
+    animation: slideUp 0.4s var(--ease) backwards;
   }
-
-  .skin-item .si-info { flex: 1; }
-  .skin-item .si-name { font-size: 13px; font-weight: 500; }
-  .skin-item .si-meta { font-size: 11px; color: var(--text2); margin-top: 3px; }
-
-  .skin-item .si-remove {
-    background: none; border: none;
-    color: var(--danger); cursor: pointer;
-    font-size: 16px; padding: 2px 6px; flex-shrink: 0;
+  .add-plate-title {
+    font-size: 11px; color: var(--t2); font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 12px; text-align: center;
   }
-
   .add-btns-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 
   .add-skin-btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 13px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    padding: 14px 10px; border-radius: 13px;
     background: var(--surface2);
-    border: none;
-    color: #fff;
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: all 0.18s var(--ease);
+    border: 1px solid transparent;
+    color: #fff; font-family: var(--font-ui);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background 0.18s, border-color 0.18s, transform 0.12s var(--ease);
   }
-  .add-skin-btn i { font-size: 16px; color: var(--accent-light); }
+  .add-skin-btn i { font-size: 17px; color: var(--accent-light); }
   .add-skin-btn:active { transform: scale(0.95); }
-  .add-skin-btn.active { background: var(--accent-soft); }
+  .add-skin-btn.active { background: var(--accent-soft); border-color: var(--line-accent); color: var(--accent-light); }
 
-  .add-skin-btn.photo-mode { }
-
-  .add-skin-btn.photo-mode:active { transform: scale(0.98); }
-  .add-skin-btn.photo-mode.active { background: var(--accent-soft); color: var(--accent-light); }
-
-  .photo-submenu {
-    display: none;
-    grid-template-columns: 1fr 1fr; gap: 6px;
-    margin-top: 6px;
-  }
-  .photo-submenu.visible { display: grid; }
-
+  .photo-submenu { display: none; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .photo-submenu.visible { display: grid; animation: slideUp 0.25s var(--ease); }
   .photo-sub-btn {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
     background: var(--accent-soft);
-    border: none;
-    border-radius: 12px; padding: 13px 8px;
-    color: var(--accent-light); font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.18s;
+    border: 1px solid var(--line-accent);
+    border-radius: 13px; padding: 14px 8px;
+    color: var(--accent-light); font-family: var(--font-ui);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: transform 0.15s, background 0.18s;
     width: 100%;
   }
-  .photo-sub-btn:active { transform: scale(0.98); }
-  .photo-sub-btn .psb-icon { font-size: 20px; }
+  .photo-sub-btn:active { transform: scale(0.97); }
+  .photo-sub-btn .psb-icon { font-size: 21px; }
 
-  /* ── Карточка подтверждения после распознавания ── */
+  /* ── Карточка распознавания ── */
   .confirm-card {
-    background: var(--card);
-    border: none;
-    border-radius: 16px; padding: 16px;
-    margin-top: 12px; display: none;
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line-accent);
+    border-radius: var(--r-l); padding: 16px;
+    margin-top: 12px; margin-bottom: 10px; display: none;
     box-shadow: var(--shadow-card);
     animation: scaleIn 0.3s var(--ease);
   }
-
   .confirm-card.visible { display: block; }
-
   .confirm-card .cc-title {
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 13px; font-weight: 600;
-    letter-spacing: 1.5px; color: var(--accent);
-    text-transform: uppercase; margin-bottom: 12px;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 12px;
+    background: var(--grad-accent);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: var(--accent2);
+    display: flex; align-items: center; gap: 6px;
   }
+  .confirm-card .cc-title i { font-size: 15px; -webkit-text-fill-color: var(--accent2); }
 
   .confirm-row {
-    display: flex; justify-content: space-between;
-    padding: 5px 0; font-size: 13px;
-    border-bottom: 0.5px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; font-size: 13px; gap: 8px;
+    border-bottom: 1px solid var(--line);
   }
-
   .confirm-row:last-of-type { border-bottom: none; }
-  .confirm-row .cr-label { color: var(--text2); }
-  .confirm-row .cr-val { font-weight: 500; }
+  .confirm-row .cr-label { color: var(--t2); flex-shrink: 0; }
+  .confirm-row .cr-val { font-weight: 600; text-align: right; min-width: 0; overflow-wrap: anywhere; }
 
   .cr-edit-btn {
-    background: none; border: none;
-    color: var(--text2); cursor: pointer;
-    font-size: 14px; padding: 0 0 0 8px;
-    opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0;
+    background: var(--surface); border: none;
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    color: var(--t2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s, background 0.2s;
   }
-  .cr-edit-btn:hover { opacity: 1; color: var(--accent); }
+  .cr-edit-btn i { font-size: 14px; }
+  .cr-edit-btn:active { color: var(--accent-light); background: var(--accent-soft); }
 
   .cr-edit-input {
     background: var(--surface2);
-    border: 1px solid var(--accent);
-    border-radius: 6px; padding: 4px 8px;
-    color: var(--text); font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 13px; outline: none;
+    border: 1px solid var(--line-accent);
+    border-radius: 8px; padding: 6px 10px;
+    color: var(--text); font-family: var(--font-ui);
+    font-size: 16px; outline: none;
     flex: 1; min-width: 0;
   }
 
-  .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .cc-picker { margin: 10px 0; }
 
+  .confirm-actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-top: 16px; }
   .confirm-ok {
-    background: var(--accent); border: none;
-    border-radius: 12px; padding: 12px;
-    color: #fff; font-family: 'Onest', -apple-system, sans-serif;
+    background: var(--grad-accent); border: none;
+    border-radius: 13px; padding: 13px;
+    color: #fff; font-family: var(--font-ui);
     font-size: 14px; font-weight: 700; cursor: pointer;
+    box-shadow: var(--shadow-btn);
+    transition: transform 0.15s var(--ease);
   }
-
+  .confirm-ok:active { transform: scale(0.97); }
   .confirm-cancel {
-    background: var(--surface2);
-    border: none;
-    border-radius: 12px; padding: 12px;
-    color: var(--text2); font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 13px; cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--line);
+    border-radius: 13px; padding: 13px;
+    color: var(--t2); font-family: var(--font-ui);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: transform 0.15s var(--ease);
   }
+  .confirm-cancel:active { transform: scale(0.97); }
 
   .confirm-tb { margin-top: 12px; }
-  .confirm-tb .tb-label { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-family: 'Onest', -apple-system, sans-serif; font-weight: 600; }
-  .confirm-tb .tb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+
+  /* ── StatTrak / Souvenir ── */
+  .stattrak-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface);
+    border-radius: var(--r-s); padding: 10px 12px;
+  }
+  .confirm-row.stattrak-row, .confirm-row[id^="ccSt"], .confirm-row[id^="ccSv"] { background: transparent; }
+  .stattrak-label { font-size: 13px; font-weight: 500; color: var(--text); }
+  .stattrak-toggle { display: flex; gap: 4px; }
+  .st-btn {
+    padding: 7px 16px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; border: none;
+    background: var(--surface2);
+    color: var(--t2);
+    border-radius: 9px;
+    font-family: var(--font-ui);
+    transition: background 0.18s, color 0.18s;
+  }
+  .st-btn.active { background: var(--accent2); color: #15102e; }
+
+  /* ── Агенты ── */
+  .agent-list { display: flex; flex-direction: column; gap: 7px; }
+  .agent-btn {
+    display: flex; align-items: center; gap: 11px;
+    background: var(--surface); border: 1px solid transparent;
+    border-radius: var(--r-s); padding: 10px 12px;
+    cursor: pointer; transition: background 0.18s, border-color 0.18s;
+    color: var(--text); font-family: var(--font-ui); text-align: left;
+  }
+  .agent-btn .ag-icon, .agent-group-btn .ag-icon {
+    width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(0,0,0,0.25);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .ag-icon img { width: 36px; height: 36px; object-fit: contain; }
+  .agent-btn .ag-name { font-size: 13px; font-weight: 500; }
+  .ag-kicker { font-size: 9px; color: var(--t3); letter-spacing: 0.1em; text-transform: uppercase; }
+  .agent-btn .ag-team, .agent-group-btn .ag-team { font-size: 10px; color: var(--t3); margin-top: 2px; }
+  .agent-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); }
+  .agent-btn.selected .ag-name { color: var(--accent-light); }
+
+  .agent-group-btn {
+    display: flex; align-items: center; gap: 11px;
+    background: var(--surface);
+    border: 1px dashed var(--line2);
+    border-radius: var(--r-s); padding: 10px 12px;
+    cursor: pointer; transition: border-color 0.2s, background 0.18s;
+    color: var(--text); font-family: var(--font-ui); text-align: left;
+  }
+  .agent-group-btn:active { transform: scale(0.99); }
+  .agent-group-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); }
+  .agent-group-btn .ag-name { font-size: 13px; font-weight: 500; }
+  .agent-sublist { padding-left: 12px; display: none; flex-direction: column; gap: 7px; margin-top: 2px; }
 
   /* ── Оплата ── */
   .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
   .payment-btn {
-    background: var(--card);
-    border: none;
-    border-radius: 16px; padding: 26px 14px;
+    position: relative;
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line);
+    border-radius: var(--r-l); padding: 26px 14px 22px;
     cursor: pointer; text-align: center;
-    transition: all 0.2s var(--ease); color: var(--text);
-    font-family: 'Onest', -apple-system, sans-serif;
+    transition: border-color 0.2s, transform 0.15s var(--ease), box-shadow 0.2s;
+    color: var(--text); font-family: var(--font-ui);
     box-shadow: var(--shadow-card);
   }
-  .payment-btn .p-icon { font-size: 26px; margin-bottom: 12px; color: var(--text2); }
-  .payment-btn .p-name { font-size: 14px; font-weight: 500; }
-  .payment-btn .p-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
-  .payment-btn.selected { background: var(--accent-soft); box-shadow: 0 4px 16px rgba(139,127,222,0.25); }
-  .payment-btn.selected .p-icon { color: var(--accent-light); }
+  .payment-btn .p-icon {
+    width: 54px; height: 54px; margin: 0 auto 12px;
+    border-radius: 16px; background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .payment-btn .p-icon i { font-size: 26px; color: var(--t2); transition: color 0.2s; }
+  .payment-btn .p-name { font-size: 15px; font-weight: 600; }
+  .payment-btn .p-sub { font-size: 11px; color: var(--t3); margin-top: 4px; }
+  .payment-btn .p-check {
+    position: absolute; top: 10px; right: 10px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--grad-accent);
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 3px 10px rgba(139,127,222,0.45);
+    animation: scaleIn 0.25s var(--ease);
+  }
+  .payment-btn .p-check i { font-size: 13px; color: #fff; }
+  .payment-btn.selected { border-color: var(--line-accent); box-shadow: 0 0 0 1px rgba(167,139,250,0.15), 0 10px 28px rgba(139,127,222,0.22); }
+  .payment-btn.selected .p-icon { background: var(--accent-soft); }
+  .payment-btn.selected .p-icon i { color: var(--accent-light); }
   .payment-btn.selected .p-name { color: var(--accent-light); }
+  .payment-btn.selected .p-check { display: flex; }
   .payment-btn:active { transform: scale(0.97); }
-  .payment-btn.selected .p-name { color: var(--accent-light); }
-  .payment-btn:active { transform: scale(0.98); }
 
-  /* ── Итог ── */
-  .summary {
-    background: var(--card);
-    border: none;
-    border-radius: 16px; padding: 22px;
-    margin-bottom: 28px;
+  /* ── Итог: секции ── */
+  .sum-section {
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line);
+    border-radius: var(--r-l); padding: 14px 14px 3px;
+    margin-bottom: 12px;
     box-shadow: var(--shadow-card);
   }
-
-  .summary-row {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    padding: 10px 0;
+  .sum-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--t2);
+    padding-bottom: 11px; border-bottom: 1px solid var(--line);
+  }
+  .sum-head i { font-size: 15px; color: var(--accent-light); }
+  .sum-count {
+    margin-left: auto;
+    min-width: 22px; height: 19px; padding: 0 7px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 12px; background: var(--accent-soft);
+    color: var(--accent-light); font-size: 11px; font-weight: 700;
+    letter-spacing: 0; font-variant-numeric: tabular-nums;
   }
 
-  .summary-row:not(:last-child) { border-bottom: 0.5px solid var(--border); }
-  .summary-row .s-label { font-size: 12px; color: var(--text2); flex: 1; }
-  .summary-row .s-value { font-size: 13px; font-weight: 500; text-align: right; }
-  .summary-row.total .s-label { font-size: 13px; color: var(--text); }
-  .summary-row.total .s-value { font-size: 16px; color: var(--accent); font-weight: 700; font-family: 'Onest', -apple-system, sans-serif; }
+  .sum-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 0 11px 12px; position: relative;
+  }
+  .sum-item:not(:last-child) { border-bottom: 1px solid var(--line); }
+  .sum-item::before {
+    content: ''; position: absolute; left: 0; top: 14px; bottom: 14px;
+    width: 3px; border-radius: 3px;
+    background: var(--grad-accent); opacity: 0.9;
+  }
+  .sum-item.rar-gold::before { background: var(--grad-gold); box-shadow: 0 0 8px rgba(232,184,75,0.35); }
+
+  .sum-thumb {
+    width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+    background: radial-gradient(circle at 50% 28%, rgba(167,139,250,0.14), rgba(0,0,0,0.28) 78%);
+    border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sum-thumb img { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(167,139,250,0.3)); }
+  .sum-thumb i { font-size: 18px; color: var(--accent-light); }
+  .sum-item.rar-gold .sum-thumb { border-color: rgba(232,184,75,0.25); }
+
+  .sum-info { flex: 1; min-width: 0; }
+  .sum-name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sum-info .sc-chips { margin-top: 5px; }
+
+  .sum-pay {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0 13px;
+  }
+  .sum-pay-icon {
+    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+    background: var(--accent-soft);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sum-pay-icon i { font-size: 21px; color: var(--accent-light); }
+  .sum-pay-name { font-size: 14px; font-weight: 600; color: #fff; }
+  .sum-pay-sub { font-size: 11px; color: var(--t3); margin-top: 2px; }
 
   .submit-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #8b7fde, #a78bfa); border: none;
-    border-radius: 14px; padding: 17px;
-    color: #fff;
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 15px; font-weight: 600; letter-spacing: 0.3px;
-    cursor: pointer; transition: all 0.2s var(--ease);
+    width: 100%; margin-top: 8px;
+    background: var(--grad-accent); border: none;
+    border-radius: 15px; padding: 17px;
+    color: #fff; font-family: var(--font-ui);
+    font-size: 15px; font-weight: 700; letter-spacing: 0.02em;
+    cursor: pointer; transition: transform 0.2s var(--ease);
     box-shadow: var(--shadow-btn);
   }
-
   .submit-btn:active { transform: scale(0.98); }
-  .submit-btn:active { transform: scale(0.98); }
+  .submit-note { font-size: 12px; color: var(--t3); text-align: center; margin-top: 12px; line-height: 1.4; }
 
-  .nav-btns { display: flex; gap: 8px; margin-top: 28px; }
-
+  /* ── Навигация ── */
+  .nav-btns { display: flex; gap: 8px; margin-top: 22px; }
   .nav-back {
     flex: 1; background: var(--surface);
-    border: none;
+    border: 1px solid var(--line);
     border-radius: 14px; padding: 16px;
-    color: var(--text2); font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 13px; cursor: pointer;
-    transition: all 0.18s var(--ease);
+    color: var(--t2); font-family: var(--font-ui);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: transform 0.18s var(--ease);
   }
   .nav-back:active { transform: scale(0.97); }
-
   .nav-next {
-    flex: 2; background: linear-gradient(135deg, #8b7fde, #a78bfa); border: none;
+    flex: 2; background: var(--grad-accent); border: none;
     border-radius: 14px; padding: 16px;
-    color: #fff;
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 15px; font-weight: 600; letter-spacing: 0.2px;
-    cursor: pointer; transition: all 0.2s var(--ease);
+    color: #fff; font-family: var(--font-ui);
+    font-size: 15px; font-weight: 700; letter-spacing: 0.01em;
+    cursor: pointer; transition: transform 0.2s var(--ease), opacity 0.2s;
     box-shadow: var(--shadow-btn);
   }
+  .nav-next:disabled { opacity: 0.35; box-shadow: none; cursor: default; }
+  .nav-next:active:not(:disabled) { transform: scale(0.98); }
 
-  .nav-next:disabled { opacity: 0.4; box-shadow: none; cursor: default; }
-  .nav-next:active { transform: scale(0.98); }
-
-  .screen { display: none; padding: 0 20px; }
-  .screen.active { display: block; animation: fadeIn 0.35s ease; }
-
-  .step-title {
-    font-family: 'Onest', -apple-system, sans-serif;
-    font-size: 24px; font-weight: 600;
-    color: #fff; letter-spacing: -0.3px;
-    margin-bottom: 3px;
-  }
-  .step-sub {
-    font-size: 13px; color: var(--text3);
-    line-height: 1.2;
-    margin-bottom: 20px;
-  }
-
-  .agent-list { display: flex; flex-direction: column; gap: 6px; }
-
-  .agent-btn {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--surface2); border: none;
-    border-radius: 11px; padding: 11px 13px;
-    cursor: pointer; transition: all 0.18s; color: var(--text);
-    font-family: 'Onest', -apple-system, sans-serif;
-  }
-
-  .agent-btn .ag-icon {
-    width: 32px; height: 32px; border-radius: 6px;
-    background: var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; flex-shrink: 0;
-  }
-
-  .agent-btn .ag-name { font-size: 13px; font-weight: 500; flex: 1; }
-  .agent-btn .ag-team { font-size: 10px; color: var(--text2); margin-top: 2px; }
-  .agent-btn.selected { background: var(--accent-soft); }
-
+  /* ── Спиннер ── */
   .spinner {
     display: inline-block;
-    width: 16px; height: 16px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
+    width: 14px; height: 14px;
+    border: 2px solid var(--line2);
+    border-top-color: var(--accent2);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
-    vertical-align: middle; margin-right: 6px;
+    vertical-align: -2px; margin-right: 7px;
   }
 
-  @keyframes spin { to { transform: rotate(360deg); } }
-  /* ── StatTrak переключатель ── */
-  .stattrak-row {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface2);
-    border: none;
-    border-radius: 11px; padding: 11px 14px;
-    margin-bottom: 0;
-  }
-
-  .stattrak-label {
-    font-size: 13px; font-weight: 500; color: var(--text);
-  }
-
-  .stattrak-toggle {
-    display: flex; gap: 4px;
-    background: transparent;
-    border: none;
-    border-radius: 8px; overflow: hidden;
-  }
-
-  .st-btn {
-    padding: 6px 16px;
-    font-size: 12px; font-weight: 500;
-    cursor: pointer; border: none;
-    background: var(--surface2);
-    color: var(--text2);
-    border-radius: 8px;
-    font-family: 'Onest', -apple-system, sans-serif;
-    transition: all 0.18s;
-  }
-
-  .st-btn.active {
-    background: var(--accent);
-    color: #0a0a0f;
-  }
-
-  .agent-group-btn {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--surface2);
-    border: 1px dashed var(--border);
-    border-radius: 10px; padding: 10px 12px;
-    cursor: pointer; transition: all 0.2s; color: var(--text);
-    font-family: 'Onest', -apple-system, sans-serif;
-  }
-  .agent-group-btn:active { transform: scale(0.99); }
-  .agent-group-btn .ag-arrow { color: var(--accent); font-size: 10px; transition: transform 0.2s; }
-  .agent-group-btn.open .ag-arrow { transform: rotate(90deg); }
-  .agent-sublist { padding-left: 12px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-
-
+  /* ── Иконки ── */
   .ti { font-family: 'tabler-icons' !important; font-style: normal; font-weight: normal; line-height: 1; -webkit-font-smoothing: antialiased; }
-  .ti-inline { font-size: 16px; vertical-align: -2px; margin-right: 6px; opacity: 0.85; }
+  .ti-inline { font-size: 15px; vertical-align: -2px; margin-right: 6px; opacity: 0.85; }
 
-  /* ── Кнопка: блик один раз + свечение ── */
-  @keyframes btnShineOnce {
-    0% { left: -60%; }
-    100% { left: 130%; }
-  }
+  /* ── Блик кнопки отправки ── */
+  @keyframes btnShineOnce { 0% { left: -60%; } 100% { left: 130%; } }
   @keyframes btnBreathe {
-    0%, 100% { box-shadow: 0 4px 16px rgba(139,127,222,0.4); }
-    50% { box-shadow: 0 4px 24px rgba(139,127,222,0.6); }
+    0%, 100% { box-shadow: 0 6px 22px rgba(139,127,222,0.35), inset 0 1px 0 rgba(255,255,255,0.22); }
+    50% { box-shadow: 0 6px 30px rgba(139,127,222,0.55), inset 0 1px 0 rgba(255,255,255,0.22); }
   }
-  .shine-btn { position: relative; overflow: hidden; animation: btnBreathe 3s ease-in-out infinite; }
+  .shine-btn { position: relative; overflow: hidden; animation: btnBreathe 3.5s ease-in-out infinite; }
   .shine-btn::after {
     content: ''; position: absolute; top: 0; left: -60%;
     width: 45%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
     transform: skewX(-20deg);
     animation: btnShineOnce 1.2s ease-out 0.4s 1;
   }
 
-  /* ── Экран успеха (Apple Pay стиль) ── */
+  /* ── Подсветка ошибки валидации ── */
+  @keyframes flashErr {
+    0%   { box-shadow: 0 0 0 0 rgba(239,106,150,0); }
+    25%  { box-shadow: 0 0 0 2px var(--danger), 0 6px 20px rgba(239,106,150,0.25); }
+    70%  { box-shadow: 0 0 0 2px var(--danger), 0 6px 20px rgba(239,106,150,0.18); }
+    100% { box-shadow: 0 0 0 0 rgba(239,106,150,0); }
+  }
+  .flash-err { animation: flashErr 1.1s ease; border-radius: var(--r-s); }
+
+  /* ── Экран успеха ── */
   .success-overlay {
     display: none; position: fixed; inset: 0;
-    background: linear-gradient(165deg, #16162a 0%, #22223f 100%);
+    background:
+      radial-gradient(420px 320px at 50% 38%, rgba(95,214,171,0.10), transparent 65%),
+      linear-gradient(170deg, var(--bg0) 0%, var(--bg1) 100%);
     z-index: 200;
     flex-direction: column; align-items: center; justify-content: center;
     padding: 40px;
   }
   .success-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
-
-  .success-check { width: 90px; height: 90px; margin-bottom: 24px; }
+  .success-check { width: 88px; height: 88px; margin-bottom: 26px; filter: drop-shadow(0 8px 24px rgba(95,214,171,0.3)); }
   .success-check circle {
-    fill: none; stroke: #5dcaa5; stroke-width: 4;
+    fill: none; stroke: var(--success); stroke-width: 4;
     stroke-dasharray: 283; stroke-dashoffset: 283;
     animation: drawCircle 0.5s ease-out forwards;
   }
   .success-check path {
-    fill: none; stroke: #5dcaa5; stroke-width: 5;
+    fill: none; stroke: var(--success); stroke-width: 5;
     stroke-linecap: round; stroke-linejoin: round;
     stroke-dasharray: 60; stroke-dashoffset: 60;
     animation: drawCheck 0.35s ease-out 0.45s forwards;
   }
   @keyframes drawCircle { to { stroke-dashoffset: 0; } }
-  @keyframes drawCheck { to { stroke-dashoffset: 0; } }
-
+  @keyframes drawCheck  { to { stroke-dashoffset: 0; } }
   .success-title {
-    font-size: 22px; font-weight: 600; color: #fff;
+    font-family: var(--font-display);
+    font-size: 19px; font-weight: 600; color: #fff;
     opacity: 0; animation: fadeInUp 0.4s ease 0.7s forwards;
   }
   .success-sub {
-    font-size: 14px; color: var(--text2); margin-top: 8px; text-align: center;
+    font-size: 14px; color: var(--t2); margin-top: 10px; text-align: center;
     opacity: 0; animation: fadeInUp 0.4s ease 0.85s forwards;
   }
-
-
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-
-  /* ── Бейдж-счётчик скинов ── */
+  /* ── Бейдж-счётчик ── */
   .skin-badge {
     display: inline-flex; align-items: center; justify-content: center;
-    min-width: 24px; height: 24px; padding: 0 8px;
-    margin-left: 10px; vertical-align: middle;
+    min-width: 23px; height: 23px; padding: 0 8px;
+    margin-left: 10px; vertical-align: 2px;
     border-radius: 20px;
-    background: linear-gradient(135deg, #8b7fde, #a78bfa);
-    color: #fff; font-size: 13px; font-weight: 600;
+    background: var(--grad-accent);
+    color: #fff; font-family: var(--font-ui);
+    font-size: 12px; font-weight: 700;
+    box-shadow: 0 3px 10px rgba(139,127,222,0.4);
     animation: badgePop 0.4s var(--ease);
   }
   @keyframes badgePop {
@@ -685,16 +757,28 @@
     100% { opacity: 1; transform: scale(1); }
   }
 
+  button:focus-visible, .skin-input:focus-visible {
+    outline: 2px solid var(--accent2); outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body>
 
+<div class="aurora" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="app">
+
 <div class="header">
   <div class="header-left">
-    <div class="logo"><i class="ti ti-diamond" style="font-size:19px;color:#fff;"></i></div>
+    <div class="logo"><i class="ti ti-star-filled"></i></div>
     <div class="header-text">
       <h1>ZEORGJARD</h1>
-      <p><a href="https://t.me/zeorgjard" onclick="openTgLink(event, 'zeorgjard')" style="color:var(--text2); text-decoration:none;">by @zeorgjard</a></p>
+      <p><a href="https://t.me/zeorgjard" onclick="openTgLink(event, 'zeorgjard')">@zeorgjard · скупка CS2</a></p>
     </div>
   </div>
   <button class="header-contact-btn" onclick="openTgLink(event,'zeorgjard')">
@@ -702,15 +786,19 @@
   </button>
 </div>
 
+<div class="rarity-line" aria-hidden="true"></div>
+
 <div class="progress">
   <div class="progress-step active" id="p1"></div>
   <div class="progress-step" id="p2"></div>
   <div class="progress-step" id="p3"></div>
 </div>
 
+<!-- ════════ ЭКРАН 1: СКИНЫ ════════ -->
 <div class="screen active" id="s1">
+  <div class="step-eyebrow"><b>Шаг 1</b> / 3 · Скины</div>
   <div class="step-title">Узнай цену скинов<span class="skin-badge" id="skinBadge" style="display:none;">0</span></div>
-  <div class="step-sub" style="margin-bottom:1px;">Добавь и получи оценку сразу</div>
+  <div class="step-sub">Добавь и получи оценку сразу</div>
 
   <div class="skins-list" id="skinsList"></div>
 
@@ -724,142 +812,37 @@
 
   <div class="photo-submenu" id="photoSubmenu">
     <button class="photo-sub-btn" onclick="triggerMediaLibrary()">
-      <i class="ti ti-photo" style="font-size:20px;"></i>Медиатека
+      <i class="ti ti-photo psb-icon"></i>Медиатека
     </button>
     <button class="photo-sub-btn" onclick="pasteFromClipboard()">
-      <i class="ti ti-clipboard" style="font-size:20px;"></i>Вставить
+      <i class="ti ti-clipboard psb-icon"></i>Вставить
     </button>
   </div>
 
   <input type="file" id="quickPhotoInput" accept="image/*" style="display:none;" onchange="handleQuickPhoto(event)">
 
+  <!-- Карточка подтверждения после распознавания -->
   <div class="confirm-card" id="confirmCard">
-    <div class="cc-title"><i class="ti ti-sparkles ti-inline"></i>Распознано</div>
+    <div class="cc-title"><i class="ti ti-sparkles"></i>Распознано</div>
 
     <div class="confirm-row">
       <span class="cr-label">Оружие</span>
       <span class="cr-val" id="ccWeapon">—</span>
       <button class="cr-edit-btn" onclick="toggleCcWeaponPicker()" title="Изменить"><i class="ti ti-pencil"></i></button>
     </div>
-    <div id="ccWeaponPicker" style="display:none; margin: 8px 0;">
-      <div class="weapon-grid" style="margin-bottom:6px;">
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AK-47')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ak-47.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">AK-47</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'AWP')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">AWP</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Desert Eagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Desert Eagle</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Galil AR')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Galil AR</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'Glock-18')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Glock-18</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A1-S')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M4A1-S</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'M4A4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M4A4</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeapon(this,'USP-S')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">USP-S</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcAgent()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Агенты</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcKnife()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Ножи</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="openCcGlove()"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Перчатки</div></div>
-        <div class="weapon-btn cc-wpn-btn" onclick="setCcWeaponCustom()"><span class="icon">🎱</span><div class="name">Другое</div></div>
-      </div>
+    <div class="cc-picker" id="ccWeaponPicker" style="display:none;">
+      <div class="weapon-grid" id="ccWeaponGrid" style="margin-bottom:6px;"></div>
       <div id="ccKnifePicker" style="display:none;">
-        <div class="card-title" style="font-size:11px;margin-bottom:6px;">Тип ножа</div>
-        <div class="weapon-grid">
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Butterfly Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Butterfly</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Karambit')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/karambit.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Karambit</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ M9 Bayonet')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m9-bayonet.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M9 Bayonet</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Skeleton Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/skeleton-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Skeleton</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Stiletto Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/stiletto-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Stiletto</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Talon Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/talon-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Talon</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bayonet')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bayonet.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bayonet</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Huntsman Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/huntsman-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Huntsman</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Flip Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/flip-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Flip Knife</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Ursus Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ursus-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Ursus</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Gut Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/gut-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Gut Knife</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Falchion Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/falchion-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Falchion</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Classic Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/classic-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Classic</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bowie Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bowie-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bowie</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Paracord Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/paracord-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Paracord</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Survival Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/survival-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Survival</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Shadow Daggers')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/shadow-daggers.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Shadow Daggers</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Nomad Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/nomad-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Nomad</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Navaja Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/navaja-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Navaja</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Kukri Knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/kukri-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Kukri</div></div>
-        </div>
+        <div class="card-title" style="font-size:11px;margin-bottom:8px;">Тип ножа</div>
+        <div class="weapon-grid" id="ccKnifeGrid"></div>
       </div>
       <div id="ccGlovePicker" style="display:none;">
-        <div class="card-title" style="font-size:11px;margin-bottom:6px;">Тип перчаток</div>
-        <div class="weapon-grid">
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Sport Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sport%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Sport Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Moto Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Moto%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Moto Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hand Wraps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hand%20Wraps.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Hand Wraps</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Driver Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Driver%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Driver Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Specialist Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Specialist</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Bloodhound Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Bloodhound%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bloodhound</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Hydra Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hydra%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Hydra Gloves</div></div>
-          <div class="weapon-btn" onclick="setCcWeapon(this,'★ Broken Fang Gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Broken%20Fang%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Broken Fang</div></div>
-        </div>
+        <div class="card-title" style="font-size:11px;margin-bottom:8px;">Тип перчаток</div>
+        <div class="weapon-grid" id="ccGloveGrid"></div>
       </div>
       <div id="ccAgentPicker" style="display:none;">
-        <div class="card-title" style="font-size:11px;margin-bottom:6px;">Агент</div>
-        <div class="agent-list">
-
-          <div class="agent-group-btn" onclick="toggleCcAgentGroup('ccGrpFBI')">
-            <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:40px;height:40px;object-fit:contain;"></div>
-            <div style="flex:1">
-              <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
-              <div class="ag-name">FBI</div>
-              <div class="ag-team">CT-side · 4 агента ▶</div>
-            </div>
-          </div>
-          <div class="agent-sublist" id="ccGrpFBI" style="display:none;">
-            <div class="agent-btn" onclick="setCcWeapon(this,'FBI')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">FBI</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'FBI SWAT')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20SWAT.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">FBI SWAT</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'FBI Sniper')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20Sniper.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">FBI Sniper</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'FBI HRT')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20HRT.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">FBI HRT</div></div></div>
-          </div>
-
-          <div class="agent-group-btn" onclick="toggleCcAgentGroup('ccGrpSWAT')">
-            <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:40px;height:40px;object-fit:contain;"></div>
-            <div style="flex:1">
-              <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
-              <div class="ag-name">SWAT / SAS / KSK</div>
-              <div class="ag-team">CT-side · 9 агентов ▶</div>
-            </div>
-          </div>
-          <div class="agent-sublist" id="ccGrpSWAT" style="display:none;">
-            <div class="agent-btn" onclick="setCcWeapon(this,'SWAT')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">SWAT</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'SAS')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SAS.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">SAS</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'KSK')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/KSK.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">KSK</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'NZSAS')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NZSAS.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">NZSAS</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'NSWC SEAL')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NSWC%20SEAL.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">NSWC SEAL</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'SEAL Frogman')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SEAL%20Frogman.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">SEAL Frogman</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'Gendarmerie Nationale')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Gendarmerie%20Nationale.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">Gendarmerie Nationale</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'TACP Cavalry')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/TACP%20Cavalry.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">TACP Cavalry</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'USAF TACP')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/USAF%20TACP.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">USAF TACP</div></div></div>
-          </div>
-
-          <div class="agent-group-btn" onclick="toggleCcAgentGroup('ccGrpT')">
-            <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:40px;height:40px;object-fit:contain;"></div>
-            <div style="flex:1">
-              <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
-              <div class="ag-name">Guerrilla / Elite / Sabre</div>
-              <div class="ag-team">T-side · 6 агентов ▶</div>
-            </div>
-          </div>
-          <div class="agent-sublist" id="ccGrpT" style="display:none;">
-            <div class="agent-btn" onclick="setCcWeapon(this,'Guerrilla Warfare')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">Guerrilla Warfare</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'Elite Crew')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Elite%20Crew.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">Elite Crew</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'Sabre')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">Sabre</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'Sabre Footsoldier')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre%20Footsoldier.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">Sabre Footsoldier</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'Phoenix')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Phoenix.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">Phoenix</div></div></div>
-            <div class="agent-btn" onclick="setCcWeapon(this,'Brazilian 1st Battalion')"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Brazilian%201st%20Battalion.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);">ТИП</div><div class="ag-name">Brazilian 1st Battalion</div></div></div>
-          </div>
-
-          <div class="agent-group-btn" onclick="setCcWeapon(this,'The Professionals')">
-            <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:40px;height:40px;object-fit:contain;"></div>
-            <div style="flex:1">
-              <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
-              <div class="ag-name">The Professionals</div>
-              <div class="ag-team">T-side</div>
-            </div>
-          </div>
-
-        </div>
+        <div class="card-title" style="font-size:11px;margin-bottom:8px;">Агент</div>
+        <div class="agent-list" id="ccAgentList"></div>
       </div>
       <input class="skin-input" id="ccWeaponCustomInput" type="text" placeholder="Введи название оружия..." style="display:none; margin-top:6px;">
     </div>
@@ -875,26 +858,18 @@
       <span class="cr-val" id="ccQuality">—</span>
       <button class="cr-edit-btn" onclick="toggleCcQualityPicker()" title="Изменить"><i class="ti ti-pencil"></i></button>
     </div>
-    <div id="ccQualityPicker" style="display:none; margin: 8px 0;">
-      <div style="display:flex; gap:6px; flex-wrap:wrap;">
-        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'FN')" style="flex:1;min-width:50px;">FN</div>
-        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'MW')" style="flex:1;min-width:50px;">MW</div>
-        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'FT')" style="flex:1;min-width:50px;">FT</div>
-        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'WW')" style="flex:1;min-width:50px;">WW</div>
-        <div class="day-btn cc-q-btn" onclick="setCcQuality(this,'BS')" style="flex:1;min-width:50px;">BS</div>
-      </div>
+    <div class="cc-picker" id="ccQualityPicker" style="display:none;">
+      <div style="display:flex; gap:6px; flex-wrap:wrap;" id="ccQualityGrid"></div>
     </div>
 
-    <!-- StatTrak в карточке подтверждения -->
-    <div class="confirm-row" id="ccStRow" style="margin-top:4px;">
+    <div class="confirm-row" id="ccStRow">
       <span class="cr-label">StatTrak™</span>
       <div class="stattrak-toggle">
         <button class="st-btn active" id="ccStNo" onclick="selectCcST(false)">Нет</button>
         <button class="st-btn" id="ccStYes" onclick="selectCcST(true)">Да</button>
       </div>
     </div>
-    <!-- Сувенир в карточке подтверждения -->
-    <div class="confirm-row" id="ccSvRow" style="margin-top:4px;">
+    <div class="confirm-row" id="ccSvRow">
       <span class="cr-label">Souvenir</span>
       <div class="stattrak-toggle">
         <button class="st-btn active" id="ccSvNo" onclick="selectCcSV(false)">Нет</button>
@@ -908,16 +883,7 @@
         <div class="tb-btn" id="ccTbNo" onclick="selectConfirmTB(false)"><i class="ti ti-x ti-inline"></i>Нет</div>
         <div class="tb-btn" id="ccTbYes" onclick="selectConfirmTB(true)"><i class="ti ti-clock ti-inline"></i>Есть</div>
       </div>
-      <div class="days-grid" id="ccDaysGrid">
-        <div class="day-btn" onclick="selectConfirmDay(this)">1</div>
-        <div class="day-btn" onclick="selectConfirmDay(this)">2</div>
-        <div class="day-btn" onclick="selectConfirmDay(this)">3</div>
-        <div class="day-btn" onclick="selectConfirmDay(this)">4</div>
-        <div class="day-btn" onclick="selectConfirmDay(this)">5</div>
-        <div class="day-btn" onclick="selectConfirmDay(this)">6</div>
-        <div class="day-btn" onclick="selectConfirmDay(this)">7</div>
-        <div class="day-btn" onclick="selectConfirmDay(this)">8</div>
-      </div>
+      <div class="days-grid" id="ccDaysGrid"></div>
     </div>
 
     <div class="confirm-actions">
@@ -926,51 +892,18 @@
     </div>
   </div>
 
+  <!-- Ручная форма добавления -->
   <div id="addForm" style="display:none; margin-top:14px;">
 
     <div class="card">
       <div class="card-title">Оружие</div>
-            <div class="weapon-grid">
-        <div class="weapon-btn" onclick="selectWeapon(this,'ak47')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ak-47.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">AK-47</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'awp')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/awp.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">AWP</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'deagle')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/desert-eagle.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Desert Eagle</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'galil')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/galil-ar.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Galil AR</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'glock')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/glock.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Glock-18</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a1s')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a1-s.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M4A1-S</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'m4a4')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m4a4.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M4A4</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'usps')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/usp.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">USP-S</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'agent')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Агенты</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Ножи</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'gloves')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Перчатки</div></div>
-        <div class="weapon-btn" onclick="selectWeapon(this,'other')"><span class="icon">🎱</span><div class="name">Другое</div></div>
-      </div>
+      <div class="weapon-grid" id="formWeaponGrid"></div>
     </div>
 
     <div class="card" id="knifeSubCard" style="display:none;">
       <div class="card-title">Тип ножа</div>
-      <div class="weapon-grid">
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bayonet.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bayonet</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/bowie-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bowie</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/butterfly-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Butterfly</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/classic-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Classic</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/falchion-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Falchion</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/flip-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Flip Knife</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/gut-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Gut Knife</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/huntsman-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Huntsman</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/karambit.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Karambit</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/kukri-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Kukri</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/m9-bayonet.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">M9 Bayonet</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/navaja-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Navaja</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/nomad-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Nomad</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/paracord-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Paracord</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/shadow-daggers.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Shadow Daggers</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/skeleton-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Skeleton</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/stiletto-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Stiletto</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/survival-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Survival</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/talon-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Talon</div></div>
-          <div class="weapon-btn sub-btn" onclick="selectSub(this,'knife')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/ursus-knife.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Ursus</div></div>
-        </div>
-      </div>
+      <div class="weapon-grid" id="formKnifeGrid"></div>
+    </div>
 
     <div class="card" id="knifeNameCard" style="display:none;">
       <div class="card-title">Скин ножа</div>
@@ -979,16 +912,7 @@
 
     <div class="card" id="gloveSubCard" style="display:none;">
       <div class="card-title">Тип перчаток</div>
-      <div class="weapon-grid">
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Bloodhound%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Bloodhound</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Broken%20Fang%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Broken Fang</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Driver%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Driver Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hand%20Wraps.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Hand Wraps</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Hydra%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Hydra Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Moto%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Moto Gloves</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Specialist%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Specialist</div></div>
-        <div class="weapon-btn sub-btn" onclick="selectSub(this,'glove')"><span class="icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sport%20Gloves.png" style="width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(167,139,250,0.25));"></span><div class="name">Sport Gloves</div></div>
-      </div>
+      <div class="weapon-grid" id="formGloveGrid"></div>
     </div>
 
     <div class="card" id="gloveNameCard" style="display:none;">
@@ -998,72 +922,7 @@
 
     <div class="card" id="agentSubCard" style="display:none;">
       <div class="card-title">Фракция агента</div>
-                  <div class="agent-list">
-
-        <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpFBI')">
-          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:40px;height:40px;object-fit:contain;"></div>
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
-            <div class="ag-name">FBI</div>
-            <div class="ag-team">CT-side · 4 агента ▶</div>
-          </div>
-        </div>
-        <div class="agent-sublist" id="agGrpFBI" style="display:none;">
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">FBI</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20SWAT.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">FBI SWAT</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI Sniper"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20Sniper.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">FBI Sniper</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="FBI HRT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/FBI%20HRT.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">FBI HRT</div></div></div>
-        </div>
-
-        <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpSWAT')">
-          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:40px;height:40px;object-fit:contain;"></div>
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
-            <div class="ag-name">SWAT / SAS / KSK</div>
-            <div class="ag-team">CT-side · 9 агентов ▶</div>
-          </div>
-        </div>
-        <div class="agent-sublist" id="agGrpSWAT" style="display:none;">
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SWAT"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SWAT.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">SWAT</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SAS"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SAS.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">SAS</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="KSK"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/KSK.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">KSK</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="NZSAS"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NZSAS.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">NZSAS</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="NSWC SEAL"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/NSWC%20SEAL.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">NSWC SEAL</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="SEAL Frogman"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/SEAL%20Frogman.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">SEAL Frogman</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Gendarmerie Nationale"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Gendarmerie%20Nationale.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">Gendarmerie Nationale</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="TACP Cavalry"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/TACP%20Cavalry.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">TACP Cavalry</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="USAF TACP"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/USAF%20TACP.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">USAF TACP</div></div></div>
-        </div>
-
-        <div class="agent-group-btn" onclick="toggleAgentGroup('agGrpT')">
-          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:40px;height:40px;object-fit:contain;"></div>
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
-            <div class="ag-name">Guerrilla / Elite / Sabre</div>
-            <div class="ag-team">T-side · 6 агентов ▶</div>
-          </div>
-        </div>
-        <div class="agent-sublist" id="agGrpT" style="display:none;">
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Guerrilla Warfare"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Guerrilla%20Warfare.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">Guerrilla Warfare</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Elite Crew"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Elite%20Crew.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">Elite Crew</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Sabre"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">Sabre</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Sabre Footsoldier"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Sabre%20Footsoldier.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">Sabre Footsoldier</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Phoenix"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Phoenix.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">Phoenix</div></div></div>
-          <div class="agent-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="Brazilian 1st Battalion"><div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/Brazilian%201st%20Battalion.png" style="width:40px;height:40px;object-fit:contain;"></div><div><div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ТИП</div><div class="ag-name">Brazilian 1st Battalion</div></div></div>
-        </div>
-
-        <div class="agent-group-btn sub-btn" onclick="selectSub(this,'agent')" data-faction="The Professionals">
-          <div class="ag-icon"><img src="https://zergad-code.github.io/skup-webapp/icons/The%20Professionals.png" style="width:40px;height:40px;object-fit:contain;"></div>
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;">ФРАКЦИЯ</div>
-            <div class="ag-name">The Professionals</div>
-            <div class="ag-team">T-side</div>
-          </div>
-        </div>
-
-        <div style="height:6px;"></div>
-
-      </div> 
+      <div class="agent-list" id="formAgentList"></div>
     </div>
 
     <div class="card" id="agentNameCard" style="display:none;">
@@ -1079,18 +938,11 @@
     <div class="card" id="skinNameCard">
       <div class="card-title">Название скина</div>
       <input class="skin-input" id="skinNameInput" type="text" placeholder="Например: Redline, Asiimov...">
-
-
     </div>
+
     <div class="card" id="qualityCard">
       <div class="card-title">Качество</div>
-      <div class="quality-list">
-        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#4be87a"></div><div class="q-name">Factory New</div><div class="q-abbr">FN</div></div>
-        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#4b9ae8"></div><div class="q-name">Minimal Wear</div><div class="q-abbr">MW</div></div>
-        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e8b84b"></div><div class="q-name">Field-Tested</div><div class="q-abbr">FT</div></div>
-        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e87a4b"></div><div class="q-name">Well-Worn</div><div class="q-abbr">WW</div></div>
-        <div class="quality-btn" onclick="selectQuality(this)"><div class="quality-dot" style="background:#e84b4b"></div><div class="q-name">Battle-Scarred</div><div class="q-abbr">BS</div></div>
-      </div>
+      <div class="quality-list" id="formQualityList"></div>
       <div class="stattrak-row" id="stattrakRow" style="margin-top:12px;">
         <span class="stattrak-label">StatTrak™</span>
         <div class="stattrak-toggle">
@@ -1107,23 +959,13 @@
       </div>
     </div>
 
-
     <div class="card" id="tbCard">
       <div class="card-title">Трейд-бан</div>
       <div class="tb-row">
         <div class="tb-btn" id="formTbNo" onclick="selectFormTB(false)"><i class="ti ti-x ti-inline"></i>Нет</div>
         <div class="tb-btn" id="formTbYes" onclick="selectFormTB(true)"><i class="ti ti-clock ti-inline"></i>Есть</div>
       </div>
-      <div class="days-grid" id="formDaysGrid">
-        <div class="day-btn" onclick="selectFormDay(this)">1</div>
-        <div class="day-btn" onclick="selectFormDay(this)">2</div>
-        <div class="day-btn" onclick="selectFormDay(this)">3</div>
-        <div class="day-btn" onclick="selectFormDay(this)">4</div>
-        <div class="day-btn" onclick="selectFormDay(this)">5</div>
-        <div class="day-btn" onclick="selectFormDay(this)">6</div>
-        <div class="day-btn" onclick="selectFormDay(this)">7</div>
-        <div class="day-btn" onclick="selectFormDay(this)">8</div>
-      </div>
+      <div class="days-grid" id="formDaysGrid"></div>
     </div>
 
     <button class="nav-next" onclick="addSkin()" style="width:100%; margin-bottom:8px;">Добавить в список</button>
@@ -1135,17 +977,21 @@
   </div>
 </div>
 
+<!-- ════════ ЭКРАН 2: ОПЛАТА ════════ -->
 <div class="screen" id="s2">
+  <div class="step-eyebrow"><b>Шаг 2</b> / 3 · Выплата</div>
   <div class="step-title">Способ оплаты</div>
   <div class="step-sub">Как хочешь получить деньги?</div>
 
   <div class="payment-grid">
     <div class="payment-btn" onclick="selectPayment(this)">
+      <span class="p-check"><i class="ti ti-check"></i></span>
       <div class="p-icon"><i class="ti ti-currency-bitcoin"></i></div>
       <div class="p-name">Крипта</div>
       <div class="p-sub">USDT, BTC и др.</div>
     </div>
     <div class="payment-btn" onclick="selectPayment(this)">
+      <span class="p-check"><i class="ti ti-check"></i></span>
       <div class="p-icon"><i class="ti ti-credit-card"></i></div>
       <div class="p-name">Карта</div>
       <div class="p-sub">RUB / UAH</div>
@@ -1158,27 +1004,53 @@
   </div>
 </div>
 
+<!-- ════════ ЭКРАН 3: ИТОГ ════════ -->
 <div class="screen" id="s3">
+  <div class="step-eyebrow"><b>Шаг 3</b> / 3 · Подтверждение</div>
   <div class="step-title">Итоговая заявка</div>
   <div class="step-sub">Проверь данные перед отправкой</div>
 
-  <div class="summary" id="summaryBlock"></div>
+  <div id="summaryBlock"></div>
 
   <button class="submit-btn shine-btn" onclick="submitOrder()">Отправить заявку</button>
+  <div class="submit-note">Бот пришлёт предварительную оценку в чат —<br>итоговую цену @zeorgjard напишет лично</div>
 
-  <div class="nav-btns" style="margin-top:10px;">
+  <div class="nav-btns" style="margin-top:14px;">
     <button class="nav-back" onclick="goTo(2)">← Назад</button>
   </div>
 </div>
 
+</div><!-- /.app -->
+
 <script>
   // ── КОНФИГ ──────────────────────────────────────────────────────────────────
-  // Замени на реальный URL своего Flask сервиса на Railway
   const API_URL = 'https://motivated-gratitude-production-dddc.up.railway.app/recognize';
+  const ICONS_BASE = 'https://zergad-code.github.io/skup-webapp/icons/';
+  const ic = name => ICONS_BASE + encodeURIComponent(name);
 
   // ── Telegram ─────────────────────────────────────────────────────────────────
   const tg = window.Telegram?.WebApp;
-  if (tg) { tg.ready(); tg.expand(); }
+  if (tg) {
+    tg.ready(); tg.expand();
+    try { tg.setHeaderColor('#0d0d1c'); tg.setBackgroundColor('#0d0d1c'); } catch (_) {}
+    try { tg.disableVerticalSwipes?.(); } catch (_) {}
+  }
+
+  // Хаптика — мягкая обратная связь, как в нативных приложениях
+  function haptic(kind = 'light') {
+    try {
+      const h = tg?.HapticFeedback;
+      if (!h) return;
+      if (kind === 'success' || kind === 'error' || kind === 'warning') h.notificationOccurred(kind);
+      else if (kind === 'selection') h.selectionChanged();
+      else h.impactOccurred(kind);
+    } catch (_) {}
+  }
+
+  function notify(msg) {
+    if (tg?.showAlert) { try { tg.showAlert(msg); return; } catch (_) {} }
+    alert(msg);
+  }
 
   // Открытие Telegram-ссылок (ЛС, канал) изнутри Mini App
   function openTgLink(event, username) {
@@ -1191,9 +1063,186 @@
     }
   }
 
+  // ── ДАННЫЕ ДЛЯ ПИКЕРОВ ──────────────────────────────────────────────────────
+  // Лейблы и значения 1-в-1 как раньше — формат payload для бота не меняется.
+  const GUNS = [
+    { t: 'ak47',   label: 'AK-47',        full: 'AK-47',        img: 'ak-47.png' },
+    { t: 'awp',    label: 'AWP',          full: 'AWP',          img: 'awp.png' },
+    { t: 'deagle', label: 'Desert Eagle', full: 'Desert Eagle', img: 'desert-eagle.png' },
+    { t: 'galil',  label: 'Galil AR',     full: 'Galil AR',     img: 'galil-ar.png' },
+    { t: 'glock',  label: 'Glock-18',     full: 'Glock-18',     img: 'glock.png' },
+    { t: 'm4a1s',  label: 'M4A1-S',       full: 'M4A1-S',       img: 'm4a1-s.png' },
+    { t: 'm4a4',   label: 'M4A4',         full: 'M4A4',         img: 'm4a4.png' },
+    { t: 'usps',   label: 'USP-S',        full: 'USP-S',        img: 'usp.png' },
+  ];
+
+  const KNIVES = [
+    { label: 'Bayonet',        full: '★ Bayonet',         img: 'bayonet.png' },
+    { label: 'Bowie',          full: '★ Bowie Knife',     img: 'bowie-knife.png' },
+    { label: 'Butterfly',      full: '★ Butterfly Knife', img: 'butterfly-knife.png' },
+    { label: 'Classic',        full: '★ Classic Knife',   img: 'classic-knife.png' },
+    { label: 'Falchion',       full: '★ Falchion Knife',  img: 'falchion-knife.png' },
+    { label: 'Flip Knife',     full: '★ Flip Knife',      img: 'flip-knife.png' },
+    { label: 'Gut Knife',      full: '★ Gut Knife',       img: 'gut-knife.png' },
+    { label: 'Huntsman',       full: '★ Huntsman Knife',  img: 'huntsman-knife.png' },
+    { label: 'Karambit',       full: '★ Karambit',        img: 'karambit.png' },
+    { label: 'Kukri',          full: '★ Kukri Knife',     img: 'kukri-knife.png' },
+    { label: 'M9 Bayonet',     full: '★ M9 Bayonet',      img: 'm9-bayonet.png' },
+    { label: 'Navaja',         full: '★ Navaja Knife',    img: 'navaja-knife.png' },
+    { label: 'Nomad',          full: '★ Nomad Knife',     img: 'nomad-knife.png' },
+    { label: 'Paracord',       full: '★ Paracord Knife',  img: 'paracord-knife.png' },
+    { label: 'Shadow Daggers', full: '★ Shadow Daggers',  img: 'shadow-daggers.png' },
+    { label: 'Skeleton',       full: '★ Skeleton Knife',  img: 'skeleton-knife.png' },
+    { label: 'Stiletto',       full: '★ Stiletto Knife',  img: 'stiletto-knife.png' },
+    { label: 'Survival',       full: '★ Survival Knife',  img: 'survival-knife.png' },
+    { label: 'Talon',          full: '★ Talon Knife',     img: 'talon-knife.png' },
+    { label: 'Ursus',          full: '★ Ursus Knife',     img: 'ursus-knife.png' },
+  ];
+
+  const GLOVES = [
+    { label: 'Bloodhound',    full: '★ Bloodhound Gloves',  img: 'Bloodhound Gloves.png' },
+    { label: 'Broken Fang',   full: '★ Broken Fang Gloves', img: 'Broken Fang Gloves.png' },
+    { label: 'Driver Gloves', full: '★ Driver Gloves',      img: 'Driver Gloves.png' },
+    { label: 'Hand Wraps',    full: '★ Hand Wraps',         img: 'Hand Wraps.png' },
+    { label: 'Hydra Gloves',  full: '★ Hydra Gloves',       img: 'Hydra Gloves.png' },
+    { label: 'Moto Gloves',   full: '★ Moto Gloves',        img: 'Moto Gloves.png' },
+    { label: 'Specialist',    full: '★ Specialist Gloves',  img: 'Specialist Gloves.png' },
+    { label: 'Sport Gloves',  full: '★ Sport Gloves',       img: 'Sport Gloves.png' },
+  ];
+
+  const AGENT_GROUPS = [
+    { id: 'FBI',  title: 'FBI',                     team: 'CT-side', icon: 'FBI.png',
+      items: ['FBI', 'FBI SWAT', 'FBI Sniper', 'FBI HRT'] },
+    { id: 'SWAT', title: 'SWAT / SAS / KSK',        team: 'CT-side', icon: 'SWAT.png',
+      items: ['SWAT', 'SAS', 'KSK', 'NZSAS', 'NSWC SEAL', 'SEAL Frogman', 'Gendarmerie Nationale', 'TACP Cavalry', 'USAF TACP'] },
+    { id: 'T',    title: 'Guerrilla / Elite / Sabre', team: 'T-side', icon: 'Guerrilla Warfare.png',
+      items: ['Guerrilla Warfare', 'Elite Crew', 'Sabre', 'Sabre Footsoldier', 'Phoenix', 'Brazilian 1st Battalion'] },
+  ];
+  const AGENT_SINGLE = { name: 'The Professionals', team: 'T-side', icon: 'The Professionals.png' };
+
+  const QUALITIES = [
+    // pos — середина реального диапазона флоата в % (FN 0–0.07, MW –0.15, FT –0.38, WW –0.45, BS –1)
+    { abbr: 'FN', name: 'Factory New',    color: '#4be87a', pos: 3.5 },
+    { abbr: 'MW', name: 'Minimal Wear',   color: '#9be84b', pos: 11 },
+    { abbr: 'FT', name: 'Field-Tested',   color: '#e8b84b', pos: 26.5 },
+    { abbr: 'WW', name: 'Well-Worn',      color: '#e87a4b', pos: 41.5 },
+    { abbr: 'BS', name: 'Battle-Scarred', color: '#e84b4b', pos: 72.5 },
+  ];
+
+  function agentPlural(n) {
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return n + ' агент';
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return n + ' агента';
+    return n + ' агентов';
+  }
+
+  // ── РЕНДЕР ПИКЕРОВ ───────────────────────────────────────────────────────────
+  function weaponTile({ img, emoji, label, onclick, extraClass = '' }) {
+    const icon = img
+      ? `<img src="${ic(img)}" alt="" loading="lazy">`
+      : `<span class="emoji">${emoji}</span>`;
+    return `<div class="weapon-btn ${extraClass}" onclick="${onclick}"><span class="icon">${icon}</span><div class="name">${label}</div></div>`;
+  }
+
+  function agentRow({ name, icon, kicker, onclick, extraClass = 'agent-btn', dataAttr = '' }) {
+    return `<div class="${extraClass}" onclick="${onclick}" ${dataAttr}>
+      <div class="ag-icon"><img src="${ic(icon)}" alt="" loading="lazy"></div>
+      <div><div class="ag-kicker">${kicker}</div><div class="ag-name">${name}</div></div>
+    </div>`;
+  }
+
+  function agentGroupRow(g, prefix, onclickGroup) {
+    return `<div class="agent-group-btn" onclick="${onclickGroup}">
+      <div class="ag-icon"><img src="${ic(g.icon)}" alt="" loading="lazy"></div>
+      <div style="flex:1">
+        <div class="ag-kicker">Фракция</div>
+        <div class="ag-name">${g.title}</div>
+        <div class="ag-team">${g.team} · ${agentPlural(g.items.length)} ▸</div>
+      </div>
+    </div>`;
+  }
+
+  function renderPickers() {
+    // — Ручная форма —
+    document.getElementById('formWeaponGrid').innerHTML =
+      GUNS.map(g => weaponTile({ img: g.img, label: g.label, onclick: `selectWeapon(this,'${g.t}')` })).join('') +
+      weaponTile({ img: 'The Professionals.png', label: 'Агенты',   onclick: "selectWeapon(this,'agent')" }) +
+      weaponTile({ img: 'butterfly-knife.png',   label: 'Ножи',     onclick: "selectWeapon(this,'knife')" }) +
+      weaponTile({ img: 'Specialist Gloves.png', label: 'Перчатки', onclick: "selectWeapon(this,'gloves')" }) +
+      weaponTile({ emoji: '🎱', label: 'Другое', onclick: "selectWeapon(this,'other')" });
+
+    document.getElementById('formKnifeGrid').innerHTML =
+      KNIVES.map(k => weaponTile({ img: k.img, label: k.label, onclick: "selectSub(this,'knife')", extraClass: 'sub-btn' })).join('');
+
+    document.getElementById('formGloveGrid').innerHTML =
+      GLOVES.map(g => weaponTile({ img: g.img, label: g.label, onclick: "selectSub(this,'glove')", extraClass: 'sub-btn' })).join('');
+
+    document.getElementById('formAgentList').innerHTML =
+      AGENT_GROUPS.map(g =>
+        agentGroupRow(g, 'ag', `toggleAgentGroup('agGrp${g.id}')`) +
+        `<div class="agent-sublist" id="agGrp${g.id}" style="display:none;">` +
+          g.items.map(name => agentRow({
+            name, icon: name + '.png', kicker: 'Тип',
+            onclick: "selectSub(this,'agent')",
+            extraClass: 'agent-btn sub-btn',
+            dataAttr: `data-faction="${name}"`,
+          })).join('') +
+        `</div>`
+      ).join('') +
+      agentRow({
+        name: AGENT_SINGLE.name, icon: AGENT_SINGLE.icon, kicker: 'Фракция',
+        onclick: "selectSub(this,'agent')",
+        extraClass: 'agent-btn sub-btn',
+        dataAttr: `data-faction="${AGENT_SINGLE.name}"`,
+      });
+
+    document.getElementById('formQualityList').innerHTML =
+      QUALITIES.map(q =>
+        `<div class="quality-btn" onclick="selectQuality(this)"><div class="q-gauge"><i style="left:${q.pos}%"></i></div><div class="q-name">${q.name}</div><div class="q-abbr">${q.abbr}</div></div>`
+      ).join('');
+
+    document.getElementById('formDaysGrid').innerHTML =
+      Array.from({ length: 8 }, (_, i) => `<div class="day-btn" onclick="selectFormDay(this)">${i + 1}</div>`).join('');
+
+    // — Карточка распознавания —
+    document.getElementById('ccWeaponGrid').innerHTML =
+      GUNS.map(g => weaponTile({ img: g.img, label: g.label, onclick: `setCcWeapon(this,'${g.full}')`, extraClass: 'cc-wpn-btn' })).join('') +
+      weaponTile({ img: 'The Professionals.png', label: 'Агенты',   onclick: 'openCcAgent()', extraClass: 'cc-wpn-btn' }) +
+      weaponTile({ img: 'butterfly-knife.png',   label: 'Ножи',     onclick: 'openCcKnife()', extraClass: 'cc-wpn-btn' }) +
+      weaponTile({ img: 'Specialist Gloves.png', label: 'Перчатки', onclick: 'openCcGlove()', extraClass: 'cc-wpn-btn' }) +
+      weaponTile({ emoji: '🎱', label: 'Другое', onclick: 'setCcWeaponCustom()', extraClass: 'cc-wpn-btn' });
+
+    document.getElementById('ccKnifeGrid').innerHTML =
+      KNIVES.map(k => weaponTile({ img: k.img, label: k.label, onclick: `setCcWeapon(this,'${k.full}')` })).join('');
+
+    document.getElementById('ccGloveGrid').innerHTML =
+      GLOVES.map(g => weaponTile({ img: g.img, label: g.label, onclick: `setCcWeapon(this,'${g.full}')` })).join('');
+
+    document.getElementById('ccAgentList').innerHTML =
+      AGENT_GROUPS.map(g =>
+        agentGroupRow(g, 'cc', `toggleCcAgentGroup('ccGrp${g.id}')`) +
+        `<div class="agent-sublist" id="ccGrp${g.id}" style="display:none;">` +
+          g.items.map(name => agentRow({
+            name, icon: name + '.png', kicker: 'Тип',
+            onclick: `setCcWeapon(this,'${name}')`,
+          })).join('') +
+        `</div>`
+      ).join('') +
+      agentRow({
+        name: AGENT_SINGLE.name, icon: AGENT_SINGLE.icon, kicker: 'Фракция',
+        onclick: `setCcWeapon(this,'${AGENT_SINGLE.name}')`,
+      });
+
+    document.getElementById('ccQualityGrid').innerHTML =
+      QUALITIES.map(q => `<div class="day-btn cc-q-btn" onclick="setCcQuality(this,'${q.abbr}')" style="flex:1;min-width:50px;box-shadow:inset 0 -2px 0 ${q.color}55;">${q.abbr}</div>`).join('');
+
+    document.getElementById('ccDaysGrid').innerHTML =
+      Array.from({ length: 8 }, (_, i) => `<div class="day-btn" onclick="selectConfirmDay(this)">${i + 1}</div>`).join('');
+  }
+
   // ── Состояние ────────────────────────────────────────────────────────────────
   const state = {
-    skins: [],    // [{weapon, skinName, quality, tradeBan, banDays}]
+    skins: [],    // [{weapon, skinName, quality, tradeBan, banDays, stattrak, souvenir}]
     payment: null,
   };
 
@@ -1202,10 +1251,10 @@
   let formWeaponLabel  = null;
   let formTradeBan     = null;  // null = не выбрано
   let formBanDays      = null;
-  let formStatTrak     = false; // StatTrak для ручной формы
-  let ccStatTrak       = false; // StatTrak для карточки подтверждения
-  let formSouvenir     = false; // Сувенир для ручной формы
-  let ccSouvenir       = false; // Сувенир для карточки подтверждения
+  let formStatTrak     = false;
+  let ccStatTrak       = false;
+  let formSouvenir     = false;
+  let ccSouvenir       = false;
 
   // ── Навигация ────────────────────────────────────────────────────────────────
   function goTo(n) {
@@ -1218,20 +1267,15 @@
     });
     if (n === 3) {
       renderSummary();
-      // Перезапускаем блик кнопки отправки
-      const sb = document.querySelector('.shine-btn');
+      // Перезапуск блика кнопки отправки
+      const sb = document.querySelector('.submit-btn');
       if (sb) {
-        sb.style.animation = 'none';
-        const after = sb.querySelector('::after');
-        // Форсируем reflow и перезапуск
-        void sb.offsetWidth;
-        sb.style.animation = '';
-        // Перезапуск псевдоэлемента через переключение класса
         sb.classList.remove('shine-btn');
         void sb.offsetWidth;
         sb.classList.add('shine-btn');
       }
     }
+    haptic('light');
     window.scrollTo(0, 0);
   }
 
@@ -1239,6 +1283,7 @@
   function selectWeapon(el, type) {
     document.querySelectorAll('.weapon-btn:not(.sub-btn)').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    haptic('selection');
     formWeaponType  = type;
     formWeaponLabel = el.querySelector('.name').textContent.trim();
 
@@ -1256,27 +1301,23 @@
 
     if (type === 'knife') {
       document.getElementById('knifeSubCard').style.display  = 'block';
-      document.getElementById('skinNameCard').style.display  = 'none';
       document.getElementById('qualityCard').style.display   = 'block';
       document.getElementById('souvenirRow').style.display   = 'none';
     } else if (type === 'gloves') {
       document.getElementById('gloveSubCard').style.display  = 'block';
-      document.getElementById('skinNameCard').style.display  = 'none';
       document.getElementById('stattrakRow').style.display   = 'none';
       document.getElementById('souvenirRow').style.display   = 'none';
     } else if (type === 'agent') {
       document.getElementById('agentSubCard').style.display  = 'block';
-      document.getElementById('qualityCard').style.display   = 'none';
-      document.getElementById('skinNameCard').style.display  = 'none';
       document.getElementById('stattrakRow').style.display   = 'none';
       document.getElementById('souvenirRow').style.display   = 'none';
       // ТБ появится после выбора конкретного агента
     } else if (type === 'other') {
       document.getElementById('otherInputCard').style.display = 'block';
       document.getElementById('qualityCard').style.display    = 'block';
-      document.getElementById('tbCard') && (document.getElementById('tbCard').style.display = 'block');
+      document.getElementById('tbCard').style.display         = 'block';
     } else {
-      // Обычное оружие — показываем название, качество, ТБ
+      // Обычное оружие — название, качество, ТБ
       document.getElementById('skinNameCard').style.display = 'block';
       document.getElementById('qualityCard').style.display  = 'block';
       document.getElementById('tbCard').style.display       = 'block';
@@ -1285,12 +1326,9 @@
 
   function toggleAgentGroup(groupId) {
     const list = document.getElementById(groupId);
-    const arrow = document.getElementById(groupId + '-arrow');
     const btn = list.previousElementSibling;
     const isOpen = list.style.display !== 'none';
     list.style.display = isOpen ? 'none' : 'flex';
-    list.style.flexDirection = 'column';
-    list.style.gap = '6px';
     btn.classList.toggle('open', !isOpen);
   }
 
@@ -1298,24 +1336,24 @@
     const cardMap = { knife: 'knifeSubCard', glove: 'gloveSubCard', agent: 'agentSubCard' };
     document.querySelectorAll('#' + cardMap[type] + ' .sub-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    haptic('selection');
     if (type === 'knife') {
       document.getElementById('knifeNameCard').style.display = 'block';
       document.getElementById('qualityCard').style.display   = 'block';
-      document.getElementById('tbCard') && (document.getElementById('tbCard').style.display = 'block');
+      document.getElementById('tbCard').style.display        = 'block';
     }
     if (type === 'glove') {
       document.getElementById('gloveNameCard').style.display = 'block';
       document.getElementById('qualityCard').style.display   = 'block';
-      document.getElementById('tbCard') && (document.getElementById('tbCard').style.display = 'block');
+      document.getElementById('tbCard').style.display        = 'block';
     }
     if (type === 'agent') {
       const noName = ["FBI", "FBI SWAT", "FBI Sniper", "FBI HRT", "SAS", "KSK", "NZSAS", "USAF TACP", "TACP Cavalry"];
       const faction = el.dataset.faction || '';
       document.getElementById('agentNameCard').style.display = noName.includes(faction) ? 'none' : 'block';
-      document.getElementById('tbCard') && (document.getElementById('tbCard').style.display = 'block');
+      document.getElementById('tbCard').style.display        = 'block';
     }
   }
-
 
   function showAddSkin() {
     const f = document.getElementById('addForm');
@@ -1326,6 +1364,7 @@
     const manualBtn = document.querySelector('.add-skin-btn:not(.photo-mode)');
     if (manualBtn) manualBtn.classList.toggle('active', isHidden);
     if (isHidden) resetAddForm();
+    haptic('light');
   }
 
   function resetAddForm() {
@@ -1333,6 +1372,8 @@
     formWeaponLabel = null;
     formTradeBan    = null;
     formBanDays     = null;
+    formStatTrak    = false;
+    formSouvenir    = false;
 
     document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('selected'));
     document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'));
@@ -1344,10 +1385,9 @@
 
     document.getElementById('qualityCard').style.display  = 'none';
     document.getElementById('skinNameCard').style.display = 'none';
-    const tbCard = document.getElementById('tbCard');
-    if (tbCard) tbCard.style.display = 'none';
-    const stRow = document.getElementById('stattrakRow');
-    if (stRow) stRow.style.display = '';
+    document.getElementById('tbCard').style.display       = 'none';
+    document.getElementById('stattrakRow').style.display  = '';
+    document.getElementById('souvenirRow').style.display  = '';
 
     ['skinNameInput','knifeNameInput','gloveNameInput','agentNameInput','otherNameInput'].forEach(id => {
       const el = document.getElementById(id);
@@ -1360,22 +1400,17 @@
     document.getElementById('formTbYes').classList.remove('selected');
     document.getElementById('formDaysGrid').classList.remove('visible');
     document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
-    // Сброс StatTrak
-    formStatTrak = false;
-    document.getElementById('stNo')?.classList.add('active');
-    document.getElementById('stYes')?.classList.remove('active');
-    // Сброс Сувенир
-    formSouvenir = false;
-    document.getElementById('svNo')?.classList.add('active');
-    document.getElementById('svYes')?.classList.remove('active');
+
     document.getElementById('stNo').classList.add('active');
     document.getElementById('stYes').classList.remove('active');
+    document.getElementById('svNo').classList.add('active');
+    document.getElementById('svYes').classList.remove('active');
   }
 
   // ── Добавить скин в список ────────────────────────────────────────────────
   function addSkin() {
     const type = formWeaponType;
-    if (!type) { return; }
+    if (!type) { flashEl(document.getElementById('formWeaponGrid').parentElement); return; }
 
     let weapon   = formWeaponLabel;
     let skinName = '';
@@ -1404,14 +1439,14 @@
       if (!subEl) { flashCard('agentSubCard'); return; }
       const faction = subEl.dataset.faction || subEl.querySelector('.ag-name').textContent.trim();
       const noName = ["FBI", "FBI SWAT", "FBI Sniper", "FBI HRT", "SAS", "KSK", "NZSAS", "USAF TACP", "TACP Cavalry"];
-      weapon   = 'Агент (' + faction + ')';
+      weapon = 'Агент (' + faction + ')';
       if (noName.includes(faction)) {
         skinName = faction;
       } else {
         skinName = document.getElementById('agentNameInput').value.trim();
         if (!skinName) { flashCard('agentNameCard'); return; }
       }
-      quality  = '—';
+      quality = '—';
 
     } else if (type === 'other') {
       skinName = document.getElementById('otherNameInput').value.trim();
@@ -1433,6 +1468,7 @@
     state.skins.push({ weapon, skinName, quality, tradeBan: formTradeBan, banDays: formBanDays, stattrak: formStatTrak, souvenir: formSouvenir });
 
     renderSkinsList();
+    haptic('medium');
     document.getElementById('addForm').style.display = 'none';
     document.getElementById('s1Next').disabled = false;
     const manualBtn = document.querySelector('.add-skin-btn:not(.photo-mode)');
@@ -1441,12 +1477,14 @@
 
   function selectST(val) {
     formStatTrak = val;
+    haptic('selection');
     document.getElementById('stNo').classList.toggle('active', !val);
     document.getElementById('stYes').classList.toggle('active', val);
   }
 
   function selectSV(val) {
     formSouvenir = val;
+    haptic('selection');
     document.getElementById('svNo').classList.toggle('active', !val);
     document.getElementById('svYes').classList.toggle('active', val);
   }
@@ -1468,12 +1506,14 @@
   function selectQuality(el) {
     document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    haptic('selection');
   }
 
   // ── Форма: трейд-бан ─────────────────────────────────────────────────────
   function selectFormTB(hasTB) {
     formTradeBan = hasTB;
     formBanDays  = null;
+    haptic('selection');
     document.getElementById('formTbNo').classList.toggle('selected', !hasTB);
     document.getElementById('formTbYes').classList.toggle('selected', hasTB);
     const grid = document.getElementById('formDaysGrid');
@@ -1484,19 +1524,17 @@
   function selectFormDay(el) {
     document.querySelectorAll('#formDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    haptic('selection');
     formBanDays = parseInt(el.textContent.trim());
   }
 
   // ── Рендер списка скинов ──────────────────────────────────────────────────────
   const qualityFullName = { FN:'Factory New', MW:'Minimal Wear', FT:'Field-Tested', WW:'Well-Worn', BS:'Battle-Scarred', '—':'—' };
 
-  const ICONS_BASE = 'https://zergad-code.github.io/skup-webapp/icons/';
-
   // Подбирает PNG-иконку по названию оружия/предмета
   function skinIconImg(weapon) {
     const w = (weapon || '').toLowerCase();
 
-    // Карта известных оружий → файл
     const map = {
       'ak-47': 'ak-47.png', 'ak 47': 'ak-47.png', 'калаш': 'ak-47.png',
       'awp': 'awp.png',
@@ -1525,56 +1563,63 @@
 
     // Чистим название от ★, StatTrak, скобок
     let clean = w.replace('★','').replace('stattrak™','').replace('stattrak','').replace('souvenir','').trim();
-    // Берём часть до |
     const weaponPart = clean.split('|')[0].trim();
 
-    // Прямое совпадение
     for (const key in map) {
-      if (weaponPart === key || weaponPart.startsWith(key + ' ') || weaponPart === key) {
-        return ICONS_BASE + encodeURIComponent(map[key]);
+      if (weaponPart === key || weaponPart.startsWith(key + ' ')) {
+        return ic(map[key]);
       }
     }
-    // Частичное вхождение
     for (const key in map) {
       if (weaponPart.includes(key)) {
-        return ICONS_BASE + encodeURIComponent(map[key]);
+        return ic(map[key]);
       }
     }
-    // Перчатки по маркеру
-    if (detectGlove(weapon)) return ICONS_BASE + encodeURIComponent('Specialist Gloves.png');
-    // Агент по маркеру
-    if (detectAgent(weapon)) return ICONS_BASE + encodeURIComponent('The Professionals.png');
+    if (detectGlove(weapon)) return ic('Specialist Gloves.png');
+    if (detectAgent(weapon)) return ic('The Professionals.png');
 
-    return null; // не нашли — покажем запасную иконку
+    return null;
+  }
+
+  // Чипы скина — общие для списка и итоговой заявки
+  function skinChips(skin) {
+    const isAgent = detectAgent(skin.weapon);
+    let chips = '';
+    if (!isAgent && skin.quality && skin.quality !== '—') {
+      const q = QUALITIES.find(x => x.abbr === skin.quality);
+      chips += q
+        ? `<span class="chip" style="background:${q.color}1f;color:${q.color}">${skin.quality}</span>`
+        : `<span class="chip chip-q">${skin.quality}</span>`;
+    }
+    if (skin.stattrak) chips += `<span class="chip chip-st">ST™</span>`;
+    if (skin.souvenir) chips += `<span class="chip chip-sv">SV</span>`;
+    chips += skin.tradeBan
+      ? `<span class="chip chip-tb">ТБ ${skin.banDays} дн.</span>`
+      : `<span class="chip chip-neutral">без ТБ</span>`;
+    return chips;
   }
 
   function renderSkinsList() {
     const list = document.getElementById('skinsList');
     list.innerHTML = '';
-    state.skins.forEach((skin, idx) => {
-      const qualText = qualityFullName[skin.quality] || skin.quality;
-      const isAgent = detectAgent(skin.weapon);
-      const iconUrl = skinIconImg(skin.weapon);
+    const hasAny = state.skins.length > 0;
 
-      // Чипы
-      let chips = '';
-      if (!isAgent && skin.quality && skin.quality !== '—') {
-        chips += `<span class="chip chip-q">${skin.quality}</span>`;
-      }
-      if (skin.stattrak) {
-        chips += `<span class="chip chip-st">ST™</span>`;
-      }
-      if (skin.souvenir) {
-        chips += `<span class="chip chip-sv">SV</span>`;
-      }
-      if (skin.tradeBan) {
-        chips += `<span class="chip chip-tb">${skin.banDays} дн.</span>`;
-      } else {
-        chips += `<span class="chip chip-neutral">без ТБ</span>`;
-      }
+    if (!hasAny) {
+      list.innerHTML = `
+        <div class="empty-state anim-card">
+          <div class="es-icon"><i class="ti ti-packages"></i></div>
+          <div class="es-t">Пока пусто</div>
+          <div class="es-s">Добавь скин вручную или скрином<br>из инвентаря Steam</div>
+        </div>`;
+    }
+
+    state.skins.forEach((skin, idx) => {
+      const isGold  = detectKnife(skin.weapon) || detectGlove(skin.weapon);
+      const iconUrl = skinIconImg(skin.weapon);
+      const chips   = skinChips(skin);
 
       const div = document.createElement('div');
-      div.className = 'skin-card anim-card';
+      div.className = 'skin-card anim-card' + (isGold ? ' rar-gold' : '');
       div.style.animationDelay = `${0.05 + idx * 0.06}s`;
       div.innerHTML = `
         <div class="sc-icon">${iconUrl ? `<img src="${iconUrl}" alt="">` : `<i class="ti ti-cube"></i>`}</div>
@@ -1582,18 +1627,12 @@
           <div class="sc-name">${skin.weapon} | ${skin.skinName}</div>
           <div class="sc-chips">${chips}</div>
         </div>
-        <button class="sc-remove" onclick="removeSkin(${idx})"><i class="ti ti-x"></i></button>
+        <button class="sc-remove" onclick="removeSkin(${idx})" title="Убрать"><i class="ti ti-x"></i></button>
       `;
       list.appendChild(div);
     });
 
-    const hasAny = state.skins.length > 0;
     document.getElementById('s1Next').disabled = !hasAny;
-
-    // Динамический отступ: мал когда пусто, больше когда есть скины
-    list.style.marginBottom = hasAny ? '18px' : '0';
-    const sub = document.querySelector('#s1 .step-sub');
-    if (sub) sub.style.marginBottom = hasAny ? '16px' : '1px';
 
     // Бейдж-счётчик
     const badge = document.getElementById('skinBadge');
@@ -1601,7 +1640,6 @@
       if (hasAny) {
         badge.textContent = state.skins.length;
         badge.style.display = 'inline-flex';
-        // Перезапуск анимации pop
         badge.style.animation = 'none';
         void badge.offsetWidth;
         badge.style.animation = '';
@@ -1613,6 +1651,7 @@
 
   function removeSkin(idx) {
     state.skins.splice(idx, 1);
+    haptic('light');
     renderSkinsList();
   }
 
@@ -1620,6 +1659,7 @@
   function selectPayment(el) {
     document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    haptic('selection');
     state.payment = el.querySelector('.p-name').textContent.trim();
     document.getElementById('s2Next').disabled = false;
   }
@@ -1627,38 +1667,46 @@
   // ── Итог ─────────────────────────────────────────────────────────────────────
   function renderSummary() {
     const block = document.getElementById('summaryBlock');
+    const n = state.skins.length;
 
-    const skinsHtml = state.skins.map(s => {
-      const tbText  = s.tradeBan ? `ТБ ${s.banDays} дн.` : 'Без ТБ';
-      const qualAbbr = s.quality;
+    const skinsHtml = state.skins.map((s, idx) => {
+      const isGold  = detectKnife(s.weapon) || detectGlove(s.weapon);
+      const iconUrl = skinIconImg(s.weapon);
       return `
-        <div class="summary-row">
-          <span class="s-label">${s.weapon} | ${s.skinName}</span>
-          <span class="s-value">${qualAbbr} · ${tbText}</span>
-        </div>
-      `;
+        <div class="sum-item ${isGold ? 'rar-gold' : ''} anim-card" style="animation-delay:${0.05 + idx * 0.05}s">
+          <div class="sum-thumb">${iconUrl ? `<img src="${iconUrl}" alt="">` : `<i class="ti ti-cube"></i>`}</div>
+          <div class="sum-info">
+            <div class="sum-name">${s.weapon} | ${s.skinName}</div>
+            <div class="sc-chips">${skinChips(s)}</div>
+          </div>
+        </div>`;
     }).join('');
 
+    const payIcon = state.payment === 'Крипта' ? 'ti-coin-bitcoin'
+                  : state.payment === 'Карта'  ? 'ti-credit-card'
+                  : 'ti-wallet';
+
     block.innerHTML = `
-      <div class="summary-row">
-        <span class="s-label">Скинов</span>
-        <span class="s-value">${state.skins.length} шт.</span>
+      <div class="sum-section anim-card">
+        <div class="sum-head"><i class="ti ti-packages"></i>Скины<span class="sum-count">${n}</span></div>
+        ${skinsHtml}
       </div>
-      ${skinsHtml}
-      <div class="summary-row">
-        <span class="s-label">Оплата</span>
-        <span class="s-value">${state.payment || '—'}</span>
-      </div>
-      <div class="summary-row total">
-        <span class="s-label">Статус</span>
-        <span class="s-value">Ждите оценки</span>
+      <div class="sum-section anim-card" style="animation-delay:0.1s">
+        <div class="sum-head"><i class="ti ti-cash"></i>Оплата</div>
+        <div class="sum-pay">
+          <div class="sum-pay-icon"><i class="ti ${payIcon}"></i></div>
+          <div>
+            <div class="sum-pay-name">${state.payment || '—'}</div>
+            <div class="sum-pay-sub">Реквизиты обсудим в чате</div>
+          </div>
+        </div>
       </div>
     `;
   }
 
   // ── Быстрое добавление по фото ───────────────────────────────────────────────
   let pendingRecognized = null; // { weapon, skinName, quality } — ждёт подтверждения
-  let confirmTradeBan = false;
+  let confirmTradeBan = null;
   let confirmBanDays  = null;
 
   function togglePhotoMenu() {
@@ -1670,6 +1718,7 @@
     if (manualBtn) manualBtn.classList.remove('active');
     menu.classList.toggle('visible', !isVisible);
     btn.classList.toggle('active', !isVisible);
+    haptic('light');
   }
 
   function closePhotoMenu() {
@@ -1690,8 +1739,7 @@
       for (const item of items) {
         // Пробуем все типы подряд — Safari иногда отдаёт нестандартные
         const preferredTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
-        
-        // Сначала пробуем стандартные image/* типы
+
         let blob = null;
         let usedType = null;
 
@@ -1713,7 +1761,7 @@
                 usedType = 'image/png'; // Safari screenshot всегда PNG по факту
                 break;
               }
-            } catch(_) {}
+            } catch (_) {}
           }
         }
 
@@ -1724,9 +1772,9 @@
         }
       }
 
-      alert('В буфере обмена нет изображения. Сначала сделай скриншот.');
+      notify('В буфере обмена нет изображения. Сначала сделай скриншот.');
     } catch (err) {
-      alert('Safari заблокировал доступ к буферу. Используй Ctrl+V или скопируй изображение и попробуй снова.');
+      notify('Браузер заблокировал доступ к буферу. Используй Ctrl+V или скопируй изображение и попробуй снова.');
     }
   }
 
@@ -1747,13 +1795,13 @@
 
     // Показываем карточку в состоянии загрузки
     card.classList.add('visible');
-    document.getElementById('ccWeapon').textContent  = 'распознаю...';
+    document.getElementById('ccWeapon').innerHTML   = '<span class="spinner"></span>распознаю…';
     document.getElementById('ccSkin').textContent    = '—';
     document.getElementById('ccQuality').textContent = '—';
     resetConfirmTB();
 
     try {
-      const base64   = await fileToBase64(file);
+      const base64    = await fileToBase64(file);
       const mediaType = file.type || 'image/jpeg';
 
       const response = await fetch(API_URL, {
@@ -1777,8 +1825,8 @@
       selectCcST(data.stattrak || false);
 
       // Определяем агента и перчатки (по флагу Vision ИЛИ по названию)
-      const isAgent = data.is_agent === true || detectAgent(pendingRecognized.weapon);
-      const isGlove = detectGlove(pendingRecognized.weapon);
+      const isAgent  = data.is_agent === true || detectAgent(pendingRecognized.weapon);
+      const isGlove  = detectGlove(pendingRecognized.weapon);
       const isKnifeW = detectKnife(pendingRecognized.weapon);
       applyConfirmModes(isAgent, isGlove, isKnifeW);
 
@@ -1794,21 +1842,22 @@
             }
           });
         } else if (days <= 0) {
-          // Бан уже прошёл — нет ТБ
           selectConfirmTB(false);
         }
-        // если days > 8 — оставляем выбор пользователю (защита обмена обсуждается отдельно)
+        // если days > 8 — оставляем выбор пользователю
       }
 
       document.getElementById('ccWeapon').textContent  = pendingRecognized.weapon;
       document.getElementById('ccSkin').textContent    = pendingRecognized.skinName;
       document.getElementById('ccQuality').textContent = pendingRecognized.quality;
+      haptic('success');
 
     } catch (err) {
       document.getElementById('ccWeapon').textContent  = 'Ошибка: ' + (err.message || 'не распознано');
       document.getElementById('ccSkin').textContent    = 'Попробуй ещё раз или добавь вручную';
       document.getElementById('ccQuality').textContent = '—';
       pendingRecognized = null;
+      haptic('error');
     }
 
     event.target.value = '';
@@ -1817,6 +1866,7 @@
   function selectConfirmTB(hasTB) {
     confirmTradeBan = hasTB;
     confirmBanDays  = null;
+    haptic('selection');
     document.getElementById('ccTbNo').classList.toggle('selected', !hasTB);
     document.getElementById('ccTbYes').classList.toggle('selected', hasTB);
     const grid = document.getElementById('ccDaysGrid');
@@ -1827,6 +1877,7 @@
   function selectConfirmDay(el) {
     document.querySelectorAll('#ccDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    haptic('selection');
     confirmBanDays = parseInt(el.textContent.trim());
   }
 
@@ -1850,7 +1901,6 @@
     const picker = document.getElementById('ccWeaponPicker');
     const isOpen = picker.style.display !== 'none';
     picker.style.display = isOpen ? 'none' : 'block';
-    // Закрываем подпикеры
     ['ccKnifePicker','ccGlovePicker','ccAgentPicker'].forEach(id => {
       document.getElementById(id).style.display = 'none';
     });
@@ -1902,10 +1952,11 @@
   function setCcWeapon(el, name) {
     document.getElementById('ccWeapon').textContent = name;
     if (pendingRecognized) pendingRecognized.weapon = name;
+    haptic('selection');
     document.getElementById('ccWeaponPicker').style.display = 'none';
     // Пересчитываем режимы качество/StatTrak
-    const isAgent = detectAgent(name);
-    const isGlove = detectGlove(name);
+    const isAgent  = detectAgent(name);
+    const isGlove  = detectGlove(name);
     const isKnifeW = detectKnife(name);
     applyConfirmModes(isAgent, isGlove, isKnifeW);
   }
@@ -1915,8 +1966,6 @@
     const btn = list.previousElementSibling;
     const isOpen = list.style.display !== 'none';
     list.style.display = isOpen ? 'none' : 'flex';
-    list.style.flexDirection = 'column';
-    list.style.gap = '6px';
     btn.classList.toggle('open', !isOpen);
   }
 
@@ -1925,7 +1974,6 @@
     const opening = picker.style.display === 'none';
     picker.style.display = opening ? 'block' : 'none';
     if (opening) {
-      // Подсвечиваем только реально выбранное качество
       const current = document.getElementById('ccQuality').textContent.trim();
       document.querySelectorAll('.cc-q-btn').forEach(b => {
         b.classList.toggle('selected', b.textContent.trim() === current);
@@ -1936,6 +1984,7 @@
   function setCcQuality(el, q) {
     document.querySelectorAll('.cc-q-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
+    haptic('selection');
     document.getElementById('ccQuality').textContent = q;
     if (pendingRecognized) pendingRecognized.quality = q;
     document.getElementById('ccQualityPicker').style.display = 'none';
@@ -1948,17 +1997,14 @@
     const currentVal = span.textContent.trim();
     const btn = span.nextElementSibling;
 
-    // Создаём input
     const input = document.createElement('input');
     input.className = 'cr-edit-input';
     input.value = currentVal;
     input.type = 'text';
 
-    // Скрываем span и кнопку
     span.style.display = 'none';
     if (btn) btn.style.display = 'none';
 
-    // Вставляем input после span
     span.parentNode.insertBefore(input, span.nextSibling);
     input.focus();
     input.select();
@@ -1970,7 +2016,6 @@
       if (btn) btn.style.display = '';
       input.remove();
 
-      // Обновляем pendingRecognized
       if (!pendingRecognized) return;
       if (fieldId === 'ccWeapon')  pendingRecognized.weapon   = newVal;
       if (fieldId === 'ccSkin')    pendingRecognized.skinName = newVal;
@@ -1989,15 +2034,15 @@
   }
 
   function applyConfirmModes(isAgent, isGlove, isKnife = false) {
-    const qRow = document.getElementById('ccQualityRow');
+    const qRow  = document.getElementById('ccQualityRow');
     const stRow = document.getElementById('ccStRow');
+    const svRow = document.getElementById('ccSvRow');
     // Качество: скрыто для агентов
     if (qRow) qRow.style.display = isAgent ? 'none' : '';
     // StatTrak: скрыт для агентов и перчаток
     if (stRow) stRow.style.display = (isAgent || isGlove) ? 'none' : '';
     // Сувенир: скрыт для агентов, перчаток и ножей
-    const svRow2 = document.getElementById('ccSvRow');
-    if (svRow2) svRow2.style.display = (isAgent || isGlove || isKnife) ? 'none' : '';
+    if (svRow) svRow.style.display = (isAgent || isGlove || isKnife) ? 'none' : '';
     if (isAgent) document.getElementById('ccQuality').textContent = '—';
   }
 
@@ -2074,41 +2119,39 @@
     });
 
     renderSkinsList();
+    haptic('medium');
     cancelConfirm();
   }
 
+  // ── Подсветка ошибок валидации ──────────────────────────────────────────────
+  function flashEl(el) {
+    if (!el) return;
+    haptic('error');
+    el.classList.remove('flash-err');
+    void el.offsetWidth;
+    el.classList.add('flash-err');
+    el.addEventListener('animationend', () => el.classList.remove('flash-err'), { once: true });
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   function flashTbButtons() {
-    const no = document.getElementById('ccTbNo');
+    flashEl(document.getElementById('ccTbNo'));
     const yes = document.getElementById('ccTbYes');
-    [no, yes].forEach(b => {
-      if (!b) return;
-      const orig = b.style.borderColor;
-      b.style.borderColor = 'var(--danger)';
-      setTimeout(() => { b.style.borderColor = orig; }, 1200);
-    });
-    no && no.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (yes) { yes.classList.remove('flash-err'); void yes.offsetWidth; yes.classList.add('flash-err'); }
   }
 
   function flashDaysGrid() {
-    const grid = document.getElementById('ccDaysGrid');
-    if (!grid) return;
-    grid.style.outline = '1px solid var(--danger)';
-    setTimeout(() => { grid.style.outline = ''; }, 1200);
+    flashEl(document.getElementById('ccDaysGrid'));
   }
 
   function flashCard(cardId) {
-    const el = document.getElementById(cardId);
-    if (!el) return;
-    const orig = el.style.borderColor;
-    el.style.borderColor = 'var(--danger)';
-    el.style.transition = 'border-color 0.2s';
-    setTimeout(() => { el.style.borderColor = orig; }, 1200);
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    flashEl(document.getElementById(cardId));
   }
 
   function flashCcRow(fieldId) {
     const el = document.getElementById(fieldId);
     if (!el) return;
+    haptic('error');
     const original = el.style.color;
     el.style.color = 'var(--danger)';
     setTimeout(() => { el.style.color = original; }, 1200);
@@ -2118,12 +2161,10 @@
     pendingRecognized = null;
     document.getElementById('confirmCard').classList.remove('visible');
     resetConfirmTB();
-    // Закрываем пикеры
     const wp = document.getElementById('ccWeaponPicker');
     const qp = document.getElementById('ccQualityPicker');
     if (wp) wp.style.display = 'none';
     if (qp) qp.style.display = 'none';
-    // Сбрасываем выделение качества
     document.querySelectorAll('.cc-q-btn').forEach(b => b.classList.remove('selected'));
     // Возвращаем видимость качества и StatTrak (на случай если был агент)
     applyConfirmModes(false, false);
@@ -2139,7 +2180,6 @@
         e.preventDefault();
         const file = item.getAsFile();
         if (!file) return;
-        // Всегда идёт через быстрый путь с карточкой подтверждения
         handleQuickPhoto({ target: { files: [file], value: '' } });
         break;
       }
@@ -2148,8 +2188,11 @@
 
   // ── Отправка ─────────────────────────────────────────────────────────────────
   function submitOrder() {
-    if (!state.skins.length) { alert('Добавь хотя бы один скин'); return; }
-    if (!state.payment)      { alert('Выбери способ оплаты'); return; }
+    if (!state.skins.length) { notify('Добавь хотя бы один скин'); return; }
+    if (!state.payment)      { notify('Выбери способ оплаты'); return; }
+
+    const overlay = document.getElementById('successOverlay');
+    if (overlay.classList.contains('show')) return; // защита от двойного тапа
 
     const payload = {
       skins: state.skins.map(s => ({
@@ -2166,28 +2209,30 @@
 
     const jsonStr = JSON.stringify(payload);
 
-    // Показываем красивый экран успеха с анимацией
-    const overlay = document.getElementById('successOverlay');
     overlay.classList.add('show');
+    haptic('success');
 
     // Отправляем данные боту (но не закрываем сразу — даём увидеть галочку)
     if (tg?.sendData) {
-      // Небольшая задержка чтобы анимация галочки проигралась
       setTimeout(() => { tg.sendData(jsonStr); }, 2200);
     } else {
       console.log('Payload:', jsonStr);
     }
   }
+
+  // ── Инициализация ────────────────────────────────────────────────────────────
+  renderPickers();
+  renderSkinsList();
 </script>
 
-<!-- Экран успеха (Apple Pay стиль) -->
+<!-- Экран успеха -->
 <div class="success-overlay" id="successOverlay">
   <svg class="success-check" viewBox="0 0 100 100">
     <circle cx="50" cy="50" r="45"/>
     <path d="M30 52 L44 66 L72 36"/>
   </svg>
   <div class="success-title">Заявка отправлена!</div>
-  <div class="success-sub" id="successSub">Роман скоро свяжется с тобой</div>
+  <div class="success-sub" id="successSub">Предварительная оценка будет в чате.<br>Итоговую цену Роман напишет лично</div>
 </div>
 
 </body>
