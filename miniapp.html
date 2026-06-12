@@ -135,18 +135,21 @@
     flex: 1; height: 4px; border-radius: 3px;
     background: rgba(255,255,255,0.08);
     overflow: hidden; position: relative;
-    transition: background 0.3s;
   }
-  .progress-step.done { background: var(--accent); }
-  .progress-step.active { background: rgba(167,139,250,0.25); }
-  .progress-step.active::after {
+  /* Заливка сегмента: один ::after, состояние управляется классами */
+  .progress-step::after {
     content: ''; position: absolute; inset: 0;
     background: var(--grad-accent);
     border-radius: 3px;
     transform-origin: left;
-    animation: progFill 0.5s var(--ease) forwards;
+    transform: scaleX(0);
+    box-shadow: 0 0 8px rgba(167,139,250,0.45);
   }
+  .progress-step.lit::after { transform: scaleX(1); }          /* светится, без анимации */
+  .progress-step.fill-in::after { animation: progFill 0.5s var(--ease) forwards; }   /* вход: слева направо */
+  .progress-step.fill-out::after { animation: progEmpty 0.4s var(--ease) forwards; } /* выход назад: гаснет справа налево */
   @keyframes progFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes progEmpty { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
   /* ── Экраны и заголовки ── */
   .screen { display: none; padding: 0 20px; }
@@ -790,7 +793,7 @@
 <div class="rarity-line" aria-hidden="true"></div>
 
 <div class="progress">
-  <div class="progress-step active" id="p1"></div>
+  <div class="progress-step fill-in" id="p1"></div>
   <div class="progress-step" id="p2"></div>
   <div class="progress-step" id="p3"></div>
 </div>
@@ -1258,14 +1261,40 @@
   let ccSouvenir       = false;
 
   // ── Навигация ────────────────────────────────────────────────────────────────
+  let progStep = 1; // текущий шаг прогресса
+
+  function updateProgress(n) {
+    const prev = progStep;
+    document.querySelectorAll('.progress-step').forEach((p, i) => {
+      const idx = i + 1;
+      p.classList.remove('fill-in', 'fill-out');
+      if (idx < n) {
+        p.classList.add('lit');                 // пройденные: светятся статично
+      } else if (idx === n) {
+        if (n > prev) {                          // вперёд: новый сегмент заливается слева направо
+          p.classList.remove('lit');
+          void p.offsetWidth;
+          p.classList.add('fill-in');
+        } else {
+          p.classList.add('lit');                // назад/на месте: уже горит, без анимации
+        }
+      } else {
+        if (idx <= prev) {                       // покидаемые при движении назад: гаснут справа налево
+          p.classList.remove('lit');
+          void p.offsetWidth;
+          p.classList.add('fill-out');
+        } else {
+          p.classList.remove('lit');
+        }
+      }
+    });
+    progStep = n;
+  }
+
   function goTo(n) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('s' + n).classList.add('active');
-    document.querySelectorAll('.progress-step').forEach((p, i) => {
-      p.classList.remove('active', 'done');
-      if (i + 1 < n) p.classList.add('done');
-      if (i + 1 === n) p.classList.add('active');
-    });
+    updateProgress(n);
     if (n === 3) {
       renderSummary();
       // Перезапуск блика кнопки отправки
