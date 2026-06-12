@@ -64,6 +64,7 @@
     min-height: 100vh;
     padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* ── Фон: аврора + зерно ── */
@@ -159,7 +160,7 @@
   .step-eyebrow b { color: var(--accent2); font-weight: 600; }
   .step-title {
     font-family: var(--font-display);
-    font-size: 20px; font-weight: 600;
+    font-size: 22px; font-weight: 600;
     color: #fff; letter-spacing: 0.01em; line-height: 1.25;
     margin-bottom: 6px;
   }
@@ -462,7 +463,7 @@
     box-shadow: var(--shadow-btn);
     transition: transform 0.15s var(--ease);
   }
-  .confirm-ok:active { transform: scale(0.97); }
+  .confirm-ok:active { transform: scale(0.97); opacity: 0.85; }
   .confirm-cancel {
     background: var(--surface2); border: 1px solid var(--line);
     border-radius: 13px; padding: 13px;
@@ -639,7 +640,7 @@
     cursor: pointer; transition: transform 0.2s var(--ease);
     box-shadow: var(--shadow-btn);
   }
-  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:active { transform: scale(0.98); opacity: 0.85; }
   .submit-note { font-size: 12px; color: var(--t3); text-align: center; margin-top: 12px; line-height: 1.4; }
 
   /* ── Навигация ── */
@@ -662,7 +663,7 @@
     box-shadow: var(--shadow-btn);
   }
   .nav-next:disabled { opacity: 0.35; box-shadow: none; cursor: default; }
-  .nav-next:active:not(:disabled) { transform: scale(0.98); }
+  .nav-next:active:not(:disabled) { transform: scale(0.98); opacity: 0.85; }
 
   /* ── Спиннер ── */
   .spinner {
@@ -682,10 +683,10 @@
   /* ── Блик кнопки отправки ── */
   @keyframes btnShineOnce { 0% { left: -60%; } 100% { left: 130%; } }
   @keyframes btnBreathe {
-    0%, 100% { box-shadow: 0 6px 22px rgba(139,127,222,0.35), inset 0 1px 0 rgba(255,255,255,0.22); }
-    50% { box-shadow: 0 6px 30px rgba(139,127,222,0.55), inset 0 1px 0 rgba(255,255,255,0.22); }
+    0%, 100% { box-shadow: 0 6px 22px rgba(139,127,222,0.33), inset 0 1px 0 rgba(255,255,255,0.22); }
+    50% { box-shadow: 0 6px 28px rgba(139,127,222,0.46), inset 0 1px 0 rgba(255,255,255,0.22); }
   }
-  .shine-btn { position: relative; overflow: hidden; animation: btnBreathe 3.5s ease-in-out infinite; }
+  .shine-btn { position: relative; overflow: hidden; animation: btnBreathe 4.5s ease-in-out infinite; }
   .shine-btn::after {
     content: ''; position: absolute; top: 0; left: -60%;
     width: 45%; height: 100%;
@@ -730,7 +731,7 @@
   @keyframes drawCheck  { to { stroke-dashoffset: 0; } }
   .success-title {
     font-family: var(--font-display);
-    font-size: 19px; font-weight: 600; color: #fff;
+    font-size: 21px; font-weight: 600; color: #fff;
     opacity: 0; animation: fadeInUp 0.4s ease 0.7s forwards;
   }
   .success-sub {
