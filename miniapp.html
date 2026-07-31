@@ -218,7 +218,7 @@
     display: flex; align-items: baseline; gap: 8px;
     font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
     text-transform: uppercase; color: var(--t3);
-    padding-bottom: 9px; margin-bottom: 2px;
+    padding-bottom: 14px; margin-bottom: 0;
     border-bottom: 1px solid var(--line2);
   }
   .own-card-h i { display: none; }   /* рубрике иконка не нужна, шум */
@@ -229,6 +229,11 @@
     display: none;
   }
   .own-count.on { display: inline; }
+
+  /* Строки-поля отступают своим padding, сетки — нет */
+  .admin-app .weapon-grid,
+  .admin-app .quality-list,
+  .admin-app .agent-list { margin-top: 13px; }
 
   /* ── Поля: строки реестра, разделённые волосяной линией ── */
   .own-row {
@@ -2698,7 +2703,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 13;
+  const APP_VERSION = 14;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
