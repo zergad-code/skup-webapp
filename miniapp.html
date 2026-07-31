@@ -266,12 +266,7 @@
   }
 
   /* ── Каналы: одна строка с прокруткой вместо сетки ── */
-  .chan-grid {
-    display: flex; gap: 7px;
-    overflow-x: auto; padding-bottom: 4px;
-    scrollbar-width: none; -ms-overflow-style: none;
-  }
-  .chan-grid::-webkit-scrollbar { display: none; }
+  .chan-grid { display: flex; flex-wrap: wrap; gap: 7px; }
   .chan-btn {
     flex: 0 0 auto;
     background: none; border: 1px solid var(--line2);
@@ -332,7 +327,7 @@
   .own-add:active { opacity: 0.6; }
   .own-add.active { color: var(--t2); }
 
-  .own-picker-actions { margin: 20px 0 0; }
+  .own-picker-actions { margin: 22px 0 26px; }
 
   /* ── Деньги: суммы — главное на экране ── */
   .own-money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 4px; }
@@ -432,7 +427,7 @@
   .admin-app .tb-btn + .tb-btn { border-left: 1px solid var(--line2); }
   .admin-app .tb-btn.selected { background: var(--accent2); color: #052e2b; font-weight: 600; }
   .admin-app .tb-btn:active { transform: none; }
-  .admin-app .days-grid { grid-template-columns: repeat(8, 1fr); gap: 5px; margin-top: 10px; }
+  .admin-app .days-grid { grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
   .admin-app .day-btn {
     background: none; border: 1px solid var(--line);
     border-radius: 8px; padding: 9px 0; font-size: 12px;
@@ -2703,7 +2698,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 12;
+  const APP_VERSION = 13;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -2830,8 +2825,9 @@
     document.getElementById('adChannels').innerHTML =
       CHANNELS.map(c => `<div class="chan-btn" onclick="adSelectChannel(this,'${c}')">${c}</div>`).join('');
 
+    // Максимум 7 дней: дольше трейд-бан у нас не встречается
     document.getElementById('adDaysGrid').innerHTML =
-      Array.from({ length: 8 }, (_, i) => `<div class="day-btn" onclick="adSelectDay(this)">${i + 1}</div>`).join('');
+      Array.from({ length: 7 }, (_, i) => `<div class="day-btn" onclick="adSelectDay(this)">${i + 1}</div>`).join('');
 
     adRenderItems();
   }
