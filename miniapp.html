@@ -404,10 +404,28 @@
   .own-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .own-stepper input[type=number] { -moz-appearance: textfield; }
 
-  .own-usd {
-    font-family: var(--font-display); font-size: 17px; font-weight: 600;
-    color: var(--accent-light); font-variant-numeric: tabular-nums;
+  /* Итоговая сумма правится руками: пересчёт по курсу — подсказка,
+     а не приговор */
+  .own-usd-box {
+    display: flex; align-items: baseline; gap: 2px; flex-shrink: 0;
+    border-bottom: 1px solid var(--line2);
+    transition: border-color 0.2s;
   }
+  .own-usd-box:focus-within { border-bottom-color: var(--accent2); }
+  .own-usd-box span { font-size: 14px; color: var(--t3); font-weight: 500; }
+  .own-usd-box input {
+    width: 104px; background: none; border: none; outline: none;
+    padding: 0 0 5px; text-align: right;
+    color: var(--accent-light);
+    font-family: var(--font-display); font-size: 17px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .own-usd-box input::placeholder { color: var(--t3); font-weight: 400; }
+  .own-usd-box input::-webkit-outer-spin-button,
+  .own-usd-box input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .own-usd-box input[type=number] { -moz-appearance: textfield; }
+  /* Ручной ввод помечаем цветом: видно, что число не пересчитанное */
+  .own-usd-box.manual input { color: var(--gold); }
 
   .own-ver {
     text-align: center; margin-top: 9px;
@@ -1563,8 +1581,12 @@
       </div>
     </div>
     <div class="own-row">
-      <label>В таблицу уйдёт</label>
-      <b class="own-usd" id="adMarketUsd">—</b>
+      <label for="adMarketUsd">В таблицу уйдёт</label>
+      <div class="own-usd-box">
+        <span>$</span>
+        <input id="adMarketUsd" type="number" inputmode="decimal" step="0.01" min="0"
+               placeholder="—" oninput="adUsdEdited()">
+      </div>
     </div>
 
     <div class="own-spread" id="adSpreadBox"><span id="adSpreadLabel">Референс не заполнен</span><b id="adSpreadVal">—</b></div>
@@ -1670,6 +1692,17 @@
     { label: 'Specialist',    full: '★ Specialist Gloves',  img: 'Specialist Gloves.png' },
     { label: 'Sport Gloves',  full: '★ Sport Gloves',       img: 'Sport Gloves.png' },
   ];
+
+  // Иконки по каноническому имени, собранные из тех же списков, что и пикер.
+  // Отдельный словарь ниже вести руками не выходит — он уже отстал на шесть ножей.
+  const ICON_BY_FULL = (() => {
+    const norm = s => String(s).toLowerCase()
+      .replace('★', '').replace('stattrak™', '').replace('souvenir', '')
+      .replace(/\s+/g, ' ').trim();
+    const map = {};
+    [...GUNS, ...KNIVES, ...GLOVES].forEach(x => { map[norm(x.full)] = x.img; });
+    return map;
+  })();
 
   const AGENT_GROUPS = [
     { id: 'FBI',  title: 'FBI',                     team: 'CT-side', icon: 'FBI.png',
@@ -2157,6 +2190,10 @@
         return ic(map[key]);
       }
     }
+    // Словарь выше набран руками и отстаёт от списков пикера: в нём не было
+    // шести ножей. Здесь ищем по тем же данным, из которых строится пикер, —
+    // так пропусков не появится при добавлении новых предметов.
+    if (ICON_BY_FULL[weaponPart]) return ic(ICON_BY_FULL[weaponPart]);
     for (const key in map) {
       if (weaponPart.includes(key)) {
         return ic(map[key]);
@@ -2816,7 +2853,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 17;
+  const APP_VERSION = 18;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3280,6 +3317,7 @@
 
       document.getElementById('adMarketRub').value = data.total_rub || '';
       if (data.usd_rate) document.getElementById('adRate').value = data.usd_rate;
+      adUsdManual = false;   // пришли свежие цены — считаем заново
       adRecalc();
 
       const missed = data.items.length - data.found;
@@ -3306,19 +3344,38 @@
     adRecalc();
   }
 
-  // Референс в таблицу уходит в долларах, а маркет отдаёт рубли:
-  // пересчёт по курсу, который правится руками прямо в форме.
-  function adMarketUsd() {
+  // Референс в таблицу уходит в долларах, а маркет отдаёт рубли.
+  // Пересчёт по курсу — подсказка: итог можно перебить руками, и тогда
+  // рубли с курсом его больше не трогают.
+  let adUsdManual = false;
+
+  function adComputeUsd() {
     const rub = parseFloat(document.getElementById('adMarketRub').value);
     const rate = parseFloat(document.getElementById('adRate').value);
     if (isNaN(rub) || isNaN(rate) || rate <= 0) return null;
     return Math.round(rub / rate * 100) / 100;
   }
 
+  // То, что реально уйдёт в таблицу
+  function adMarketUsd() {
+    const v = parseFloat(document.getElementById('adMarketUsd').value);
+    return isNaN(v) ? null : v;
+  }
+
+  function adUsdEdited() {
+    const el = document.getElementById('adMarketUsd');
+    adUsdManual = el.value.trim() !== '';
+    el.parentElement.classList.toggle('manual', adUsdManual);
+    adSpread();
+  }
+
   function adRecalc() {
-    const usd = adMarketUsd();
-    document.getElementById('adMarketUsd').textContent =
-      usd === null ? '—' : '$' + usd.toFixed(2);
+    if (!adUsdManual) {
+      const usd = adComputeUsd();
+      const el = document.getElementById('adMarketUsd');
+      el.value = usd === null ? '' : usd.toFixed(2);
+      el.parentElement.classList.remove('manual');
+    }
     adSpread();
   }
 
@@ -3448,6 +3505,9 @@
     document.getElementById('adParty').value = '';
     document.getElementById('adBuy').value = '';
     document.getElementById('adMarketRub').value = '';
+    adUsdManual = false;
+    document.getElementById('adMarketUsd').value = '';
+    document.getElementById('adMarketUsd').parentElement.classList.remove('manual');
     document.getElementById('adPrices').classList.remove('on');
     document.getElementById('adPrices').innerHTML = '';
     document.getElementById('adLinkBox').style.display = 'none';
