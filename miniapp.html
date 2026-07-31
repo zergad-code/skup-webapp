@@ -145,39 +145,253 @@
   .admin-entry i { font-size: 17px; }
   .admin-entry:active { transform: scale(0.98); background: rgba(232,184,75,0.2); }
 
-  /* ── Экран владельца ── */
-  .admin-app { display: none; padding: 0 20px; }
+  /* ── Экран владельца ──────────────────────────────────────────────────────
+     Режим владельца перекрашивается целиком через переопределение переменных:
+     все переиспользованные компоненты подхватывают палитру сами, дублировать
+     их стили не нужно. Бирюза вместо фиолета — чтобы режим был виден сразу,
+     без чтения заголовка. */
+  body.owner-mode {
+    --accent: #2dd4bf;
+    --accent2: #5eead4;
+    --accent-light: #99f6e4;
+    --accent-soft: rgba(45,212,191,0.13);
+    --line-accent: rgba(94,234,212,0.30);
+    --grad-accent: linear-gradient(135deg, #14b8a6, #22d3ee);
+    --shadow-btn: 0 6px 22px rgba(45,212,191,0.30), inset 0 1px 0 rgba(255,255,255,0.18);
+    --card: #14202b;
+    --card2: #182a36;
+    --bg0: #0a1219;
+    --bg1: #101c25;
+  }
+  body.owner-mode .aurora {
+    background:
+      radial-gradient(620px 420px at 12% -6%, rgba(45,212,191,0.16), transparent 62%),
+      radial-gradient(720px 520px at 108% 24%, rgba(34,211,238,0.09), transparent 60%),
+      radial-gradient(520px 400px at 50% 112%, rgba(232,184,75,0.05), transparent 62%);
+  }
+  body.owner-mode .rarity-line,
+  body.owner-mode .header-contact-btn { display: none; }
+
+  .admin-app { display: none; padding: 0 16px; }
   .admin-app.visible { display: block; animation: screenIn 0.34s var(--ease); }
-  .chan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
+  /* Шапка режима */
+  .own-head {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 2px 4px 16px;
+  }
+  .own-kicker {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent2); opacity: 0.85;
+  }
+  .own-title {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 600; color: #fff;
+    letter-spacing: 0.01em; margin-top: 5px;
+  }
+  .own-count {
+    margin-left: auto; flex-shrink: 0;
+    min-width: 30px; height: 30px; padding: 0 10px;
+    display: none; align-items: center; justify-content: center;
+    border-radius: 10px; background: var(--accent-soft);
+    border: 1px solid var(--line-accent);
+    color: var(--accent-light); font-size: 14px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .own-count.on { display: inline-flex; animation: badgePop 0.35s var(--ease); }
+
+  /* Карточка-секция: плотнее клиентской, тут вводят, а не любуются */
+  .own-card {
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line);
+    border-radius: var(--r-m);
+    padding: 13px 14px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 8px 24px rgba(4,10,16,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .own-card-h {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--t2);
+    padding-bottom: 11px; margin-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .own-card-h i { font-size: 14px; color: var(--accent2); }
+
+  /* Строка «подпись слева — поле справа»: экономит высоту против стопки */
+  .own-row { display: flex; align-items: center; gap: 12px; }
+  .own-row + .own-row { margin-top: 10px; }
+  .own-row > label { font-size: 13px; color: var(--t2); flex: 1; min-width: 0; }
+  .own-input {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 12px;
+    color: var(--text); font-family: var(--font-ui);
+    font-size: 16px; outline: none; min-width: 0;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .own-input:focus {
+    background: rgba(255,255,255,0.06);
+    border-color: var(--line-accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .own-input::placeholder { color: var(--t3); }
+  .own-row .own-input { width: 168px; flex-shrink: 0; text-align: right; }
+  .own-row input[type="date"] { text-align: left; }
+
+  .own-sub {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--t3);
+    margin: 15px 0 9px;
+  }
+
+  /* Каналы — компактные чипы по три в ряд */
+  .chan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .chan-btn {
     background: var(--surface); border: 1px solid transparent;
-    border-radius: var(--r-s); padding: 11px 8px;
+    border-radius: 9px; padding: 9px 4px;
     color: var(--t2); font-family: var(--font-ui);
-    font-size: 12.5px; font-weight: 500; cursor: pointer;
-    transition: background 0.18s, border-color 0.18s;
+    font-size: 11.5px; font-weight: 500; cursor: pointer;
+    text-align: center; white-space: nowrap;
+    transition: background 0.18s, border-color 0.18s, color 0.18s;
   }
   .chan-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); color: var(--accent-light); }
-  .chan-btn:active { transform: scale(0.97); }
+  .chan-btn:active { transform: scale(0.96); }
 
-  .money-row { display: flex; align-items: center; gap: 10px; }
-  .money-row + .money-row { margin-top: 9px; }
-  .money-row label { font-size: 13px; color: var(--t2); flex: 1; }
-  .money-row .skin-input { width: 118px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; }
-
-  /* Полное имя не обрезаем: перед записью его надо видеть целиком, иначе
-     опечатку в скине заметишь уже в таблице */
-  .admin-app .sc-name {
-    white-space: normal; overflow: visible; text-overflow: clip;
-    line-height: 1.35; overflow-wrap: anywhere;
+  /* Предметы */
+  .own-items { display: flex; flex-direction: column; gap: 8px; }
+  .own-item {
+    display: flex; align-items: flex-start; gap: 11px;
+    padding: 11px 12px; border-radius: var(--r-s);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    position: relative;
+    animation: slideUp 0.3s var(--ease) backwards;
   }
+  .own-item::before {
+    content: ''; position: absolute; left: 0; top: 11px; bottom: 11px;
+    width: 2px; border-radius: 0 2px 2px 0;
+    background: var(--grad-accent);
+  }
+  .own-item.gold::before { background: var(--grad-gold); box-shadow: 0 0 8px rgba(232,184,75,0.35); }
+  .own-item-ic {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .own-item-ic img { width: 27px; height: 27px; object-fit: contain; }
+  .own-item-ic i { font-size: 16px; color: var(--accent-light); }
+  .own-item.gold .own-item-ic { border-color: rgba(232,184,75,0.28); }
+  /* Полное имя не обрезаем: опечатку надо заметить до записи, а не в таблице */
+  .own-item-name {
+    flex: 1; min-width: 0;
+    font-size: 12.5px; font-weight: 500; color: #fff;
+    line-height: 1.4; overflow-wrap: anywhere; padding-top: 2px;
+  }
+  .own-item-del {
+    background: none; border: none; cursor: pointer; flex-shrink: 0;
+    width: 26px; height: 26px; border-radius: 8px;
+    color: var(--t3);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s var(--ease), background 0.2s, color 0.2s;
+  }
+  .own-item-del i { font-size: 14px; }
+  .own-item-del:active { transform: scale(0.85) rotate(90deg); background: rgba(239,106,150,0.14); color: var(--danger); }
 
-  .ad-hint { font-size: 11.5px; color: var(--t3); margin-top: 8px; line-height: 1.45; }
+  .own-empty {
+    border: 1.5px dashed var(--line2);
+    border-radius: var(--r-s);
+    padding: 20px 14px; text-align: center;
+  }
+  .own-empty i { font-size: 22px; color: var(--t3); }
+  .own-empty div { font-size: 12px; color: var(--t3); margin-top: 7px; line-height: 1.45; }
+
+  .own-add {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 11px; padding: 12px;
+    background: var(--accent-soft);
+    border: 1px dashed var(--line-accent);
+    border-radius: var(--r-s);
+    color: var(--accent-light); font-family: var(--font-ui);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.18s, transform 0.14s var(--ease);
+  }
+  .own-add i { font-size: 16px; }
+  .own-add:active { transform: scale(0.98); }
+  .own-add.active { background: rgba(45,212,191,0.2); }
+
+  /* Деньги — два поля в ряд, суммы крупнее прочего */
+  .own-money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .own-money-field label {
+    display: block; font-size: 11px; color: var(--t2);
+    margin-bottom: 6px; letter-spacing: 0.02em;
+  }
+  .own-money-input {
+    display: flex; align-items: center; gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px; padding: 0 10px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .own-money-input:focus-within {
+    border-color: var(--line-accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .own-money-input span { font-size: 15px; color: var(--t3); font-weight: 600; }
+  .own-money-input input {
+    width: 100%; min-width: 0; background: none; border: none; outline: none;
+    padding: 11px 0; color: var(--text);
+    font-family: var(--font-ui); font-size: 17px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .own-money-input input::-webkit-outer-spin-button,
+  .own-money-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .own-money-input input[type=number] { -moz-appearance: textfield; }
+
+  /* Спред считается на лету и никуда не пишется — колонок под него нет */
+  .own-spread {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 12px; padding-top: 11px;
+    border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--t3);
+  }
+  .own-spread b {
+    font-size: 14px; font-weight: 700; color: var(--t2);
+    font-variant-numeric: tabular-nums;
+  }
+  .own-spread.plus b  { color: var(--success); }
+  .own-spread.minus b { color: var(--danger); }
+
+  /* Кнопка записи всегда под рукой: форма длиннее экрана */
+  .own-bar {
+    position: sticky; bottom: 0; z-index: 5;
+    margin: 14px -16px 0; padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(10,18,25,0), var(--bg0) 32%);
+  }
+  .own-submit {
+    width: 100%; padding: 16px;
+    background: var(--grad-accent); border: none;
+    border-radius: 14px;
+    color: #06231f; font-family: var(--font-ui);
+    font-size: 15px; font-weight: 700; letter-spacing: 0.01em;
+    cursor: pointer; box-shadow: var(--shadow-btn);
+    transition: transform 0.18s var(--ease), opacity 0.2s;
+  }
+  .own-submit:disabled { opacity: 0.55; }
+  .own-submit:active:not(:disabled) { transform: scale(0.985); opacity: 0.9; }
+
   .ad-result {
     display: none; margin-top: 12px; padding: 12px 14px;
     border-radius: var(--r-s); font-size: 13px; line-height: 1.45;
   }
   .ad-result.ok   { display: block; background: rgba(95,214,171,0.12); color: var(--success); }
   .ad-result.err  { display: block; background: rgba(239,106,150,0.12); color: var(--danger); }
+
+  @media (max-width: 359px) {
+    .chan-grid { grid-template-columns: repeat(2, 1fr); }
+    .own-row .own-input { width: 140px; }
+  }
 
   /* ── Прогресс ── */
   .progress { display: flex; gap: 6px; padding: 0 20px; margin-bottom: 22px; }
@@ -1085,51 +1299,64 @@
 <!-- Рисуется только после того, как бэкенд подтвердил подпись.
      Параметр screen=table сам по себе прав не даёт. -->
 <div class="admin-app" id="adminApp">
-  <div class="step-eyebrow">Владелец · лист «Сделки»</div>
-  <div class="step-title">Новая закупка<span class="skin-badge" id="adBadge" style="display:none;">0</span></div>
-  <div class="step-sub">Строка допишется в конец, остальные колонки заполнишь сам</div>
-
-  <div class="card">
-    <div class="card-title">Дата оплаты</div>
-    <input class="skin-input" id="adDate" type="date">
+  <div class="own-head">
+    <div>
+      <div class="own-kicker">Лист «Сделки»</div>
+      <div class="own-title">Новая закупка</div>
+    </div>
+    <span class="own-count" id="adBadge">0</span>
   </div>
 
-  <div class="card">
-    <div class="card-title">Предметы</div>
-    <div class="skins-list" id="adItems"></div>
-    <button class="add-skin-btn" id="adPickerBtn" onclick="adTogglePicker()" style="width:100%; margin-top:12px;">
+  <section class="own-card">
+    <div class="own-card-h"><i class="ti ti-file-invoice"></i>Сделка</div>
+    <div class="own-row">
+      <label for="adDate">Дата оплаты</label>
+      <input class="own-input" id="adDate" type="date">
+    </div>
+    <div class="own-row">
+      <label for="adParty">Контрагент</label>
+      <input class="own-input" id="adParty" type="text" placeholder="@username" autocapitalize="none" autocomplete="off">
+    </div>
+    <div class="own-sub">Канал</div>
+    <div class="chan-grid" id="adChannels"></div>
+  </section>
+
+  <section class="own-card">
+    <div class="own-card-h"><i class="ti ti-packages"></i>Предметы</div>
+    <div class="own-items" id="adItems"></div>
+    <button class="own-add" id="adPickerBtn" onclick="adTogglePicker()">
       <i class="ti ti-plus"></i>Добавить предмет
     </button>
-  </div>
+  </section>
 
   <div id="adPicker" style="display:none;">
-    <div class="card">
-      <div class="card-title">Оружие</div>
+    <section class="own-card">
+      <div class="own-card-h"><i class="ti ti-crosshair"></i>Оружие</div>
       <div class="weapon-grid" id="adWeaponGrid"></div>
-    </div>
+    </section>
 
-    <div class="card" id="adKnifeCard" style="display:none;">
-      <div class="card-title">Тип ножа</div>
+    <section class="own-card" id="adKnifeCard" style="display:none;">
+      <div class="own-card-h"><i class="ti ti-blade"></i>Тип ножа</div>
       <div class="weapon-grid" id="adKnifeGrid"></div>
-    </div>
+    </section>
 
-    <div class="card" id="adGloveCard" style="display:none;">
-      <div class="card-title">Тип перчаток</div>
+    <section class="own-card" id="adGloveCard" style="display:none;">
+      <div class="own-card-h"><i class="ti ti-hand-stop"></i>Тип перчаток</div>
       <div class="weapon-grid" id="adGloveGrid"></div>
-    </div>
+    </section>
 
-    <div class="card" id="adAgentCard" style="display:none;">
-      <div class="card-title">Фракция агента</div>
+    <section class="own-card" id="adAgentCard" style="display:none;">
+      <div class="own-card-h"><i class="ti ti-user-shield"></i>Фракция агента</div>
       <div class="agent-list" id="adAgentList"></div>
-    </div>
+    </section>
 
-    <div class="card" id="adNameCard" style="display:none;">
-      <div class="card-title" id="adNameTitle">Название скина</div>
-      <input class="skin-input" id="adNameInput" type="text" placeholder="Например: Redline, Asiimov...">
-    </div>
+    <section class="own-card" id="adNameCard" style="display:none;">
+      <div class="own-card-h"><i class="ti ti-tag"></i><span id="adNameTitle">Название скина</span></div>
+      <input class="own-input" id="adNameInput" type="text" placeholder="Например: Redline, Asiimov..." style="width:100%;">
+    </section>
 
-    <div class="card" id="adQualityCard" style="display:none;">
-      <div class="card-title">Качество</div>
+    <section class="own-card" id="adQualityCard" style="display:none;">
+      <div class="own-card-h"><i class="ti ti-gauge"></i>Качество</div>
       <div class="quality-list" id="adQualityList"></div>
       <div class="stattrak-row" id="adStRow" style="margin-top:12px;">
         <span class="stattrak-label">StatTrak™</span>
@@ -1145,7 +1372,7 @@
           <button class="st-btn" id="adSvYes" onclick="adSelectSV(true)">Да</button>
         </div>
       </div>
-    </div>
+    </section>
 
     <div class="confirm-actions">
       <button class="confirm-ok" onclick="adAddItem()">Добавить в сделку</button>
@@ -1153,40 +1380,39 @@
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">Контрагент</div>
-    <input class="skin-input" id="adParty" type="text" placeholder="@username" autocapitalize="none" autocomplete="off">
-  </div>
-
-  <div class="card">
-    <div class="card-title">Канал</div>
-    <div class="chan-grid" id="adChannels"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Трейд-бан</div>
+  <section class="own-card">
+    <div class="own-card-h"><i class="ti ti-lock-clock"></i>Трейд-бан</div>
     <div class="tb-row">
       <div class="tb-btn" id="adTbNo" onclick="adSelectTB(false)"><i class="ti ti-x ti-inline"></i>Нет</div>
       <div class="tb-btn" id="adTbYes" onclick="adSelectTB(true)"><i class="ti ti-clock ti-inline"></i>Есть</div>
     </div>
     <div class="days-grid" id="adDaysGrid"></div>
-  </div>
+  </section>
 
-  <div class="card">
-    <div class="card-title">Деньги</div>
-    <div class="money-row">
-      <label for="adBuy">Buy $ — сколько отдал</label>
-      <input class="skin-input" id="adBuy" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+  <section class="own-card">
+    <div class="own-card-h"><i class="ti ti-cash"></i>Деньги</div>
+    <div class="own-money-grid">
+      <div class="own-money-field">
+        <label for="adBuy">Отдал</label>
+        <div class="own-money-input"><span>$</span>
+          <input id="adBuy" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0" oninput="adSpread()">
+        </div>
+      </div>
+      <div class="own-money-field">
+        <label for="adMarket">Референс рынка</label>
+        <div class="own-money-input"><span>$</span>
+          <input id="adMarket" type="number" inputmode="decimal" step="0.01" min="0" placeholder="—" oninput="adSpread()">
+        </div>
+      </div>
     </div>
-    <div class="money-row">
-      <label for="adMarket">Референс рынка $</label>
-      <input class="skin-input" id="adMarket" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
-    </div>
-    <div class="ad-hint">Референс можно оставить пустым — тогда колонка останется пустой, а не нулевой.</div>
-  </div>
+    <div class="own-spread" id="adSpreadBox"><span id="adSpreadLabel">Референс не заполнен</span><b id="adSpreadVal">—</b></div>
+  </section>
 
-  <button class="submit-btn" id="adSubmit" onclick="adSubmit()">Записать в таблицу</button>
   <div class="ad-result" id="adResult"></div>
+
+  <div class="own-bar">
+    <button class="own-submit" id="adSubmit" onclick="adSubmit()">Записать в таблицу</button>
+  </div>
 </div>
 
 </div><!-- /.app -->
@@ -2425,7 +2651,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 8;
+  const APP_VERSION = 9;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -2485,10 +2711,14 @@
   }
 
   function showAdminApp() {
+    // owner-mode переопределяет палитру: переиспользованные компоненты
+    // перекрашиваются сами, дублировать их стили не нужно
+    document.body.classList.add('owner-mode');
     document.querySelector('.progress').style.display = 'none';
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('adminBar').classList.remove('visible');
     document.getElementById('adminApp').classList.add('visible');
+    try { tg?.setHeaderColor('#0a1219'); tg?.setBackgroundColor('#0a1219'); } catch (_) {}
     window.scrollTo(0, 0);
     if (!ad.dealId) adInit();
   }
@@ -2719,25 +2949,44 @@
     const badge = document.getElementById('adBadge');
 
     if (!ad.items.length) {
-      list.innerHTML = `<div class="empty-state"><div class="es-icon"><i class="ti ti-packages"></i></div>
-        <div class="es-t">Предметов нет</div>
-        <div class="es-s">В одну строку таблицы уйдут все предметы сделки</div></div>`;
-      badge.style.display = 'none';
+      list.innerHTML = `<div class="own-empty"><i class="ti ti-packages"></i>
+        <div>Все предметы сделки уйдут в одну строку</div></div>`;
+      badge.classList.remove('on');
       return;
     }
 
     list.innerHTML = ad.items.map((hash, i) => {
       const icon = skinIconImg(hash);
       const gold = detectKnife(hash) || detectGlove(hash);
-      return `<div class="skin-card${gold ? ' rar-gold' : ''}">
-        <div class="sc-icon">${icon ? `<img src="${icon}" alt="">` : `<i class="ti ti-cube"></i>`}</div>
-        <div class="sc-info"><div class="sc-name">${hash}</div></div>
-        <button class="sc-remove" onclick="adRemoveItem(${i})" title="Убрать"><i class="ti ti-x"></i></button>
+      return `<div class="own-item${gold ? ' gold' : ''}" style="animation-delay:${i * 0.04}s">
+        <div class="own-item-ic">${icon ? `<img src="${icon}" alt="">` : `<i class="ti ti-cube"></i>`}</div>
+        <div class="own-item-name">${hash}</div>
+        <button class="own-item-del" onclick="adRemoveItem(${i})" title="Убрать"><i class="ti ti-x"></i></button>
       </div>`;
     }).join('');
 
     badge.textContent = ad.items.length;
-    badge.style.display = 'inline-flex';
+    badge.classList.add('on');
+  }
+
+  // Спред считается только для глаз: колонки под него в таблице нет
+  function adSpread() {
+    const buy = parseFloat(document.getElementById('adBuy').value);
+    const ref = parseFloat(document.getElementById('adMarket').value);
+    const box = document.getElementById('adSpreadBox');
+    const label = document.getElementById('adSpreadLabel');
+    const val = document.getElementById('adSpreadVal');
+
+    box.classList.remove('plus', 'minus');
+    if (isNaN(buy) || isNaN(ref) || !buy) {
+      label.textContent = isNaN(ref) ? 'Референс не заполнен' : 'Впиши сумму покупки';
+      val.textContent = '—';
+      return;
+    }
+    const diff = ref - buy;
+    label.textContent = `Разница к референсу · ${Math.round(diff / buy * 100)}%`;
+    val.textContent = (diff >= 0 ? '+$' : '−$') + Math.abs(diff).toFixed(2);
+    box.classList.add(diff >= 0 ? 'plus' : 'minus');
   }
 
   function adSelectChannel(el, name) {
@@ -2854,6 +3103,7 @@
     document.getElementById('adPicker').style.display = 'none';
     document.getElementById('adPickerBtn').classList.remove('active');
     adRenderItems();
+    adSpread();
   }
 
   // ── Инициализация ────────────────────────────────────────────────────────────
