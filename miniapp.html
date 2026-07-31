@@ -6,6 +6,13 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0d0d1c">
 <title>ZEORGJARD — скупка скинов</title>
+<script>
+  // Ставится ДО отрисовки: скрипт в конце body сработал бы уже после того,
+  // как браузер показал клиентский экран. Снимается после ответа сервера.
+  if (new URLSearchParams(location.search).get('screen') === 'table') {
+    document.documentElement.classList.add('owner-boot');
+  }
+</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Onest:wght@400;500;600;700&display=swap');
@@ -174,6 +181,21 @@
   body.owner-mode .rarity-line,
   body.owner-mode .header { display: none; }
 
+  /* Пока идёт проверка подписи, клиентский экран не показываем вовсе:
+     иначе он успевает отрисоваться и через миг подменяется. Права это
+     не ослабляет — интерфейс владельца рисуется только после ответа сервера,
+     а не по параметру в адресе. */
+  .owner-boot .header,
+  .owner-boot .rarity-line,
+  .owner-boot .progress,
+  .owner-boot .screen { display: none !important; }
+  .own-boot { display: none; }
+  .owner-boot .own-boot {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 60vh;
+  }
+  .own-boot .spinner { width: 22px; height: 22px; border-width: 2.5px; margin: 0; }
+
   .admin-app { display: none; padding: 0 16px; }
   .admin-app.visible { display: block; animation: screenIn 0.34s var(--ease); }
   /* Шапки нет — отступ сверху берёт на себя сам экран */
@@ -292,6 +314,9 @@
 
   /* Пусто — значит пусто: заглушка занимала полэкрана и ничего не сообщала */
   .own-items:empty + .own-add { margin-top: 0; }
+
+  /* Кнопки пикера прилегали вплотную к следующей карточке */
+  .own-picker-actions { margin-bottom: 10px; }
 
   .own-add {
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -1281,6 +1306,9 @@
   </div>
 </div>
 
+<!-- Держит паузу, пока бэкенд проверяет подпись -->
+<div class="own-boot" id="ownBoot"><span class="spinner"></span></div>
+
 <!-- ════════ ЭКРАН ВЛАДЕЛЬЦА: НОВАЯ ЗАКУПКА ════════ -->
 <!-- Рисуется только после того, как бэкенд подтвердил подпись.
      Параметр screen=table сам по себе прав не даёт. -->
@@ -1352,7 +1380,7 @@
       </div>
     </section>
 
-    <div class="confirm-actions">
+    <div class="confirm-actions own-picker-actions">
       <button class="confirm-ok" onclick="adAddItem()">Добавить в сделку</button>
       <button class="confirm-cancel" onclick="adTogglePicker()">Отмена</button>
     </div>
@@ -2629,37 +2657,47 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 10;
+  const APP_VERSION = 11;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
   const SCREEN = new URLSearchParams(location.search).get('screen') || '';
 
+
   async function checkAdminSession() {
     // initData пуста, когда Mini App запущен с reply-клавиатуры — Telegram
     // не прикладывает подпись к такому запуску. Админка открывается только
-    // inline-кнопкой из /add, там подпись есть. Запрос шлём в любом случае:
+    // inline-кнопкой, там подпись есть. Запрос шлём в любом случае:
     // причина отказа тогда видна в логе бэкенда.
     const initData = tg?.initData || '';
     const q = new URLSearchParams({
       v: APP_VERSION,
       p: tg?.platform || 'нет',
     });
+
+    let admin = false;
     try {
       const r = await fetch(ADMIN_API_URL + '/api/admin/session?' + q, {
         headers: { 'X-Telegram-Init-Data': initData },
       });
-      if (!r.ok) return;    // 403 — обычный клиентский вид, молча
-      const data = await r.json();
-      if (data.is_admin !== true) return;
-
-      IS_ADMIN = true;
-      // screen=table — открываем интерфейс владельца вместо клиентского флоу.
-      // Иначе показываем только кнопку перехода.
-      if (SCREEN === 'table') showAdminApp();
-      else document.getElementById('adminBar').classList.add('visible');
+      if (r.ok) admin = (await r.json()).is_admin === true;
     } catch (_) {
       // сеть недоступна — остаёмся клиентом, ничего не ломаем
+    }
+
+    if (!admin) {
+      // Отказ или обрыв: возвращаем обычный клиентский вид
+      document.documentElement.classList.remove('owner-boot');
+      return;
+    }
+
+    IS_ADMIN = true;
+    // screen=table — интерфейс владельца вместо клиентского флоу.
+    // Иначе показываем только кнопку перехода.
+    if (SCREEN === 'table') showAdminApp();
+    else {
+      document.documentElement.classList.remove('owner-boot');
+      document.getElementById('adminBar').classList.add('visible');
     }
   }
 
@@ -2691,6 +2729,7 @@
   function showAdminApp() {
     // owner-mode переопределяет палитру: переиспользованные компоненты
     // перекрашиваются сами, дублировать их стили не нужно
+    document.documentElement.classList.remove('owner-boot');
     document.body.classList.add('owner-mode');
     document.querySelector('.progress').style.display = 'none';
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
