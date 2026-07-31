@@ -2283,13 +2283,20 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 3;
+  const APP_VERSION = 4;
 
   async function checkAdminSession() {
     // Запрос уходит всегда, даже с пустой initData. Молчаливый ранний выход
     // в логах неотличим от старого закэшированного HTML.
+    // platform различает настоящий контейнер Mini App (ios/android/tdesktop)
+    // и обычный браузер, где initData пуста по определению.
+    const q = new URLSearchParams({
+      v: APP_VERSION,
+      p: tg?.platform || 'нет',
+      tgv: tg?.version || 'нет',
+    });
     try {
-      const r = await fetch(ADMIN_API_URL + '/api/admin/session?v=' + APP_VERSION, {
+      const r = await fetch(ADMIN_API_URL + '/api/admin/session?' + q, {
         headers: { 'X-Telegram-Init-Data': tg?.initData || '' },
       });
       if (!r.ok) return;    // 403 — обычный клиентский вид, молча
