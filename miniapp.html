@@ -334,6 +334,76 @@
 
   .own-picker-actions { margin: 22px 0 26px; }
 
+  /* Два способа добавить предмет: пикером или ссылкой со Steam */
+  .own-add-row { display: flex; gap: 22px; }
+  .own-add-row .own-add { width: auto; }
+  .own-link { display: flex; gap: 10px; align-items: center; padding: 4px 0 12px; }
+  .own-link .own-input { flex: 1; text-align: left; border-bottom: 1px solid var(--line); padding: 9px 0; }
+  .own-link button {
+    flex-shrink: 0; background: none; border: 1px solid var(--accent2);
+    border-radius: 9px; padding: 9px 14px;
+    color: var(--accent2); font-family: var(--font-ui);
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+  }
+  .own-link button:active { opacity: 0.6; }
+
+  /* Подтягивание цены */
+  .own-fetch {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 18px; padding: 12px;
+    background: none; border: 1px solid var(--line2);
+    border-radius: 10px;
+    color: var(--accent2); font-family: var(--font-ui);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: border-color 0.18s, opacity 0.18s;
+  }
+  .own-fetch i { font-size: 16px; }
+  .own-fetch:disabled { opacity: 0.5; }
+  .own-fetch:active:not(:disabled) { opacity: 0.65; }
+
+  /* Поштучно: видно, если один предмет не нашёлся или стоит странно */
+  .own-prices { display: none; padding-top: 4px; }
+  .own-prices.on { display: block; }
+  .own-price {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+    font-size: 12px; color: var(--t2);
+  }
+  .own-price span { flex: 1; min-width: 0; overflow-wrap: anywhere; line-height: 1.35; }
+  .own-price b {
+    flex-shrink: 0; font-family: var(--font-display); font-size: 12.5px;
+    font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .own-price.miss b { color: var(--danger); font-weight: 500; }
+
+  /* Курс: правится стрелками, потому что нативные у number скрыты */
+  .own-stepper {
+    display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+    border: 1px solid var(--line2); border-radius: 9px; overflow: hidden;
+  }
+  .own-stepper button {
+    background: none; border: none; cursor: pointer;
+    width: 36px; height: 36px; color: var(--accent2);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .own-stepper button:active { background: var(--accent-soft); }
+  .own-stepper button i { font-size: 15px; }
+  .own-stepper input {
+    width: 62px; background: none; border: none; outline: none;
+    text-align: center; color: var(--text);
+    font-family: var(--font-display); font-size: 15px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .own-stepper input::-webkit-outer-spin-button,
+  .own-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .own-stepper input[type=number] { -moz-appearance: textfield; }
+
+  .own-usd {
+    font-family: var(--font-display); font-size: 17px; font-weight: 600;
+    color: var(--accent-light); font-variant-numeric: tabular-nums;
+  }
+
   /* ── Деньги: суммы — главное на экране ── */
   .own-money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 4px; }
   .own-money-field label {
@@ -1376,9 +1446,19 @@
   <section class="own-card">
     <div class="own-card-h"><i class="ti ti-packages"></i>Предметы<span class="own-count" id="adBadge">0</span></div>
     <div class="own-items" id="adItems"></div>
-    <button class="own-add" id="adPickerBtn" onclick="adTogglePicker()">
-      <i class="ti ti-plus"></i>Добавить предмет
-    </button>
+    <div class="own-add-row">
+      <button class="own-add" id="adPickerBtn" onclick="adTogglePicker()">
+        <i class="ti ti-plus"></i>Предмет
+      </button>
+      <button class="own-add" id="adLinkBtn" onclick="adToggleLink()">
+        <i class="ti ti-link"></i>Ссылка
+      </button>
+    </div>
+    <div class="own-link" id="adLinkBox" style="display:none;">
+      <input class="own-input" id="adLinkInput" type="url" inputmode="url"
+             autocapitalize="none" autocomplete="off" placeholder="Ссылка со Steam Market">
+      <button onclick="adAddFromLink()">Добавить</button>
+    </div>
   </section>
 
   <div id="adPicker" style="display:none;">
@@ -1451,12 +1531,31 @@
         </div>
       </div>
       <div class="own-money-field">
-        <label for="adMarket">Референс рынка</label>
-        <div class="own-money-input"><span>$</span>
-          <input id="adMarket" type="number" inputmode="decimal" step="0.01" min="0" placeholder="—" oninput="adSpread()">
+        <label for="adMarketRub">Референс рынка</label>
+        <div class="own-money-input"><span>₽</span>
+          <input id="adMarketRub" type="number" inputmode="decimal" step="1" min="0" placeholder="—" oninput="adRecalc()">
         </div>
       </div>
     </div>
+
+    <button class="own-fetch" id="adFetch" onclick="adFetchPrice()">
+      <i class="ti ti-download"></i>Подтянуть с маркета
+    </button>
+    <div class="own-prices" id="adPrices"></div>
+
+    <div class="own-row">
+      <label for="adRate">Курс ₽ за $</label>
+      <div class="own-stepper">
+        <button onclick="adBumpRate(-0.5)" aria-label="Уменьшить курс"><i class="ti ti-minus"></i></button>
+        <input id="adRate" type="number" inputmode="decimal" step="0.5" min="1" value="80" oninput="adRecalc()">
+        <button onclick="adBumpRate(0.5)" aria-label="Увеличить курс"><i class="ti ti-plus"></i></button>
+      </div>
+    </div>
+    <div class="own-row">
+      <label>В таблицу уйдёт</label>
+      <b class="own-usd" id="adMarketUsd">—</b>
+    </div>
+
     <div class="own-spread" id="adSpreadBox"><span id="adSpreadLabel">Референс не заполнен</span><b id="adSpreadVal">—</b></div>
   </section>
 
@@ -2703,7 +2802,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 14;
+  const APP_VERSION = 15;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -2726,7 +2825,12 @@
       const r = await fetch(ADMIN_API_URL + '/api/admin/session?' + q, {
         headers: { 'X-Telegram-Init-Data': initData },
       });
-      if (r.ok) admin = (await r.json()).is_admin === true;
+      if (r.ok) {
+        const data = await r.json();
+        admin = data.is_admin === true;
+        // Курс берём с бэкенда, чтобы он не жил вторым числом во фронте
+        if (data.usd_rate) USD_RATE_DEFAULT = data.usd_rate;
+      }
     } catch (_) {
       // сеть недоступна — остаёмся клиентом, ничего не ломаем
     }
@@ -2757,6 +2861,7 @@
   const QUALITY_FULL = { FN: 'Factory New', MW: 'Minimal Wear', FT: 'Field-Tested',
                          WW: 'Well-Worn', BS: 'Battle-Scarred' };
 
+  let USD_RATE_DEFAULT = 80;   // подменяется значением с бэкенда при входе
   const ad = { items: [], channel: null, tradeBan: null, banDays: null, dealId: null, sending: false };
   let adKind = null;      // gun | knife | glove | agent | other
   let adFull = null;      // каноническое имя предмета без скина
@@ -2834,7 +2939,9 @@
     document.getElementById('adDaysGrid').innerHTML =
       Array.from({ length: 7 }, (_, i) => `<div class="day-btn" onclick="adSelectDay(this)">${i + 1}</div>`).join('');
 
+    document.getElementById('adRate').value = USD_RATE_DEFAULT;
     adRenderItems();
+    adRecalc();
   }
 
   function adTogglePicker() {
@@ -3047,17 +3154,128 @@
     badge.classList.add('on');
   }
 
+  // ── Ссылка со Steam ──────────────────────────────────────────────────────
+  function adToggleLink() {
+    const box = document.getElementById('adLinkBox');
+    const opening = box.style.display === 'none';
+    box.style.display = opening ? 'flex' : 'none';
+    document.getElementById('adLinkBtn').classList.toggle('active', opening);
+    if (opening) document.getElementById('adLinkInput').focus();
+    haptic('light');
+  }
+
+  // Из ссылки берём только имя предмета. За ценой в Steam не ходим —
+  // датацентровые адреса он блокирует, цена всегда с market.csgo.com.
+  function parseSteamLink(url) {
+    const m = String(url || '').match(/\/market\/listings\/\d+\/([^?#/]+)/i);
+    if (!m) return null;
+    try {
+      const name = decodeURIComponent(m[1]).trim();
+      return name || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function adAddFromLink() {
+    const input = document.getElementById('adLinkInput');
+    const name = parseSteamLink(input.value);
+    if (!name) {
+      flashEl(input);
+      adShowResult('Не похоже на ссылку Steam Market — нужен адрес страницы предмета', false);
+      return;
+    }
+    ad.items.push(name);
+    input.value = '';
+    haptic('medium');
+    adClearResult();
+    adRenderItems();
+    adToggleLink();
+  }
+
+  // ── Цены с маркета ───────────────────────────────────────────────────────
+  async function adFetchPrice() {
+    if (!ad.items.length) {
+      flashEl(document.getElementById('adItems'));
+      return adShowResult('Сначала добавь предметы — цену тянем по ним', false);
+    }
+    const btn = document.getElementById('adFetch');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Спрашиваю маркет…';
+    adClearResult();
+
+    try {
+      const q = new URLSearchParams();
+      ad.items.forEach(n => q.append('name', n));
+      const r = await fetch(ADMIN_API_URL + '/api/admin/market-price?' + q, {
+        headers: { 'X-Telegram-Init-Data': tg?.initData || '' },
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || `ошибка ${r.status}`);
+
+      const box = document.getElementById('adPrices');
+      box.innerHTML = data.items.map(it => `
+        <div class="own-price${it.rub === null ? ' miss' : ''}">
+          <span>${it.name}</span>
+          <b>${it.rub === null ? 'не найден' : it.rub.toLocaleString('ru-RU') + ' ₽'}</b>
+        </div>`).join('');
+      box.classList.add('on');
+
+      document.getElementById('adMarketRub').value = data.total_rub || '';
+      if (data.usd_rate) document.getElementById('adRate').value = data.usd_rate;
+      adRecalc();
+
+      const missed = data.items.length - data.found;
+      if (missed) {
+        haptic('warning');
+        adShowResult(`Маркет не знает ${missed} из ${data.items.length}. Сумма только по найденным — поправь вручную.`, false);
+      } else {
+        haptic('success');
+      }
+    } catch (e) {
+      haptic('error');
+      adShowResult('Цену не подтянуло: ' + (e.message || 'нет связи') + '. Впиши рубли вручную.', false);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-download"></i>Подтянуть с маркета';
+    }
+  }
+
+  function adBumpRate(step) {
+    const el = document.getElementById('adRate');
+    const next = Math.max(1, (parseFloat(el.value) || 0) + step);
+    el.value = Number(next.toFixed(2));
+    haptic('selection');
+    adRecalc();
+  }
+
+  // Референс в таблицу уходит в долларах, а маркет отдаёт рубли:
+  // пересчёт по курсу, который правится руками прямо в форме.
+  function adMarketUsd() {
+    const rub = parseFloat(document.getElementById('adMarketRub').value);
+    const rate = parseFloat(document.getElementById('adRate').value);
+    if (isNaN(rub) || isNaN(rate) || rate <= 0) return null;
+    return Math.round(rub / rate * 100) / 100;
+  }
+
+  function adRecalc() {
+    const usd = adMarketUsd();
+    document.getElementById('adMarketUsd').textContent =
+      usd === null ? '—' : '$' + usd.toFixed(2);
+    adSpread();
+  }
+
   // Спред считается только для глаз: колонки под него в таблице нет
   function adSpread() {
     const buy = parseFloat(document.getElementById('adBuy').value);
-    const ref = parseFloat(document.getElementById('adMarket').value);
+    const ref = adMarketUsd();
     const box = document.getElementById('adSpreadBox');
     const label = document.getElementById('adSpreadLabel');
     const val = document.getElementById('adSpreadVal');
 
     box.classList.remove('plus', 'minus');
-    if (isNaN(buy) || isNaN(ref) || !buy) {
-      label.textContent = isNaN(ref) ? 'Референс не заполнен' : 'Впиши сумму покупки';
+    if (isNaN(buy) || ref === null || !buy) {
+      label.textContent = ref === null ? 'Референс не заполнен' : 'Впиши сумму покупки';
       val.textContent = '—';
       return;
     }
@@ -3106,7 +3324,7 @@
 
     const date = document.getElementById('adDate').value;
     const buyRaw = document.getElementById('adBuy').value.trim();
-    const marketRaw = document.getElementById('adMarket').value.trim();
+    const marketUsd = adMarketUsd();   // рубли, делённые на курс из формы
     let party = document.getElementById('adParty').value.trim();
 
     if (!date)                { flashEl(document.getElementById('adDate')); return adShowResult('Укажи дату оплаты', false); }
@@ -3141,7 +3359,7 @@
           trade_ban: ad.tradeBan,
           ban_days: ad.banDays,
           buy_price_usd: parseFloat(buyRaw),
-          market_price_usd: marketRaw === '' ? null : parseFloat(marketRaw),
+          market_price_usd: marketUsd,
         }),
       });
 
@@ -3172,7 +3390,13 @@
     ad.dealId = newDealId();
     document.getElementById('adParty').value = '';
     document.getElementById('adBuy').value = '';
-    document.getElementById('adMarket').value = '';
+    document.getElementById('adMarketRub').value = '';
+    document.getElementById('adPrices').classList.remove('on');
+    document.getElementById('adPrices').innerHTML = '';
+    document.getElementById('adLinkBox').style.display = 'none';
+    document.getElementById('adLinkInput').value = '';
+    document.getElementById('adLinkBtn').classList.remove('active');
+    // Курс не сбрасываем: он один на все сделки дня
     document.querySelectorAll('#adChannels .chan-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('adTbNo').classList.remove('selected');
     document.getElementById('adTbYes').classList.remove('selected');
@@ -3181,7 +3405,7 @@
     document.getElementById('adPicker').style.display = 'none';
     document.getElementById('adPickerBtn').classList.remove('active');
     adRenderItems();
-    adSpread();
+    adRecalc();
   }
 
   // ── Инициализация ────────────────────────────────────────────────────────────
