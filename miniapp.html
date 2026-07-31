@@ -375,6 +375,11 @@
     font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
   }
   .own-price.miss b { color: var(--danger); font-weight: 500; }
+  .own-fixed {
+    display: block; margin-top: 3px;
+    font-style: normal; font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); opacity: 0.8;
+  }
 
   /* Курс: правится стрелками, потому что нативные у number скрыты */
   .own-stepper {
@@ -1456,7 +1461,7 @@
     </div>
     <div class="own-link" id="adLinkBox" style="display:none;">
       <input class="own-input" id="adLinkInput" type="url" inputmode="url"
-             autocapitalize="none" autocomplete="off" placeholder="Ссылка со Steam Market">
+             autocapitalize="none" autocomplete="off" placeholder="Ссылка на предмет с market.csgo.com">
       <button onclick="adAddFromLink()">Добавить</button>
     </div>
   </section>
@@ -2802,7 +2807,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 15;
+  const APP_VERSION = 16;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3164,25 +3169,40 @@
     haptic('light');
   }
 
-  // Из ссылки берём только имя предмета. За ценой в Steam не ходим —
-  // датацентровые адреса он блокирует, цена всегда с market.csgo.com.
-  function parseSteamLink(url) {
-    const m = String(url || '').match(/\/market\/listings\/\d+\/([^?#/]+)/i);
-    if (!m) return null;
-    try {
-      const name = decodeURIComponent(m[1]).trim();
-      return name || null;
-    } catch (_) {
-      return null;
+  // Из ссылки берём только имя предмета — цена всё равно запрашивается
+  // отдельно через бэкенд.
+  function parseItemLink(url) {
+    const raw = String(url || '').trim();
+    if (!raw) return null;
+
+    const decode = s => {
+      try {
+        const name = decodeURIComponent(s).trim();
+        // Категорию от предмета отличает пробел или разделитель: адрес вида
+        // /ru/Rifle/AK-47 кончается на «AK-47», и это ещё не предмет
+        return (name.includes(' ') || name.includes('|')) ? name : null;
+      } catch (_) {
+        return null;
+      }
+    };
+
+    // market.csgo.com/ru/Rifle/AK-47/AK-47 | Inheritance (Battle-Scarred)
+    if (/market\.csgo\.com/i.test(raw)) {
+      const last = raw.split(/[?#]/)[0].replace(/\/+$/, '').split('/').pop();
+      return decode(last);
     }
+
+    // Steam оставляем рабочим: ссылку оттуда тоже иногда удобно вставить
+    const steam = raw.match(/\/market\/listings\/\d+\/([^?#/]+)/i);
+    return steam ? decode(steam[1]) : null;
   }
 
   function adAddFromLink() {
     const input = document.getElementById('adLinkInput');
-    const name = parseSteamLink(input.value);
+    const name = parseItemLink(input.value);
     if (!name) {
       flashEl(input);
-      adShowResult('Не похоже на ссылку Steam Market — нужен адрес страницы предмета', false);
+      adShowResult('Не разобрал ссылку — нужен адрес страницы предмета на market.csgo.com', false);
       return;
     }
     ad.items.push(name);
@@ -3213,12 +3233,26 @@
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || `ошибка ${r.status}`);
 
+      // Бэкенд мог уточнить название через нормализатор — забираем канонический
+      // вариант в список: в таблицу должно уйти официальное имя, а не то,
+      // что удалось набрать в форме
+      let fixed = 0;
+      data.items.forEach((it, i) => {
+        if (it.rub !== null && it.resolved && it.resolved !== it.name) {
+          ad.items[i] = it.resolved;
+          fixed++;
+        }
+      });
+      if (fixed) adRenderItems();
+
       const box = document.getElementById('adPrices');
-      box.innerHTML = data.items.map(it => `
-        <div class="own-price${it.rub === null ? ' miss' : ''}">
-          <span>${it.name}</span>
+      box.innerHTML = data.items.map(it => {
+        const changed = it.rub !== null && it.resolved && it.resolved !== it.name;
+        return `<div class="own-price${it.rub === null ? ' miss' : ''}">
+          <span>${it.resolved || it.name}${changed ? '<i class="own-fixed">имя уточнено</i>' : ''}</span>
           <b>${it.rub === null ? 'не найден' : it.rub.toLocaleString('ru-RU') + ' ₽'}</b>
-        </div>`).join('');
+        </div>`;
+      }).join('');
       box.classList.add('on');
 
       document.getElementById('adMarketRub').value = data.total_rub || '';
