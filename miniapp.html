@@ -2282,13 +2282,15 @@
   // проверяется на сервере отдельно.
   let IS_ADMIN = false;
 
-  async function checkAdminSession() {
-    const initData = tg?.initData;
-    if (!initData) return;  // открыто вне Telegram — админки нет
+  // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
+  const APP_VERSION = 3;
 
+  async function checkAdminSession() {
+    // Запрос уходит всегда, даже с пустой initData. Молчаливый ранний выход
+    // в логах неотличим от старого закэшированного HTML.
     try {
-      const r = await fetch(ADMIN_API_URL + '/api/admin/session', {
-        headers: { 'X-Telegram-Init-Data': initData },
+      const r = await fetch(ADMIN_API_URL + '/api/admin/session?v=' + APP_VERSION, {
+        headers: { 'X-Telegram-Init-Data': tg?.initData || '' },
       });
       if (!r.ok) return;    // 403 — обычный клиентский вид, молча
       const data = await r.json();
