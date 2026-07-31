@@ -129,6 +129,22 @@
   .header-contact-btn i { font-size: 16px; }
   .header-contact-btn:active { transform: scale(0.94); }
 
+  /* ── Вход в админ-режим ── */
+  .admin-bar { display: none; padding: 0 20px; margin-bottom: 14px; }
+  .admin-bar.visible { display: flex; animation: slideUp 0.35s var(--ease); }
+  .admin-entry {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 12px;
+    background: var(--gold-soft);
+    border: 1px dashed rgba(232,184,75,0.35);
+    border-radius: var(--r-s);
+    color: var(--gold); font-family: var(--font-ui);
+    font-size: 13px; font-weight: 600; letter-spacing: 0.02em;
+    cursor: pointer; transition: transform 0.15s var(--ease), background 0.18s;
+  }
+  .admin-entry i { font-size: 17px; }
+  .admin-entry:active { transform: scale(0.98); background: rgba(232,184,75,0.2); }
+
   /* ── Прогресс ── */
   .progress { display: flex; gap: 6px; padding: 0 20px; margin-bottom: 22px; }
   .progress-step {
@@ -792,6 +808,13 @@
 
 <div class="rarity-line" aria-hidden="true"></div>
 
+<!-- Виден только владельцу. Показывается по ответу бэкенда, не по флагу во фронте. -->
+<div class="admin-bar" id="adminBar">
+  <button class="admin-entry" onclick="openPurchase()">
+    <i class="ti ti-clipboard-plus"></i>Закупка
+  </button>
+</div>
+
 <div class="progress">
   <div class="progress-step fill-in" id="p1"></div>
   <div class="progress-step" id="p2"></div>
@@ -1029,6 +1052,7 @@
 <script>
   // ── КОНФИГ ──────────────────────────────────────────────────────────────────
   const API_URL = 'https://motivated-gratitude-production-dddc.up.railway.app/recognize';
+  const ADMIN_API_URL = 'https://skin-bot-production.up.railway.app';
   const ICONS_BASE = 'https://zergad-code.github.io/skup-webapp/icons/';
   const ic = name => ICONS_BASE + encodeURIComponent(name);
 
@@ -2252,9 +2276,40 @@
     }
   }
 
+  // ── Админ-режим ──────────────────────────────────────────────────────────────
+  // Права решает бэкенд по подписи initData. Здесь только показ/скрытие кнопки —
+  // спрятать её во фронте не значит защитить, поэтому каждый админ-запрос
+  // проверяется на сервере отдельно.
+  let IS_ADMIN = false;
+
+  async function checkAdminSession() {
+    const initData = tg?.initData;
+    if (!initData) return;  // открыто вне Telegram — админки нет
+
+    try {
+      const r = await fetch(ADMIN_API_URL + '/api/admin/session', {
+        headers: { 'X-Telegram-Init-Data': initData },
+      });
+      if (!r.ok) return;    // 403 — обычный клиентский вид, молча
+      const data = await r.json();
+      if (data.is_admin !== true) return;
+
+      IS_ADMIN = true;
+      document.getElementById('adminBar').classList.add('visible');
+    } catch (_) {
+      // сеть недоступна — остаёмся клиентом, ничего не ломаем
+    }
+  }
+
+  function openPurchase() {
+    haptic('light');
+    notify('Форма закупки будет на этапе 3. Доступ подтверждён.');
+  }
+
   // ── Инициализация ────────────────────────────────────────────────────────────
   renderPickers();
   renderSkinsList();
+  checkAdminSession();
 </script>
 
 <!-- Экран успеха -->
