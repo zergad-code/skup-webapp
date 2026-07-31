@@ -153,38 +153,50 @@
   .admin-entry:active { transform: scale(0.98); background: rgba(232,184,75,0.2); }
 
   /* ── Экран владельца ──────────────────────────────────────────────────────
-     Режим владельца перекрашивается целиком через переопределение переменных:
-     все переиспользованные компоненты подхватывают палитру сами, дублировать
-     их стили не нужно. Бирюза вместо фиолета — чтобы режим был виден сразу,
-     без чтения заголовка. */
-  body.owner-mode {
+     Другой язык, а не перекрашенный клиентский: вместо карточек с подложкой
+     и тенью — плоский реестр. Секции держатся типографикой и волосяными
+     линиями, поля выстроены в колонку «подпись слева, значение справа».
+     Клиентский экран продаёт, этот — считает. */
+
+  /* Палитра включается и на время загрузки, поэтому объявлена для обоих
+     состояний: иначе спиннер успевал мигнуть клиентским фиолетовым */
+  .owner-boot, body.owner-mode {
     --accent: #2dd4bf;
     --accent2: #5eead4;
     --accent-light: #99f6e4;
-    --accent-soft: rgba(45,212,191,0.13);
+    --accent-soft: rgba(45,212,191,0.12);
     --line-accent: rgba(94,234,212,0.30);
     --grad-accent: linear-gradient(135deg, #14b8a6, #22d3ee);
-    --shadow-btn: 0 6px 22px rgba(45,212,191,0.30), inset 0 1px 0 rgba(255,255,255,0.18);
-    --card: #14202b;
-    --card2: #182a36;
-    --bg0: #0a1219;
-    --bg1: #101c25;
+    --shadow-btn: 0 6px 20px rgba(45,212,191,0.26);
+    --line: rgba(148,190,200,0.11);
+    --line2: rgba(148,190,200,0.2);
+    --surface: rgba(148,200,210,0.045);
+    --surface2: rgba(148,200,210,0.075);
+    --bg0: #080f15;
+    --bg1: #0c1720;
+    --t2: #8ba3ad;
+    --t3: #5d727c;
   }
+  .owner-boot body,
+  body.owner-mode {
+    background: linear-gradient(178deg, var(--bg0) 0%, var(--bg1) 100%);
+  }
+  .owner-boot .aurora,
   body.owner-mode .aurora {
     background:
-      radial-gradient(620px 420px at 12% -6%, rgba(45,212,191,0.16), transparent 62%),
-      radial-gradient(720px 520px at 108% 24%, rgba(34,211,238,0.09), transparent 60%),
-      radial-gradient(520px 400px at 50% 112%, rgba(232,184,75,0.05), transparent 62%);
+      radial-gradient(700px 380px at 50% -8%, rgba(45,212,191,0.10), transparent 64%),
+      radial-gradient(600px 420px at 104% 60%, rgba(34,211,238,0.06), transparent 62%);
   }
-  /* Клиентская шапка, шкала редкости и контакты в этом режиме не нужны:
+  .owner-boot .grain, body.owner-mode .grain { opacity: 0.03; }
+
+  /* Клиентская шапка, шкала редкости и контакты тут не нужны:
      экран видит только владелец, представляться ему некому */
   body.owner-mode .rarity-line,
   body.owner-mode .header { display: none; }
 
   /* Пока идёт проверка подписи, клиентский экран не показываем вовсе:
      иначе он успевает отрисоваться и через миг подменяется. Права это
-     не ослабляет — интерфейс владельца рисуется только после ответа сервера,
-     а не по параметру в адресе. */
+     не ослабляет — интерфейс владельца рисуется только после ответа сервера. */
   .owner-boot .header,
   .owner-boot .rarity-line,
   .owner-boot .progress,
@@ -192,169 +204,155 @@
   .own-boot { display: none; }
   .owner-boot .own-boot {
     display: flex; align-items: center; justify-content: center;
-    min-height: 60vh;
+    min-height: 70vh;
   }
-  .own-boot .spinner { width: 22px; height: 22px; border-width: 2.5px; margin: 0; }
+  .own-boot .spinner { width: 20px; height: 20px; border-width: 2px; margin: 0; }
 
-  .admin-app { display: none; padding: 0 16px; }
-  .admin-app.visible { display: block; animation: screenIn 0.34s var(--ease); }
-  /* Шапки нет — отступ сверху берёт на себя сам экран */
-  body.owner-mode .admin-app { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
+  .admin-app { display: none; padding: 0 18px; }
+  .admin-app.visible { display: block; animation: fadeIn 0.3s ease; }
+  body.owner-mode .admin-app { padding-top: calc(20px + env(safe-area-inset-top, 0px)); }
 
-  /* Счётчик живёт в шапке своей карточки: отдельный заголовок экрана
-     владельцу ничего не сообщал — он и так знает, что заполняет */
-  .own-count {
-    margin-left: auto; flex-shrink: 0;
-    min-width: 22px; height: 20px; padding: 0 7px;
-    display: none; align-items: center; justify-content: center;
-    border-radius: 7px; background: var(--accent-soft);
-    color: var(--accent-light); font-size: 11.5px; font-weight: 700;
-    letter-spacing: 0; font-variant-numeric: tabular-nums;
-  }
-  .own-count.on { display: inline-flex; animation: badgePop 0.35s var(--ease); }
-
-  /* Карточка-секция: плотнее клиентской, тут вводят, а не любуются */
-  .own-card {
-    background: linear-gradient(180deg, var(--card2), var(--card));
-    border: 1px solid var(--line);
-    border-radius: var(--r-m);
-    padding: 13px 14px 14px;
-    margin-bottom: 10px;
-    box-shadow: 0 8px 24px rgba(4,10,16,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
-  }
+  /* ── Секция: заголовок-рубрика без коробки ── */
+  .own-card { margin-bottom: 26px; }
   .own-card-h {
-    display: flex; align-items: center; gap: 7px;
-    font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--t2);
-    padding-bottom: 11px; margin-bottom: 12px;
+    display: flex; align-items: baseline; gap: 8px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--t3);
+    padding-bottom: 9px; margin-bottom: 2px;
+    border-bottom: 1px solid var(--line2);
+  }
+  .own-card-h i { display: none; }   /* рубрике иконка не нужна, шум */
+  .own-count {
+    margin-left: auto;
+    color: var(--accent2); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; font-variant-numeric: tabular-nums;
+    display: none;
+  }
+  .own-count.on { display: inline; }
+
+  /* ── Поля: строки реестра, разделённые волосяной линией ── */
+  .own-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 0;
     border-bottom: 1px solid var(--line);
   }
-  .own-card-h i { font-size: 14px; color: var(--accent2); }
-
-  /* Строка «подпись слева — поле справа»: экономит высоту против стопки */
-  .own-row { display: flex; align-items: center; gap: 12px; }
-  .own-row + .own-row { margin-top: 10px; }
-  .own-row > label { font-size: 13px; color: var(--t2); flex: 1; min-width: 0; }
+  .own-row + .own-row { margin-top: 0; }
+  .own-row > label {
+    font-size: 13.5px; color: var(--t2); flex: 1; min-width: 0;
+  }
   .own-input {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 12px;
+    background: none; border: none; outline: none;
+    padding: 0; margin: 0;
     color: var(--text); font-family: var(--font-ui);
-    font-size: 16px; outline: none; min-width: 0;
-    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    font-size: 16px; font-weight: 500;
+    min-width: 0; text-align: right;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s, color 0.2s;
   }
-  .own-input:focus {
-    background: rgba(255,255,255,0.06);
-    border-color: var(--line-accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
+  .own-input::placeholder { color: var(--t3); font-weight: 400; }
+  .own-input:focus { border-bottom-color: var(--accent2); color: var(--accent-light); }
+  .own-row .own-input { width: 172px; flex-shrink: 0; }
+  .own-row input[type="date"] { text-align: right; font-variant-numeric: tabular-nums; }
+  /* Название скина — на всю ширину, отдельной строкой */
+  #adNameCard .own-input {
+    width: 100%; text-align: left; padding: 11px 0;
+    border-bottom: 1px solid var(--line);
   }
-  .own-input::placeholder { color: var(--t3); }
-  .own-row .own-input { width: 168px; flex-shrink: 0; text-align: right; }
-  .own-row input[type="date"] { text-align: left; }
 
   .own-sub {
-    font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
     text-transform: uppercase; color: var(--t3);
-    margin: 15px 0 9px;
+    margin: 18px 0 10px;
   }
 
-  /* Каналы — компактные чипы по три в ряд */
-  .chan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  /* ── Каналы: одна строка с прокруткой вместо сетки ── */
+  .chan-grid {
+    display: flex; gap: 7px;
+    overflow-x: auto; padding-bottom: 4px;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .chan-grid::-webkit-scrollbar { display: none; }
   .chan-btn {
-    background: var(--surface); border: 1px solid transparent;
-    border-radius: 9px; padding: 9px 4px;
+    flex: 0 0 auto;
+    background: none; border: 1px solid var(--line2);
+    border-radius: 999px; padding: 8px 14px;
     color: var(--t2); font-family: var(--font-ui);
-    font-size: 11.5px; font-weight: 500; cursor: pointer;
-    text-align: center; white-space: nowrap;
+    font-size: 12.5px; font-weight: 500; cursor: pointer;
+    white-space: nowrap;
     transition: background 0.18s, border-color 0.18s, color 0.18s;
   }
-  .chan-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); color: var(--accent-light); }
+  .chan-btn.selected {
+    background: var(--accent2); border-color: var(--accent2);
+    color: #052e2b; font-weight: 600;
+  }
   .chan-btn:active { transform: scale(0.96); }
 
-  /* Предметы */
-  .own-items { display: flex; flex-direction: column; gap: 8px; }
+  /* ── Предметы: строки со счётной нумерацией ── */
+  .own-items { display: block; }
   .own-item {
-    display: flex; align-items: flex-start; gap: 11px;
-    padding: 11px 12px; border-radius: var(--r-s);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    position: relative;
-    animation: slideUp 0.3s var(--ease) backwards;
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
+    animation: fadeIn 0.25s ease backwards;
   }
-  .own-item::before {
-    content: ''; position: absolute; left: 0; top: 11px; bottom: 11px;
-    width: 2px; border-radius: 0 2px 2px 0;
-    background: var(--grad-accent);
-  }
-  .own-item.gold::before { background: var(--grad-gold); box-shadow: 0 0 8px rgba(232,184,75,0.35); }
   .own-item-ic {
-    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
-    background: rgba(0,0,0,0.28);
-    border: 1px solid var(--line);
+    width: 30px; height: 30px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
+    opacity: 0.9;
   }
-  .own-item-ic img { width: 27px; height: 27px; object-fit: contain; }
-  .own-item-ic i { font-size: 16px; color: var(--accent-light); }
-  .own-item.gold .own-item-ic { border-color: rgba(232,184,75,0.28); }
+  .own-item-ic img { width: 28px; height: 28px; object-fit: contain; }
+  .own-item-ic i { font-size: 16px; color: var(--t3); }
+  .own-item.gold .own-item-ic { filter: drop-shadow(0 0 6px rgba(232,184,75,0.4)); }
   /* Полное имя не обрезаем: опечатку надо заметить до записи, а не в таблице */
   .own-item-name {
     flex: 1; min-width: 0;
-    font-size: 12.5px; font-weight: 500; color: #fff;
-    line-height: 1.4; overflow-wrap: anywhere; padding-top: 2px;
+    font-size: 13px; font-weight: 500; color: var(--text);
+    line-height: 1.42; overflow-wrap: anywhere; padding-top: 4px;
   }
   .own-item-del {
     background: none; border: none; cursor: pointer; flex-shrink: 0;
-    width: 26px; height: 26px; border-radius: 8px;
+    width: 26px; height: 26px; padding: 0;
     color: var(--t3);
     display: flex; align-items: center; justify-content: center;
-    transition: transform 0.2s var(--ease), background 0.2s, color 0.2s;
+    transition: color 0.2s, transform 0.2s var(--ease);
   }
-  .own-item-del i { font-size: 14px; }
-  .own-item-del:active { transform: scale(0.85) rotate(90deg); background: rgba(239,106,150,0.14); color: var(--danger); }
+  .own-item-del i { font-size: 15px; }
+  .own-item-del:active { transform: scale(0.85); color: var(--danger); }
 
-  /* Пусто — значит пусто: заглушка занимала полэкрана и ничего не сообщала */
-  .own-items:empty + .own-add { margin-top: 0; }
-
-  /* Кнопки пикера прилегали вплотную к следующей карточке */
-  .own-picker-actions { margin-bottom: 10px; }
-
+  .own-items:empty + .own-add { margin-top: 4px; }
   .own-add {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; margin-top: 11px; padding: 12px;
-    background: var(--accent-soft);
-    border: 1px dashed var(--line-accent);
-    border-radius: var(--r-s);
-    color: var(--accent-light); font-family: var(--font-ui);
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    transition: background 0.18s, transform 0.14s var(--ease);
+    display: flex; align-items: center; gap: 9px;
+    width: 100%; margin-top: 4px; padding: 14px 0;
+    background: none; border: none;
+    color: var(--accent2); font-family: var(--font-ui);
+    font-size: 13.5px; font-weight: 600; cursor: pointer;
+    transition: opacity 0.18s;
   }
-  .own-add i { font-size: 16px; }
-  .own-add:active { transform: scale(0.98); }
-  .own-add.active { background: rgba(45,212,191,0.2); }
+  .own-add i { font-size: 17px; }
+  .own-add:active { opacity: 0.6; }
+  .own-add.active { color: var(--t2); }
 
-  /* Деньги — два поля в ряд, суммы крупнее прочего */
-  .own-money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .own-picker-actions { margin: 20px 0 0; }
+
+  /* ── Деньги: суммы — главное на экране ── */
+  .own-money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 4px; }
   .own-money-field label {
-    display: block; font-size: 11px; color: var(--t2);
-    margin-bottom: 6px; letter-spacing: 0.02em;
+    display: block; font-size: 11px; color: var(--t3);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 8px;
   }
   .own-money-input {
-    display: flex; align-items: center; gap: 2px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 10px; padding: 0 10px;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    display: flex; align-items: baseline; gap: 3px;
+    border-bottom: 1px solid var(--line2);
+    transition: border-color 0.2s;
   }
-  .own-money-input:focus-within {
-    border-color: var(--line-accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-  .own-money-input span { font-size: 15px; color: var(--t3); font-weight: 600; }
+  .own-money-input:focus-within { border-bottom-color: var(--accent2); }
+  .own-money-input span { font-size: 15px; color: var(--t3); font-weight: 500; }
   .own-money-input input {
     width: 100%; min-width: 0; background: none; border: none; outline: none;
-    padding: 11px 0; color: var(--text);
-    font-family: var(--font-ui); font-size: 17px; font-weight: 600;
-    font-variant-numeric: tabular-nums;
+    padding: 0 0 9px; color: #fff;
+    font-family: var(--font-display); font-size: 22px; font-weight: 600;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
   }
   .own-money-input input::-webkit-outer-spin-button,
   .own-money-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -362,47 +360,95 @@
 
   /* Спред считается на лету и никуда не пишется — колонок под него нет */
   .own-spread {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-top: 12px; padding-top: 11px;
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-top: 20px; padding-top: 13px;
     border-top: 1px solid var(--line);
-    font-size: 12px; color: var(--t3);
+    font-size: 11.5px; color: var(--t3);
+    letter-spacing: 0.04em;
   }
   .own-spread b {
-    font-size: 14px; font-weight: 700; color: var(--t2);
+    font-family: var(--font-display);
+    font-size: 15px; font-weight: 600; color: var(--t2);
     font-variant-numeric: tabular-nums;
   }
   .own-spread.plus b  { color: var(--success); }
   .own-spread.minus b { color: var(--danger); }
 
-  /* Кнопка записи всегда под рукой: форма длиннее экрана */
+  /* ── Кнопка записи: всегда под рукой, форма длиннее экрана ── */
   .own-bar {
     position: sticky; bottom: 0; z-index: 5;
-    margin: 14px -16px 0; padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
-    background: linear-gradient(180deg, rgba(10,18,25,0), var(--bg0) 32%);
+    margin: 22px -18px 0; padding: 14px 18px calc(16px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(8,15,21,0), var(--bg0) 38%);
   }
   .own-submit {
     width: 100%; padding: 16px;
-    background: var(--grad-accent); border: none;
-    border-radius: 14px;
-    color: #06231f; font-family: var(--font-ui);
-    font-size: 15px; font-weight: 700; letter-spacing: 0.01em;
+    background: var(--accent2); border: none;
+    border-radius: 12px;
+    color: #04231f; font-family: var(--font-ui);
+    font-size: 14.5px; font-weight: 700; letter-spacing: 0.03em;
     cursor: pointer; box-shadow: var(--shadow-btn);
     transition: transform 0.18s var(--ease), opacity 0.2s;
   }
-  .own-submit:disabled { opacity: 0.55; }
+  .own-submit:disabled { opacity: 0.5; }
   .own-submit:active:not(:disabled) { transform: scale(0.985); opacity: 0.9; }
 
   .ad-result {
-    display: none; margin-top: 12px; padding: 12px 14px;
-    border-radius: var(--r-s); font-size: 13px; line-height: 1.45;
+    display: none; margin-top: 16px; padding: 12px 0;
+    border-top: 1px solid var(--line);
+    font-size: 13px; line-height: 1.45;
   }
-  .ad-result.ok   { display: block; background: rgba(95,214,171,0.12); color: var(--success); }
-  .ad-result.err  { display: block; background: rgba(239,106,150,0.12); color: var(--danger); }
+  .ad-result.ok   { display: block; color: var(--success); }
+  .ad-result.err  { display: block; color: var(--danger); }
+
+  /* ── Переиспользованные компоненты клиента: снимаем с них коробки ── */
+  .admin-app .weapon-btn {
+    background: none; border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .admin-app .weapon-btn .icon { background: none; height: 44px; }
+  .admin-app .weapon-btn.selected {
+    background: var(--accent-soft); border-color: var(--accent2); box-shadow: none;
+  }
+  .admin-app .quality-btn, .admin-app .agent-btn, .admin-app .agent-group-btn {
+    background: none; border: 1px solid var(--line); border-radius: 10px;
+  }
+  .admin-app .quality-btn.selected,
+  .admin-app .agent-btn.selected { background: var(--accent-soft); border-color: var(--accent2); }
+  .admin-app .stattrak-row { background: none; padding: 12px 0; border-top: 1px solid var(--line); }
+  .admin-app .st-btn { background: var(--surface2); border-radius: 8px; }
+  .admin-app .st-btn.active { background: var(--accent2); color: #052e2b; }
+
+  /* Трейд-бан — сегментный переключатель, а не две кнопки */
+  .admin-app .tb-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--line2); border-radius: 10px;
+    overflow: hidden; margin: 14px 0 0;
+  }
+  .admin-app .tb-btn {
+    border: none; border-radius: 0; background: none;
+    padding: 12px; color: var(--t2); font-size: 13px;
+    transition: background 0.18s, color 0.18s;
+  }
+  .admin-app .tb-btn + .tb-btn { border-left: 1px solid var(--line2); }
+  .admin-app .tb-btn.selected { background: var(--accent2); color: #052e2b; font-weight: 600; }
+  .admin-app .tb-btn:active { transform: none; }
+  .admin-app .days-grid { grid-template-columns: repeat(8, 1fr); gap: 5px; margin-top: 10px; }
+  .admin-app .day-btn {
+    background: none; border: 1px solid var(--line);
+    border-radius: 8px; padding: 9px 0; font-size: 12px;
+  }
+  .admin-app .day-btn.selected { background: var(--accent-soft); border-color: var(--accent2); color: var(--accent-light); }
+  .admin-app .confirm-ok {
+    background: none; border: 1px solid var(--accent2);
+    color: var(--accent2); box-shadow: none; font-weight: 600;
+  }
+  .admin-app .confirm-cancel { background: none; border: 1px solid var(--line2); }
 
   @media (max-width: 359px) {
-    .chan-grid { grid-template-columns: repeat(2, 1fr); }
     .own-row .own-input { width: 140px; }
+    .own-money-input input { font-size: 19px; }
   }
+
 
   /* ── Прогресс ── */
   .progress { display: flex; gap: 6px; padding: 0 20px; margin-bottom: 22px; }
@@ -2657,7 +2703,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 11;
+  const APP_VERSION = 12;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
