@@ -145,6 +145,40 @@
   .admin-entry i { font-size: 17px; }
   .admin-entry:active { transform: scale(0.98); background: rgba(232,184,75,0.2); }
 
+  /* ── Экран владельца ── */
+  .admin-app { display: none; padding: 0 20px; }
+  .admin-app.visible { display: block; animation: screenIn 0.34s var(--ease); }
+  .chan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .chan-btn {
+    background: var(--surface); border: 1px solid transparent;
+    border-radius: var(--r-s); padding: 11px 8px;
+    color: var(--t2); font-family: var(--font-ui);
+    font-size: 12.5px; font-weight: 500; cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+  }
+  .chan-btn.selected { background: var(--accent-soft); border-color: var(--line-accent); color: var(--accent-light); }
+  .chan-btn:active { transform: scale(0.97); }
+
+  .money-row { display: flex; align-items: center; gap: 10px; }
+  .money-row + .money-row { margin-top: 9px; }
+  .money-row label { font-size: 13px; color: var(--t2); flex: 1; }
+  .money-row .skin-input { width: 118px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Полное имя не обрезаем: перед записью его надо видеть целиком, иначе
+     опечатку в скине заметишь уже в таблице */
+  .admin-app .sc-name {
+    white-space: normal; overflow: visible; text-overflow: clip;
+    line-height: 1.35; overflow-wrap: anywhere;
+  }
+
+  .ad-hint { font-size: 11.5px; color: var(--t3); margin-top: 8px; line-height: 1.45; }
+  .ad-result {
+    display: none; margin-top: 12px; padding: 12px 14px;
+    border-radius: var(--r-s); font-size: 13px; line-height: 1.45;
+  }
+  .ad-result.ok   { display: block; background: rgba(95,214,171,0.12); color: var(--success); }
+  .ad-result.err  { display: block; background: rgba(239,106,150,0.12); color: var(--danger); }
+
   /* ── Прогресс ── */
   .progress { display: flex; gap: 6px; padding: 0 20px; margin-bottom: 22px; }
   .progress-step {
@@ -1045,6 +1079,114 @@
   <div class="nav-btns" style="margin-top:14px;">
     <button class="nav-back" onclick="goTo(2)">← Назад</button>
   </div>
+</div>
+
+<!-- ════════ ЭКРАН ВЛАДЕЛЬЦА: НОВАЯ ЗАКУПКА ════════ -->
+<!-- Рисуется только после того, как бэкенд подтвердил подпись.
+     Параметр screen=table сам по себе прав не даёт. -->
+<div class="admin-app" id="adminApp">
+  <div class="step-eyebrow">Владелец · лист «Сделки»</div>
+  <div class="step-title">Новая закупка<span class="skin-badge" id="adBadge" style="display:none;">0</span></div>
+  <div class="step-sub">Строка допишется в конец, остальные колонки заполнишь сам</div>
+
+  <div class="card">
+    <div class="card-title">Дата оплаты</div>
+    <input class="skin-input" id="adDate" type="date">
+  </div>
+
+  <div class="card">
+    <div class="card-title">Предметы</div>
+    <div class="skins-list" id="adItems"></div>
+    <button class="add-skin-btn" id="adPickerBtn" onclick="adTogglePicker()" style="width:100%; margin-top:12px;">
+      <i class="ti ti-plus"></i>Добавить предмет
+    </button>
+  </div>
+
+  <div id="adPicker" style="display:none;">
+    <div class="card">
+      <div class="card-title">Оружие</div>
+      <div class="weapon-grid" id="adWeaponGrid"></div>
+    </div>
+
+    <div class="card" id="adKnifeCard" style="display:none;">
+      <div class="card-title">Тип ножа</div>
+      <div class="weapon-grid" id="adKnifeGrid"></div>
+    </div>
+
+    <div class="card" id="adGloveCard" style="display:none;">
+      <div class="card-title">Тип перчаток</div>
+      <div class="weapon-grid" id="adGloveGrid"></div>
+    </div>
+
+    <div class="card" id="adAgentCard" style="display:none;">
+      <div class="card-title">Фракция агента</div>
+      <div class="agent-list" id="adAgentList"></div>
+    </div>
+
+    <div class="card" id="adNameCard" style="display:none;">
+      <div class="card-title" id="adNameTitle">Название скина</div>
+      <input class="skin-input" id="adNameInput" type="text" placeholder="Например: Redline, Asiimov...">
+    </div>
+
+    <div class="card" id="adQualityCard" style="display:none;">
+      <div class="card-title">Качество</div>
+      <div class="quality-list" id="adQualityList"></div>
+      <div class="stattrak-row" id="adStRow" style="margin-top:12px;">
+        <span class="stattrak-label">StatTrak™</span>
+        <div class="stattrak-toggle">
+          <button class="st-btn active" id="adStNo" onclick="adSelectST(false)">Нет</button>
+          <button class="st-btn" id="adStYes" onclick="adSelectST(true)">Да</button>
+        </div>
+      </div>
+      <div class="stattrak-row" id="adSvRow" style="margin-top:8px;">
+        <span class="stattrak-label">Souvenir</span>
+        <div class="stattrak-toggle">
+          <button class="st-btn active" id="adSvNo" onclick="adSelectSV(false)">Нет</button>
+          <button class="st-btn" id="adSvYes" onclick="adSelectSV(true)">Да</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="confirm-actions">
+      <button class="confirm-ok" onclick="adAddItem()">Добавить в сделку</button>
+      <button class="confirm-cancel" onclick="adTogglePicker()">Отмена</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Контрагент</div>
+    <input class="skin-input" id="adParty" type="text" placeholder="@username" autocapitalize="none" autocomplete="off">
+  </div>
+
+  <div class="card">
+    <div class="card-title">Канал</div>
+    <div class="chan-grid" id="adChannels"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Трейд-бан</div>
+    <div class="tb-row">
+      <div class="tb-btn" id="adTbNo" onclick="adSelectTB(false)"><i class="ti ti-x ti-inline"></i>Нет</div>
+      <div class="tb-btn" id="adTbYes" onclick="adSelectTB(true)"><i class="ti ti-clock ti-inline"></i>Есть</div>
+    </div>
+    <div class="days-grid" id="adDaysGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Деньги</div>
+    <div class="money-row">
+      <label for="adBuy">Buy $ — сколько отдал</label>
+      <input class="skin-input" id="adBuy" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div class="money-row">
+      <label for="adMarket">Референс рынка $</label>
+      <input class="skin-input" id="adMarket" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div class="ad-hint">Референс можно оставить пустым — тогда колонка останется пустой, а не нулевой.</div>
+  </div>
+
+  <button class="submit-btn" id="adSubmit" onclick="adSubmit()">Записать в таблицу</button>
+  <div class="ad-result" id="adResult"></div>
 </div>
 
 </div><!-- /.app -->
@@ -2283,7 +2425,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 7;
+  const APP_VERSION = 8;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -2308,7 +2450,10 @@
       if (data.is_admin !== true) return;
 
       IS_ADMIN = true;
-      document.getElementById('adminBar').classList.add('visible');
+      // screen=table — открываем интерфейс владельца вместо клиентского флоу.
+      // Иначе показываем только кнопку перехода.
+      if (SCREEN === 'table') showAdminApp();
+      else document.getElementById('adminBar').classList.add('visible');
     } catch (_) {
       // сеть недоступна — остаёмся клиентом, ничего не ломаем
     }
@@ -2316,7 +2461,399 @@
 
   function openTable() {
     haptic('light');
-    notify('Интерфейс таблицы будет на этапе 3. Доступ подтверждён.');
+    showAdminApp();
+  }
+
+  // ── Экран владельца: новая закупка ───────────────────────────────────────────
+  const CHANNELS = ['реферал', 'повтор', 'сообщество', 'чат-холод', 'входящий', 'додеп'];
+  const QUALITY_FULL = { FN: 'Factory New', MW: 'Minimal Wear', FT: 'Field-Tested',
+                         WW: 'Well-Worn', BS: 'Battle-Scarred' };
+
+  const ad = { items: [], channel: null, tradeBan: null, banDays: null, dealId: null, sending: false };
+  let adKind = null;      // gun | knife | glove | agent | other
+  let adFull = null;      // каноническое имя предмета без скина
+  let adST = false, adSV = false;
+
+  function newDealId() {
+    // deal_id живёт с момента открытия формы: повторная отправка той же
+    // сделки должна попасть в ту же строку, а не создать вторую.
+    if (crypto?.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  function showAdminApp() {
+    document.querySelector('.progress').style.display = 'none';
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('adminBar').classList.remove('visible');
+    document.getElementById('adminApp').classList.add('visible');
+    window.scrollTo(0, 0);
+    if (!ad.dealId) adInit();
+  }
+
+  function adInit() {
+    ad.dealId = newDealId();
+
+    // Локальная дата, не toISOString: после 21:00 по Киеву UTC даст вчера
+    const d = new Date();
+    document.getElementById('adDate').value =
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    document.getElementById('adWeaponGrid').innerHTML =
+      GUNS.map(g => weaponTile({ img: g.img, label: g.label, onclick: `adSelectWeapon(this,'gun','${g.full}')` })).join('') +
+      weaponTile({ img: 'The Professionals.png', label: 'Агенты',   onclick: "adSelectWeapon(this,'agent','')" }) +
+      weaponTile({ img: 'butterfly-knife.png',   label: 'Ножи',     onclick: "adSelectWeapon(this,'knife','')" }) +
+      weaponTile({ img: 'Specialist Gloves.png', label: 'Перчатки', onclick: "adSelectWeapon(this,'glove','')" }) +
+      weaponTile({ emoji: '🎱', label: 'Другое', onclick: "adSelectWeapon(this,'other','')" });
+
+    document.getElementById('adKnifeGrid').innerHTML =
+      KNIVES.map(k => weaponTile({ img: k.img, label: k.label, onclick: `adSelectSub(this,'${k.full}')` })).join('');
+
+    document.getElementById('adGloveGrid').innerHTML =
+      GLOVES.map(g => weaponTile({ img: g.img, label: g.label, onclick: `adSelectSub(this,'${g.full}')` })).join('');
+
+    document.getElementById('adAgentList').innerHTML =
+      AGENT_GROUPS.map(g =>
+        agentGroupRow(g, 'ad', `adToggleGroup('adGrp${g.id}')`) +
+        `<div class="agent-sublist" id="adGrp${g.id}" style="display:none;">` +
+          g.items.map(name => agentRow({
+            name, icon: name + '.png', kicker: 'Фракция',
+            onclick: `adSelectSub(this,'${name}')`,
+          })).join('') +
+        `</div>`
+      ).join('') +
+      agentRow({
+        name: AGENT_SINGLE.name, icon: AGENT_SINGLE.icon, kicker: 'Фракция',
+        onclick: `adSelectSub(this,'${AGENT_SINGLE.name}')`,
+      });
+
+    document.getElementById('adQualityList').innerHTML =
+      QUALITIES.map(q =>
+        `<div class="quality-btn" onclick="adSelectQuality(this)"><div class="q-gauge"><i style="left:${q.pos}%"></i></div><div class="q-name">${q.name}</div><div class="q-abbr">${q.abbr}</div></div>`
+      ).join('');
+
+    document.getElementById('adChannels').innerHTML =
+      CHANNELS.map(c => `<div class="chan-btn" onclick="adSelectChannel(this,'${c}')">${c}</div>`).join('');
+
+    document.getElementById('adDaysGrid').innerHTML =
+      Array.from({ length: 8 }, (_, i) => `<div class="day-btn" onclick="adSelectDay(this)">${i + 1}</div>`).join('');
+
+    adRenderItems();
+  }
+
+  function adTogglePicker() {
+    const p = document.getElementById('adPicker');
+    const opening = p.style.display === 'none';
+    p.style.display = opening ? 'block' : 'none';
+    document.getElementById('adPickerBtn').classList.toggle('active', opening);
+    if (opening) adResetPicker(); else adClearResult();
+    haptic('light');
+  }
+
+  function adResetPicker() {
+    adKind = null; adFull = null; adST = false; adSV = false;
+    document.querySelectorAll('#adPicker .weapon-btn, #adPicker .agent-btn')
+      .forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('#adQualityList .quality-btn').forEach(b => b.classList.remove('selected'));
+    ['adKnifeCard', 'adGloveCard', 'adAgentCard', 'adNameCard', 'adQualityCard']
+      .forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById('adNameInput').value = '';
+    document.getElementById('adStNo').classList.add('active');
+    document.getElementById('adStYes').classList.remove('active');
+    document.getElementById('adSvNo').classList.add('active');
+    document.getElementById('adSvYes').classList.remove('active');
+  }
+
+  function adSelectWeapon(el, kind, full) {
+    document.querySelectorAll('#adWeaponGrid .weapon-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    haptic('selection');
+    adKind = kind;
+    adFull = full;
+
+    ['adKnifeCard', 'adGloveCard', 'adAgentCard', 'adNameCard', 'adQualityCard']
+      .forEach(id => document.getElementById(id).style.display = 'none');
+    document.querySelectorAll('#adPicker .agent-btn, #adKnifeGrid .weapon-btn, #adGloveGrid .weapon-btn')
+      .forEach(b => b.classList.remove('selected'));
+
+    const name = document.getElementById('adNameCard');
+    const nameTitle = document.getElementById('adNameTitle');
+    const quality = document.getElementById('adQualityCard');
+
+    if (kind === 'knife') {
+      document.getElementById('adKnifeCard').style.display = 'block';
+    } else if (kind === 'glove') {
+      document.getElementById('adGloveCard').style.display = 'block';
+    } else if (kind === 'agent') {
+      document.getElementById('adAgentCard').style.display = 'block';
+    } else if (kind === 'other') {
+      nameTitle.textContent = 'Название предмета';
+      document.getElementById('adNameInput').placeholder = 'Полное название...';
+      name.style.display = 'block';
+      quality.style.display = 'block';
+      adApplyFlags();
+    } else {
+      nameTitle.textContent = 'Название скина';
+      document.getElementById('adNameInput').placeholder = 'Например: Redline, Asiimov...';
+      name.style.display = 'block';
+      quality.style.display = 'block';
+      adApplyFlags();
+    }
+  }
+
+  function adSelectSub(el, full) {
+    const scope = adKind === 'agent' ? '#adAgentList' : (adKind === 'knife' ? '#adKnifeGrid' : '#adGloveGrid');
+    document.querySelectorAll(scope + ' .weapon-btn, ' + scope + ' .agent-btn')
+      .forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    haptic('selection');
+    adFull = full;
+
+    const nameTitle = document.getElementById('adNameTitle');
+    const input = document.getElementById('adNameInput');
+    if (adKind === 'agent') {
+      nameTitle.textContent = 'Имя агента';
+      input.placeholder = 'Например: Sir Bloody Loudmouth Darryl';
+      document.getElementById('adQualityCard').style.display = 'none';  // у агентов износа нет
+    } else {
+      nameTitle.textContent = adKind === 'knife' ? 'Скин ножа' : 'Скин перчаток';
+      input.placeholder = 'Например: Fade, Doppler, Vice...';
+      document.getElementById('adQualityCard').style.display = 'block';
+      adApplyFlags();
+    }
+    document.getElementById('adNameCard').style.display = 'block';
+  }
+
+  function adApplyFlags() {
+    // Перчатки не бывают StatTrak, ножи не бывают сувенирными
+    document.getElementById('adStRow').style.display = adKind === 'glove' ? 'none' : '';
+    document.getElementById('adSvRow').style.display =
+      (adKind === 'glove' || adKind === 'knife') ? 'none' : '';
+  }
+
+  function adToggleGroup(id) {
+    const list = document.getElementById(id);
+    const open = list.style.display !== 'none';
+    list.style.display = open ? 'none' : 'flex';
+  }
+
+  function adSelectQuality(el) {
+    document.querySelectorAll('#adQualityList .quality-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    haptic('selection');
+  }
+
+  function adSelectST(v) {
+    adST = v;
+    haptic('selection');
+    document.getElementById('adStNo').classList.toggle('active', !v);
+    document.getElementById('adStYes').classList.toggle('active', v);
+  }
+
+  function adSelectSV(v) {
+    adSV = v;
+    haptic('selection');
+    document.getElementById('adSvNo').classList.toggle('active', !v);
+    document.getElementById('adSvYes').classList.toggle('active', v);
+  }
+
+  // Собирает market_hash_name в формате Steam: звезда, потом StatTrak™,
+  // качество в скобках, у агентов «Имя | Фракция» без износа.
+  function adBuildName() {
+    const skin = document.getElementById('adNameInput').value.trim();
+    const abbr = document.querySelector('#adQualityList .quality-btn.selected .q-abbr')?.textContent.trim();
+    const wear = QUALITY_FULL[abbr];
+
+    if (!adKind) return { err: 'Выбери оружие', card: 'adWeaponGrid' };
+
+    if (adKind === 'agent') {
+      if (!adFull) return { err: 'Выбери фракцию', card: 'adAgentCard' };
+      if (!skin) return { err: 'Впиши имя агента', card: 'adNameCard' };
+      return { hash: `${skin} | ${adFull}` };
+    }
+
+    if ((adKind === 'knife' || adKind === 'glove') && !adFull) {
+      return { err: 'Выбери тип', card: adKind === 'knife' ? 'adKnifeCard' : 'adGloveCard' };
+    }
+    if (!skin) return { err: 'Впиши название скина', card: 'adNameCard' };
+    if (!wear) return { err: 'Выбери качество', card: 'adQualityCard' };
+
+    if (adKind === 'other') return { hash: `${skin} (${wear})` };
+
+    let base = adFull;
+    let star = '';
+    if (base.startsWith('★ ')) { star = '★ '; base = base.slice(2); }
+
+    let prefix = '';
+    if (adKind !== 'glove') {
+      if (adSV && adKind !== 'knife') prefix = 'Souvenir ';
+      else if (adST) prefix = 'StatTrak™ ';
+    }
+    return { hash: `${star}${prefix}${base} | ${skin} (${wear})` };
+  }
+
+  function adAddItem() {
+    const built = adBuildName();
+    if (built.err) {
+      flashEl(document.getElementById(built.card));
+      adShowResult(built.err, false);
+      return;
+    }
+    ad.items.push(built.hash);
+    haptic('medium');
+    adClearResult();
+    adRenderItems();
+    adTogglePicker();
+  }
+
+  function adRemoveItem(i) {
+    ad.items.splice(i, 1);
+    haptic('light');
+    adRenderItems();
+  }
+
+  function adRenderItems() {
+    const list = document.getElementById('adItems');
+    const badge = document.getElementById('adBadge');
+
+    if (!ad.items.length) {
+      list.innerHTML = `<div class="empty-state"><div class="es-icon"><i class="ti ti-packages"></i></div>
+        <div class="es-t">Предметов нет</div>
+        <div class="es-s">В одну строку таблицы уйдут все предметы сделки</div></div>`;
+      badge.style.display = 'none';
+      return;
+    }
+
+    list.innerHTML = ad.items.map((hash, i) => {
+      const icon = skinIconImg(hash);
+      const gold = detectKnife(hash) || detectGlove(hash);
+      return `<div class="skin-card${gold ? ' rar-gold' : ''}">
+        <div class="sc-icon">${icon ? `<img src="${icon}" alt="">` : `<i class="ti ti-cube"></i>`}</div>
+        <div class="sc-info"><div class="sc-name">${hash}</div></div>
+        <button class="sc-remove" onclick="adRemoveItem(${i})" title="Убрать"><i class="ti ti-x"></i></button>
+      </div>`;
+    }).join('');
+
+    badge.textContent = ad.items.length;
+    badge.style.display = 'inline-flex';
+  }
+
+  function adSelectChannel(el, name) {
+    document.querySelectorAll('#adChannels .chan-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    haptic('selection');
+    ad.channel = name;
+  }
+
+  function adSelectTB(has) {
+    ad.tradeBan = has;
+    ad.banDays = null;
+    haptic('selection');
+    document.getElementById('adTbNo').classList.toggle('selected', !has);
+    document.getElementById('adTbYes').classList.toggle('selected', has);
+    document.getElementById('adDaysGrid').classList.toggle('visible', has);
+    document.querySelectorAll('#adDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+  }
+
+  function adSelectDay(el) {
+    document.querySelectorAll('#adDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    haptic('selection');
+    ad.banDays = parseInt(el.textContent.trim());
+  }
+
+  function adShowResult(text, ok) {
+    const box = document.getElementById('adResult');
+    box.textContent = text;
+    box.className = 'ad-result ' + (ok ? 'ok' : 'err');
+  }
+
+  function adClearResult() {
+    document.getElementById('adResult').className = 'ad-result';
+  }
+
+  async function adSubmit() {
+    if (ad.sending) return;  // защита от двойного тапа
+
+    const date = document.getElementById('adDate').value;
+    const buyRaw = document.getElementById('adBuy').value.trim();
+    const marketRaw = document.getElementById('adMarket').value.trim();
+    let party = document.getElementById('adParty').value.trim();
+
+    if (!date)                { flashEl(document.getElementById('adDate')); return adShowResult('Укажи дату оплаты', false); }
+    if (!ad.items.length)     { flashEl(document.getElementById('adItems')); return adShowResult('Добавь хотя бы один предмет', false); }
+    if (!party)               { flashEl(document.getElementById('adParty')); return adShowResult('Укажи контрагента', false); }
+    if (!ad.channel)          { flashEl(document.getElementById('adChannels')); return adShowResult('Выбери канал', false); }
+    if (ad.tradeBan === null) { flashEl(document.getElementById('adTbNo')); return adShowResult('Отметь трейд-бан', false); }
+    if (ad.tradeBan && !ad.banDays) { flashEl(document.getElementById('adDaysGrid')); return adShowResult('Выбери дни трейд-бана', false); }
+    if (buyRaw === '' || isNaN(parseFloat(buyRaw))) { flashEl(document.getElementById('adBuy')); return adShowResult('Впиши сумму покупки', false); }
+
+    if (!party.startsWith('@')) party = '@' + party;  // колонка не должна стать разнородной
+
+    const btn = document.getElementById('adSubmit');
+    ad.sending = true;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Записываю…';
+    adClearResult();
+
+    try {
+      const r = await fetch(ADMIN_API_URL + '/api/admin/purchase?v=' + APP_VERSION, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Telegram-Init-Data': tg?.initData || '',
+        },
+        body: JSON.stringify({
+          deal_id: ad.dealId,
+          date,
+          items: ad.items,
+          counterparty: party,
+          channel: ad.channel,
+          trade_ban: ad.tradeBan,
+          ban_days: ad.banDays,
+          buy_price_usd: parseFloat(buyRaw),
+          market_price_usd: marketRaw === '' ? null : parseFloat(marketRaw),
+        }),
+      });
+
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || `ошибка ${r.status}`);
+
+      haptic('success');
+      adShowResult(data.duplicate
+        ? 'Эта сделка уже записана — дубль не создан.'
+        : `Готово. Строка ID ${data.id} ушла в лист «Сделки».`, true);
+      adResetForm();
+    } catch (e) {
+      haptic('error');
+      adShowResult('Не записалось: ' + (e.message || 'нет связи') + '. Данные в форме сохранены, попробуй ещё раз.', false);
+    } finally {
+      ad.sending = false;
+      btn.disabled = false;
+      btn.textContent = 'Записать в таблицу';
+    }
+  }
+
+  function adResetForm() {
+    // Новый deal_id: следующая сделка должна стать новой строкой
+    ad.items = [];
+    ad.channel = null;
+    ad.tradeBan = null;
+    ad.banDays = null;
+    ad.dealId = newDealId();
+    document.getElementById('adParty').value = '';
+    document.getElementById('adBuy').value = '';
+    document.getElementById('adMarket').value = '';
+    document.querySelectorAll('#adChannels .chan-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('adTbNo').classList.remove('selected');
+    document.getElementById('adTbYes').classList.remove('selected');
+    document.getElementById('adDaysGrid').classList.remove('visible');
+    document.querySelectorAll('#adDaysGrid .day-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('adPicker').style.display = 'none';
+    document.getElementById('adPickerBtn').classList.remove('active');
+    adRenderItems();
   }
 
   // ── Инициализация ────────────────────────────────────────────────────────────
