@@ -409,6 +409,12 @@
     color: var(--accent-light); font-variant-numeric: tabular-nums;
   }
 
+  .own-ver {
+    text-align: center; margin-top: 9px;
+    font-size: 10px; letter-spacing: 0.14em; color: var(--t3); opacity: 0.55;
+    font-variant-numeric: tabular-nums;
+  }
+
   /* ── Деньги: суммы — главное на экране ── */
   .own-money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 4px; }
   .own-money-field label {
@@ -1551,9 +1557,9 @@
     <div class="own-row">
       <label for="adRate">Курс ₽ за $</label>
       <div class="own-stepper">
-        <button onclick="adBumpRate(-0.5)" aria-label="Уменьшить курс"><i class="ti ti-minus"></i></button>
-        <input id="adRate" type="number" inputmode="decimal" step="0.5" min="1" value="80" oninput="adRecalc()">
-        <button onclick="adBumpRate(0.5)" aria-label="Увеличить курс"><i class="ti ti-plus"></i></button>
+        <button onclick="adBumpRate(-1)" aria-label="Уменьшить курс"><i class="ti ti-minus"></i></button>
+        <input id="adRate" type="number" inputmode="decimal" step="1" min="1" value="80" oninput="adRecalc()">
+        <button onclick="adBumpRate(1)" aria-label="Увеличить курс"><i class="ti ti-plus"></i></button>
       </div>
     </div>
     <div class="own-row">
@@ -1568,6 +1574,9 @@
 
   <div class="own-bar">
     <button class="own-submit" id="adSubmit" onclick="adSubmit()">Записать в таблицу</button>
+    <!-- Версия на виду: Telegram кэширует Mini App, и «почему не работает»
+         чаще всего означает старую сборку в открытом окне -->
+    <div class="own-ver" id="adVer"></div>
   </div>
 </div>
 
@@ -2807,7 +2816,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 16;
+  const APP_VERSION = 17;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -2945,6 +2954,7 @@
       Array.from({ length: 7 }, (_, i) => `<div class="day-btn" onclick="adSelectDay(this)">${i + 1}</div>`).join('');
 
     document.getElementById('adRate').value = USD_RATE_DEFAULT;
+    document.getElementById('adVer').textContent = 'ВЕРСИЯ ' + APP_VERSION;
     adRenderItems();
     adRecalc();
   }
@@ -3186,15 +3196,23 @@
       }
     };
 
-    // market.csgo.com/ru/Rifle/AK-47/AK-47 | Inheritance (Battle-Scarred)
-    if (/market\.csgo\.com/i.test(raw)) {
-      const last = raw.split(/[?#]/)[0].replace(/\/+$/, '').split('/').pop();
-      return decode(last);
+    // Steam: имя лежит после идентификатора игры
+    const steam = raw.match(/\/market\/listings\/\d+\/([^?#/]+)/i);
+    if (steam) {
+      const name = decode(steam[1]);
+      if (name) return name;
     }
 
-    // Steam оставляем рабочим: ссылку оттуда тоже иногда удобно вставить
-    const steam = raw.match(/\/market\/listings\/\d+\/([^?#/]+)/i);
-    return steam ? decode(steam[1]) : null;
+    // Любой адрес: имя предмета — последний сегмент пути.
+    // market.csgo.com/ru/Rifle/AK-47/AK-47 | Inheritance (Battle-Scarred)
+    if (/^https?:\/\//i.test(raw) || raw.includes('/')) {
+      const last = raw.split(/[?#]/)[0].replace(/\/+$/, '').split('/').pop();
+      const name = decode(last);
+      if (name) return name;
+    }
+
+    // Вставили не ссылку, а само название — тоже принимаем
+    return decode(raw);
   }
 
   function adAddFromLink() {
@@ -3202,7 +3220,12 @@
     const name = parseItemLink(input.value);
     if (!name) {
       flashEl(input);
-      adShowResult('Не разобрал ссылку — нужен адрес страницы предмета на market.csgo.com', false);
+      // Показываем, что именно не разобралось: чаще всего это адрес
+      // категории, а не предмета
+      const tail = String(input.value || '').trim().split('/').pop().slice(0, 40);
+      adShowResult(tail
+        ? `Не разобрал: «${tail}». Нужна страница предмета, а не категории — в адресе должно быть полное название со скином.`
+        : 'Вставь ссылку на страницу предмета с market.csgo.com', false);
       return;
     }
     ad.items.push(name);
