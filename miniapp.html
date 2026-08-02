@@ -462,10 +462,6 @@
     margin: -10px 0 -6px -4px;
   }
   .own-cur:active { opacity: 0.5; }
-  .own-conv {
-    font-size: 11px; color: var(--gold); margin-top: 6px;
-    font-variant-numeric: tabular-nums; min-height: 13px;
-  }
   .own-money-input input {
     width: 100%; min-width: 0; background: none; border: none; outline: none;
     padding: 0 0 9px; color: #fff;
@@ -1579,7 +1575,6 @@
                   title="Переключить валюту">$</button>
           <input id="adBuy" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0" oninput="adSpread()">
         </div>
-        <div class="own-conv" id="adBuyConv"></div>
       </div>
       <div class="own-money-field">
         <label for="adMarketRub">Референс рынка</label>
@@ -2875,7 +2870,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 19;
+  const APP_VERSION = 20;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3425,12 +3420,6 @@
   function adSpread() {
     const buy = adBuyUsd();
     const ref = adMarketUsd();
-
-    // В рублях показываем, что уйдёт в таблицу — иначе легко не заметить,
-    // что число в поле и число в колонке разные
-    const conv = document.getElementById('adBuyConv');
-    conv.textContent = (adBuyCurrency === 'RUB' && buy !== null)
-      ? `в таблицу: $${buy.toFixed(2)}` : '';
     const box = document.getElementById('adSpreadBox');
     const label = document.getElementById('adSpreadLabel');
     const val = document.getElementById('adSpreadVal');
