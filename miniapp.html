@@ -450,18 +450,29 @@
 
   /* Валюта — не подпись, а переключатель: платим и рублями тоже,
      а в таблицу всё равно уходят доллары */
+  /* Компактная плашка вместо пунктира: сразу читается как кнопка,
+     а подчёркивание выглядело браком вёрстки */
   .own-cur {
-    background: none; border: none; cursor: pointer;
+    flex-shrink: 0; cursor: pointer; border: none;
+    background: var(--accent-soft);
+    border-radius: 7px; padding: 4px 8px; margin: 0 8px 5px 0;
     color: var(--accent2); font-family: var(--font-ui);
-    font-size: 15px; font-weight: 700;
-    border-bottom: 1px dotted var(--line-accent);
-    transition: opacity 0.15s;
-    /* Область нажатия растим вверх и вниз, а не вбок: иначе кнопка залезает
-       под поле ввода и тап по началу числа переключает валюту */
-    padding: 10px 4px 6px 4px;
-    margin: -10px 0 -6px -4px;
+    font-size: 13px; font-weight: 700; line-height: 1;
+    transition: background 0.16s, transform 0.14s var(--ease);
   }
-  .own-cur:active { opacity: 0.5; }
+  .own-cur { position: relative; }
+  /* Зона нажатия шире плашки: сама плашка должна остаться компактной,
+     но попадать в неё пальцем — без промахов. Вправо не растягиваем,
+     иначе тап по началу числа переключит валюту */
+  .own-cur::before { content: ''; position: absolute; inset: -11px -2px -11px -6px; }
+  .own-cur:active { transform: scale(0.9); background: rgba(45,212,191,0.24); }
+
+  /* Пересчёт живёт в подписи поля, а не отдельной строкой под ним */
+  .own-conv {
+    margin-left: 7px; color: var(--accent2); font-weight: 600;
+    letter-spacing: 0.02em; text-transform: none;
+    font-variant-numeric: tabular-nums;
+  }
   .own-money-input input {
     width: 100%; min-width: 0; background: none; border: none; outline: none;
     padding: 0 0 9px; color: #fff;
@@ -1569,7 +1580,7 @@
     <div class="own-card-h"><i class="ti ti-cash"></i>Деньги</div>
     <div class="own-money-grid">
       <div class="own-money-field">
-        <label for="adBuy">Отдал</label>
+        <label for="adBuy">Отдал<b class="own-conv" id="adBuyConv"></b></label>
         <div class="own-money-input">
           <button type="button" class="own-cur" id="adBuyCur" onclick="adToggleBuyCur()"
                   title="Переключить валюту">$</button>
@@ -2870,7 +2881,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 20;
+  const APP_VERSION = 21;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3420,6 +3431,13 @@
   function adSpread() {
     const buy = adBuyUsd();
     const ref = adMarketUsd();
+
+    // В рублях подпись поля показывает, что уйдёт в таблицу: число в поле
+    // и число в колонке разные, и это должно быть видно без счёта в уме
+    const conv = document.getElementById('adBuyConv');
+    conv.textContent = (adBuyCurrency === 'RUB' && buy !== null)
+      ? '$' + buy.toFixed(2) : '';
+
     const box = document.getElementById('adSpreadBox');
     const label = document.getElementById('adSpreadLabel');
     const val = document.getElementById('adSpreadVal');
