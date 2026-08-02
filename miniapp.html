@@ -447,6 +447,25 @@
   }
   .own-money-input:focus-within { border-bottom-color: var(--accent2); }
   .own-money-input span { font-size: 15px; color: var(--t3); font-weight: 500; }
+
+  /* Валюта — не подпись, а переключатель: платим и рублями тоже,
+     а в таблицу всё равно уходят доллары */
+  .own-cur {
+    background: none; border: none; cursor: pointer;
+    color: var(--accent2); font-family: var(--font-ui);
+    font-size: 15px; font-weight: 700;
+    border-bottom: 1px dotted var(--line-accent);
+    transition: opacity 0.15s;
+    /* Область нажатия растим вверх и вниз, а не вбок: иначе кнопка залезает
+       под поле ввода и тап по началу числа переключает валюту */
+    padding: 10px 4px 6px 4px;
+    margin: -10px 0 -6px -4px;
+  }
+  .own-cur:active { opacity: 0.5; }
+  .own-conv {
+    font-size: 11px; color: var(--gold); margin-top: 6px;
+    font-variant-numeric: tabular-nums; min-height: 13px;
+  }
   .own-money-input input {
     width: 100%; min-width: 0; background: none; border: none; outline: none;
     padding: 0 0 9px; color: #fff;
@@ -1555,9 +1574,12 @@
     <div class="own-money-grid">
       <div class="own-money-field">
         <label for="adBuy">Отдал</label>
-        <div class="own-money-input"><span>$</span>
+        <div class="own-money-input">
+          <button type="button" class="own-cur" id="adBuyCur" onclick="adToggleBuyCur()"
+                  title="Переключить валюту">$</button>
           <input id="adBuy" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0" oninput="adSpread()">
         </div>
+        <div class="own-conv" id="adBuyConv"></div>
       </div>
       <div class="own-money-field">
         <label for="adMarketRub">Референс рынка</label>
@@ -2853,7 +2875,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 18;
+  const APP_VERSION = 19;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3316,7 +3338,7 @@
       box.classList.add('on');
 
       document.getElementById('adMarketRub').value = data.total_rub || '';
-      if (data.usd_rate) document.getElementById('adRate').value = data.usd_rate;
+      // Курс не трогаем: он выставлен вручную и подтягивание цен его не касается
       adUsdManual = false;   // пришли свежие цены — считаем заново
       adRecalc();
 
@@ -3379,16 +3401,42 @@
     adSpread();
   }
 
+  // Платить можем и рублями, а в таблицу всё равно уходят доллары:
+  // валюта переключается прямо на знаке перед суммой.
+  let adBuyCurrency = 'USD';
+
+  function adToggleBuyCur() {
+    adBuyCurrency = adBuyCurrency === 'USD' ? 'RUB' : 'USD';
+    document.getElementById('adBuyCur').textContent = adBuyCurrency === 'USD' ? '$' : '₽';
+    haptic('selection');
+    adSpread();
+  }
+
+  function adBuyUsd() {
+    const v = parseFloat(document.getElementById('adBuy').value);
+    if (isNaN(v)) return null;
+    if (adBuyCurrency === 'USD') return v;
+    const rate = parseFloat(document.getElementById('adRate').value);
+    if (isNaN(rate) || rate <= 0) return null;
+    return Math.round(v / rate * 100) / 100;
+  }
+
   // Спред считается только для глаз: колонки под него в таблице нет
   function adSpread() {
-    const buy = parseFloat(document.getElementById('adBuy').value);
+    const buy = adBuyUsd();
     const ref = adMarketUsd();
+
+    // В рублях показываем, что уйдёт в таблицу — иначе легко не заметить,
+    // что число в поле и число в колонке разные
+    const conv = document.getElementById('adBuyConv');
+    conv.textContent = (adBuyCurrency === 'RUB' && buy !== null)
+      ? `в таблицу: $${buy.toFixed(2)}` : '';
     const box = document.getElementById('adSpreadBox');
     const label = document.getElementById('adSpreadLabel');
     const val = document.getElementById('adSpreadVal');
 
     box.classList.remove('plus', 'minus');
-    if (isNaN(buy) || ref === null || !buy) {
+    if (buy === null || ref === null || !buy) {
       label.textContent = ref === null ? 'Референс не заполнен' : 'Впиши сумму покупки';
       val.textContent = '—';
       return;
@@ -3437,7 +3485,7 @@
     if (ad.sending) return;  // защита от двойного тапа
 
     const date = document.getElementById('adDate').value;
-    const buyRaw = document.getElementById('adBuy').value.trim();
+    const buyUsd = adBuyUsd();   // рубли уже переведены по курсу из формы
     const marketUsd = adMarketUsd();   // рубли, делённые на курс из формы
     let party = document.getElementById('adParty').value.trim();
 
@@ -3447,7 +3495,7 @@
     if (!ad.channel)          { flashEl(document.getElementById('adChannels')); return adShowResult('Выбери канал', false); }
     if (ad.tradeBan === null) { flashEl(document.getElementById('adTbNo')); return adShowResult('Отметь трейд-бан', false); }
     if (ad.tradeBan && !ad.banDays) { flashEl(document.getElementById('adDaysGrid')); return adShowResult('Выбери дни трейд-бана', false); }
-    if (buyRaw === '' || isNaN(parseFloat(buyRaw))) { flashEl(document.getElementById('adBuy')); return adShowResult('Впиши сумму покупки', false); }
+    if (buyUsd === null) { flashEl(document.getElementById('adBuy')); return adShowResult('Впиши сумму покупки', false); }
 
     if (!party.startsWith('@')) party = '@' + party;  // колонка не должна стать разнородной
 
@@ -3472,7 +3520,7 @@
           channel: ad.channel,
           trade_ban: ad.tradeBan,
           ban_days: ad.banDays,
-          buy_price_usd: parseFloat(buyRaw),
+          buy_price_usd: buyUsd,
           market_price_usd: marketUsd,
         }),
       });
