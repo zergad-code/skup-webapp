@@ -295,6 +295,8 @@
     border-bottom: 1px solid var(--line);
     animation: fadeIn 0.25s ease backwards;
   }
+  /* Линия под последним ничего не отделяет — дальше кнопки со своими рамками */
+  .own-item:last-child { border-bottom: none; }
   .own-item-ic {
     width: 30px; height: 30px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
@@ -319,7 +321,8 @@
   .own-item-del i { font-size: 15px; }
   .own-item-del:active { transform: scale(0.85); color: var(--danger); }
 
-  .own-items:empty + .own-add { margin-top: 4px; }
+  /* Устарело после смены разметки: кнопки теперь в .own-add-row */
+  .own-items:empty + .own-add-row { margin-top: 13px; }
   .own-add {
     display: flex; align-items: center; gap: 9px;
     width: 100%; margin-top: 4px; padding: 14px 0;
@@ -384,6 +387,7 @@
     flex-shrink: 0; font-family: var(--font-display); font-size: 12.5px;
     font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
   }
+  .own-price:last-child { border-bottom: none; }
   .own-price.miss b { color: var(--danger); font-weight: 500; }
   .own-fixed {
     display: block; margin-top: 3px;
@@ -444,7 +448,7 @@
   }
 
   /* ── Деньги: суммы — главное на экране ── */
-  .own-money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 4px; }
+  .own-money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 13px; }
   .own-money-field label {
     display: block; font-size: 11px; color: var(--t3);
     letter-spacing: 0.1em; text-transform: uppercase;
@@ -496,8 +500,7 @@
   /* Спред считается на лету и никуда не пишется — колонок под него нет */
   .own-spread {
     display: flex; align-items: baseline; justify-content: space-between;
-    margin-top: 20px; padding-top: 13px;
-    border-top: 1px solid var(--line);
+    padding-top: 13px;
     font-size: 11.5px; color: var(--t3);
     letter-spacing: 0.04em;
   }
@@ -587,7 +590,7 @@
   .admin-app .tb-row {
     display: grid; grid-template-columns: 1fr 1fr; gap: 0;
     border: 1px solid var(--line2); border-radius: 10px;
-    overflow: hidden; margin: 14px 0 0;
+    overflow: hidden; margin: 13px 0 0;
   }
   .admin-app .tb-btn {
     border: none; border-radius: 0; background: none;
@@ -2925,7 +2928,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 22;
+  const APP_VERSION = 23;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
