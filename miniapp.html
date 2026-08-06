@@ -2524,9 +2524,16 @@
       if (response.status === 429) {
         throw new Error('Слишком много распознаваний подряд. Попробуй позже или добавь скин вручную');
       }
-      if (!response.ok) throw new Error('Ошибка сервера ' + response.status);
 
-      const data = await response.json();
+      // Тело читаем до проверки статуса: при ошибке сервер объясняет причину,
+      // а номер кода сам по себе не говорит ничего
+      const data = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(data?.error
+          ? `${response.status}: ${data.error}`
+          : 'Ошибка сервера ' + response.status);
+      }
+      if (!data) throw new Error('Сервер ответил не по формату');
       if (data.error || !data.skin) throw new Error('Скин не распознан');
 
       pendingRecognized = {
@@ -2943,7 +2950,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 24;
+  const APP_VERSION = 25;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
