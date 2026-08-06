@@ -441,6 +441,77 @@
   /* Ручной ввод помечаем цветом: видно, что число не пересчитанное */
   .own-usd-box.manual input { color: var(--gold); }
 
+  /* ── Переход к статистике и обратно ── */
+  .own-jump {
+    margin-left: auto; flex-shrink: 0; cursor: pointer;
+    background: none; border: none; padding: 0;
+    color: var(--accent2); font-family: var(--font-ui);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: opacity 0.15s;
+  }
+  .own-jump:active { opacity: 0.55; }
+
+  .own-back {
+    display: flex; align-items: center; gap: 8px;
+    background: none; border: none; cursor: pointer;
+    padding: 0 0 20px; margin: 0;
+    color: var(--accent2); font-family: var(--font-ui);
+    font-size: 13px; font-weight: 600;
+  }
+  .own-back i { font-size: 16px; }
+  .own-back:active { opacity: 0.55; }
+
+  /* ── Статистика ── */
+  .stat-big { display: flex; gap: 26px; padding: 13px 0 4px; }
+  .stat-big div { min-width: 0; }
+  .stat-big span {
+    display: block; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--t3); margin-bottom: 6px;
+  }
+  .stat-big b {
+    font-family: var(--font-display); font-size: 24px; font-weight: 600;
+    color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  }
+
+  .stat-split { display: flex; gap: 10px; padding-top: 13px; }
+  .stat-split div {
+    flex: 1; min-width: 0; padding: 11px 12px;
+    border-radius: var(--r-s); background: var(--surface);
+  }
+  .stat-split span {
+    display: block; font-size: 10.5px; letter-spacing: 0.06em;
+    color: var(--t3); margin-bottom: 5px;
+  }
+  .stat-split b {
+    font-family: var(--font-display); font-size: 16px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-split .got b { color: var(--success); }
+  .stat-split .wait b { color: var(--gold); }
+
+  .stat-person {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--line);
+  }
+  .stat-person:last-child { border-bottom: none; }
+  .stat-person .who { flex: 1; min-width: 0; }
+  .stat-person .nick {
+    font-size: 13.5px; color: #fff; font-weight: 500;
+    overflow-wrap: anywhere; line-height: 1.35;
+  }
+  .stat-person .parts { font-size: 11px; color: var(--t3); margin-top: 4px; }
+  .stat-person .parts i { font-style: normal; }
+  .stat-person .parts .got { color: var(--success); }
+  .stat-person .parts .wait { color: var(--gold); }
+  .stat-person .sum {
+    flex-shrink: 0; font-family: var(--font-display);
+    font-size: 14px; font-weight: 600; color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-empty { padding: 16px 0; font-size: 13px; color: var(--t3); }
+
   .own-ver {
     text-align: center; margin-top: 9px;
     font-size: 10px; letter-spacing: 0.14em; color: var(--t3); opacity: 0.55;
@@ -1527,8 +1598,11 @@
 <!-- Рисуется только после того, как бэкенд подтвердил подпись.
      Параметр screen=table сам по себе прав не даёт. -->
 <div class="admin-app" id="adminApp">
+<div id="adFormPane">
   <section class="own-card">
-    <div class="own-card-h"><i class="ti ti-file-invoice"></i>Сделка</div>
+    <div class="own-card-h"><i class="ti ti-file-invoice"></i>Сделка
+      <button type="button" class="own-jump" onclick="adOpenStats()">Статистика</button>
+    </div>
     <div class="own-row">
       <label for="adDate">Дата оплаты</label>
       <input class="own-input" id="adDate" type="date" onchange="adSync()">
@@ -1675,6 +1749,15 @@
          чаще всего означает старую сборку в открытом окне -->
     <div class="own-ver" id="adVer"></div>
   </div>
+</div><!-- /#adFormPane -->
+
+<!-- ── Страница статистики ── -->
+<div id="adStatsPane" style="display:none;">
+  <button type="button" class="own-back" onclick="adCloseStats()">
+    <i class="ti ti-arrow-left"></i>К новой сделке
+  </button>
+  <div id="adStatsBody"></div>
+</div>
 </div>
 
 </div><!-- /.app -->
@@ -2950,7 +3033,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 25;
+  const APP_VERSION = 26;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3317,6 +3400,85 @@
       adBuyUsd() !== null,
     ].filter(Boolean).length;
     document.getElementById('adFill').style.transform = `scaleX(${done / 6})`;
+  }
+
+  // ── Статистика ───────────────────────────────────────────────────────────
+  const money = v => '$' + Number(v || 0).toLocaleString('ru-RU',
+    { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  function adOpenStats() {
+    document.getElementById('adFormPane').style.display = 'none';
+    document.getElementById('adStatsPane').style.display = 'block';
+    haptic('light');
+    window.scrollTo(0, 0);
+    adLoadStats();
+  }
+
+  function adCloseStats() {
+    document.getElementById('adStatsPane').style.display = 'none';
+    document.getElementById('adFormPane').style.display = 'block';
+    haptic('light');
+    window.scrollTo(0, 0);
+  }
+
+  async function adLoadStats() {
+    const box = document.getElementById('adStatsBody');
+    box.innerHTML = '<div class="stat-empty"><span class="spinner"></span>Считаю…</div>';
+    try {
+      const r = await fetch(ADMIN_API_URL + '/api/admin/stats?v=' + APP_VERSION, {
+        headers: { 'X-Telegram-Init-Data': tg?.initData || '' },
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(d?.error || `ошибка ${r.status}`);
+      adRenderStats(d);
+    } catch (e) {
+      box.innerHTML = `<div class="stat-empty" style="color:var(--danger)">
+        Не удалось получить: ${e.message || 'нет связи'}</div>`;
+    }
+  }
+
+  function adRenderStats(d) {
+    const box = document.getElementById('adStatsBody');
+    if (!d.count) {
+      box.innerHTML = `<section class="own-card">
+        <div class="own-card-h">Открытые сделки</div>
+        <div class="stat-empty">Открытых сделок нет — всё закрыто</div>
+      </section>`;
+      return;
+    }
+
+    // Разбивку «получено / ждём» показываем, только если есть обе стороны:
+    // иначе это просто повтор общей суммы
+    const обе = d.received > 0 && d.pending > 0;
+    const люди = d.people.map(p => {
+      const части = (p.received > 0 && p.pending > 0)
+        ? `<i class="got">получено ${money(p.received)}</i> · <i class="wait">ждём ${money(p.pending)}</i>`
+        : (p.pending > 0 ? '<i class="wait">скины не получены</i>' : '<i class="got">скины у нас</i>');
+      return `<div class="stat-person">
+        <div class="who">
+          <div class="nick">${p.name}</div>
+          <div class="parts">${части}${p.count > 1 ? ` · сделок ${p.count}` : ''}</div>
+        </div>
+        <div class="sum">${money(p.total)}</div>
+      </div>`;
+    }).join('');
+
+    box.innerHTML = `
+      <section class="own-card">
+        <div class="own-card-h">Открытые сделки</div>
+        <div class="stat-big">
+          <div><span>Сделок</span><b>${d.count}</b></div>
+          <div><span>Вложено</span><b>${money(d.total)}</b></div>
+        </div>
+        ${обе ? `<div class="stat-split">
+          <div class="got"><span>Скины у нас</span><b>${money(d.received)}</b></div>
+          <div class="wait"><span>Ещё ждём</span><b>${money(d.pending)}</b></div>
+        </div>` : ''}
+      </section>
+      <section class="own-card">
+        <div class="own-card-h">Контрагенты<span class="own-count on">${d.people.length}</span></div>
+        ${люди}
+      </section>`;
   }
 
   function adToggleLink() {
