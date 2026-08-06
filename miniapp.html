@@ -1684,6 +1684,9 @@
   const API_URL = 'https://motivated-gratitude-production-dddc.up.railway.app/recognize';
   const ADMIN_API_URL = 'https://skin-bot-production.up.railway.app';
   const ICONS_BASE = 'https://zergad-code.github.io/skup-webapp/icons/';
+  // Личный опознаватель из адреса кнопки. Нужен сервису распознавания:
+  // запуск с reply-клавиатуры подписи Telegram не получает, а Vision платный.
+  const WEBAPP_TOKEN = new URLSearchParams(location.search).get('t') || '';
   const ic = name => ICONS_BASE + encodeURIComponent(name);
 
   // ── Telegram ─────────────────────────────────────────────────────────────────
@@ -2505,10 +2508,22 @@
 
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // Кто запрашивает. Токен приходит в адресе кнопки: с reply-клавиатуры
+          // Telegram подписи не даёт, а распознавание стоит денег
+          'X-Webapp-Token': WEBAPP_TOKEN,
+          'X-Telegram-Init-Data': tg?.initData || '',
+        },
         body: JSON.stringify({ image: base64, media_type: mediaType }),
       });
 
+      if (response.status === 401) {
+        throw new Error('Приложение устарело. Закрой его и напиши боту /start');
+      }
+      if (response.status === 429) {
+        throw new Error('Слишком много распознаваний подряд. Попробуй позже или добавь скин вручную');
+      }
       if (!response.ok) throw new Error('Ошибка сервера ' + response.status);
 
       const data = await response.json();
@@ -2928,11 +2943,12 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 23;
+  const APP_VERSION = 24;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
   const SCREEN = new URLSearchParams(location.search).get('screen') || '';
+
 
 
   async function checkAdminSession() {
