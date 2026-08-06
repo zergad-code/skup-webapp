@@ -462,56 +462,68 @@
   .own-back i { font-size: 16px; }
   .own-back:active { opacity: 0.55; }
 
-  /* ── Статистика ── */
-  .stat-big { display: flex; gap: 26px; padding: 13px 0 4px; }
-  .stat-big div { min-width: 0; }
-  .stat-big span {
-    display: block; font-size: 10px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--t3); margin-bottom: 6px;
+  /* ── Статистика: не форма, а сводка — числа крупно, доли видно ── */
+  .stat-hero { padding: 16px 0 4px; }
+  .stat-hero .sum {
+    font-family: var(--font-display); font-size: 34px; font-weight: 600;
+    color: #fff; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+    line-height: 1.05;
   }
-  .stat-big b {
-    font-family: var(--font-display); font-size: 24px; font-weight: 600;
-    color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
-  }
+  .stat-hero .sub { font-size: 12px; color: var(--t3); margin-top: 8px; }
 
-  .stat-split { display: flex; gap: 10px; padding-top: 13px; }
-  .stat-split div {
-    flex: 1; min-width: 0; padding: 11px 12px;
-    border-radius: var(--r-s); background: var(--surface);
+  /* Полоса долей: доля ожидания видна раньше, чем прочитаны цифры */
+  .stat-bar {
+    display: flex; height: 8px; border-radius: 5px; overflow: hidden;
+    margin: 18px 0 14px; background: var(--surface2);
   }
-  .stat-split span {
-    display: block; font-size: 10.5px; letter-spacing: 0.06em;
-    color: var(--t3); margin-bottom: 5px;
+  .stat-bar i { display: block; height: 100%; }
+  .stat-bar .got  { background: var(--success); }
+  .stat-bar .wait { background: var(--gold); }
+
+  .stat-legend { display: flex; gap: 22px; }
+  .stat-legend > div { min-width: 0; }
+  .stat-legend span {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--t3); margin-bottom: 5px;
   }
-  .stat-split b {
+  .stat-legend span::before {
+    content: ''; width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0;
+  }
+  .stat-legend .got span::before  { background: var(--success); }
+  .stat-legend .wait span::before { background: var(--gold); }
+  .stat-legend b {
     font-family: var(--font-display); font-size: 16px; font-weight: 600;
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: tabular-nums; color: var(--text);
   }
-  .stat-split .got b { color: var(--success); }
-  .stat-split .wait b { color: var(--gold); }
 
-  .stat-person {
-    display: flex; align-items: baseline; gap: 12px;
-    padding: 12px 0; border-bottom: 1px solid var(--line);
-  }
+  .stat-person { padding: 13px 0; border-bottom: 1px solid var(--line); }
   .stat-person:last-child { border-bottom: none; }
-  .stat-person .who { flex: 1; min-width: 0; }
+  .stat-person .top {
+    display: flex; align-items: baseline; gap: 12px;
+  }
   .stat-person .nick {
+    flex: 1; min-width: 0;
     font-size: 13.5px; color: #fff; font-weight: 500;
     overflow-wrap: anywhere; line-height: 1.35;
   }
-  .stat-person .parts { font-size: 11px; color: var(--t3); margin-top: 4px; }
-  .stat-person .parts i { font-style: normal; }
-  .stat-person .parts .got { color: var(--success); }
-  .stat-person .parts .wait { color: var(--gold); }
   .stat-person .sum {
     flex-shrink: 0; font-family: var(--font-display);
     font-size: 14px; font-weight: 600; color: var(--text);
     font-variant-numeric: tabular-nums;
   }
+  .stat-person .bar {
+    display: flex; height: 3px; border-radius: 2px; overflow: hidden;
+    margin: 9px 0 7px; background: var(--surface2);
+  }
+  .stat-person .bar i { display: block; height: 100%; }
+  .stat-person .bar .got  { background: var(--success); }
+  .stat-person .bar .wait { background: var(--gold); }
+  .stat-person .parts { font-size: 11px; color: var(--t3); }
+  .stat-person .parts i { font-style: normal; }
+  .stat-person .parts .got  { color: var(--success); }
+  .stat-person .parts .wait { color: var(--gold); }
 
   .stat-empty { padding: 16px 0; font-size: 13px; color: var(--t3); }
-
   .own-ver {
     text-align: center; margin-top: 9px;
     font-size: 10px; letter-spacing: 0.14em; color: var(--t3); opacity: 0.55;
@@ -3033,7 +3045,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 26;
+  const APP_VERSION = 27;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3406,6 +3418,14 @@
   const money = v => '$' + Number(v || 0).toLocaleString('ru-RU',
     { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  // «1 сделка», «2 сделки», «5 сделок» — иначе цифра рядом со словом режет глаз
+  function склонение(n, одна, две, много) {
+    const m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return одна;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return две;
+    return много;
+  }
+
   function adOpenStats() {
     document.getElementById('adFormPane').style.display = 'none';
     document.getElementById('adStatsPane').style.display = 'block';
@@ -3447,36 +3467,51 @@
       return;
     }
 
-    // Разбивку «получено / ждём» показываем, только если есть обе стороны:
-    // иначе это просто повтор общей суммы
+    const bar = (got, wait) => {
+      const всего = got + wait;
+      if (!всего) return '';
+      const g = Math.round(got / всего * 100);
+      return `<i class="got" style="width:${g}%"></i><i class="wait" style="width:${100 - g}%"></i>`;
+    };
+
+    // Разбивку показываем, только если есть обе стороны: иначе это просто
+    // повтор общей суммы
     const обе = d.received > 0 && d.pending > 0;
+
     const люди = d.people.map(p => {
-      const части = (p.received > 0 && p.pending > 0)
-        ? `<i class="got">получено ${money(p.received)}</i> · <i class="wait">ждём ${money(p.pending)}</i>`
-        : (p.pending > 0 ? '<i class="wait">скины не получены</i>' : '<i class="got">скины у нас</i>');
+      const пара = p.received > 0 && p.pending > 0;
+      const части = пара
+        ? `<i class="got">в инвентаре ${money(p.received)}</i> · <i class="wait">в ожидании ${money(p.pending)}</i>`
+        : (p.pending > 0 ? '<i class="wait">в ожидании</i>' : '<i class="got">в инвентаре</i>');
       return `<div class="stat-person">
-        <div class="who">
+        <div class="top">
           <div class="nick">${p.name}</div>
-          <div class="parts">${части}${p.count > 1 ? ` · сделок ${p.count}` : ''}</div>
+          <div class="sum">${money(p.total)}</div>
         </div>
-        <div class="sum">${money(p.total)}</div>
+        ${пара ? `<div class="bar">${bar(p.received, p.pending)}</div>` : ''}
+        <div class="parts">${части}${p.count > 1 ? ` · сделок ${p.count}` : ''}</div>
       </div>`;
     }).join('');
 
+    const сделки = склонение(d.count, 'сделка', 'сделки', 'сделок');
+    const контрагенты = склонение(d.people.length, 'контрагент', 'контрагента', 'контрагентов');
+
     box.innerHTML = `
       <section class="own-card">
-        <div class="own-card-h">Открытые сделки</div>
-        <div class="stat-big">
-          <div><span>Сделок</span><b>${d.count}</b></div>
-          <div><span>Вложено</span><b>${money(d.total)}</b></div>
+        <div class="own-card-h">Открыто</div>
+        <div class="stat-hero">
+          <div class="sum">${money(d.total)}</div>
+          <div class="sub">${d.count} ${сделки} · ${d.people.length} ${контрагенты}</div>
         </div>
-        ${обе ? `<div class="stat-split">
-          <div class="got"><span>Скины у нас</span><b>${money(d.received)}</b></div>
-          <div class="wait"><span>Ещё ждём</span><b>${money(d.pending)}</b></div>
-        </div>` : ''}
+        ${обе ? `
+          <div class="stat-bar">${bar(d.received, d.pending)}</div>
+          <div class="stat-legend">
+            <div class="got"><span>В инвентаре</span><b>${money(d.received)}</b></div>
+            <div class="wait"><span>В ожидании</span><b>${money(d.pending)}</b></div>
+          </div>` : ''}
       </section>
       <section class="own-card">
-        <div class="own-card-h">Контрагенты<span class="own-count on">${d.people.length}</span></div>
+        <div class="own-card-h">Контрагенты</div>
         ${люди}
       </section>`;
   }
