@@ -442,15 +442,18 @@
   .own-usd-box.manual input { color: var(--gold); }
 
   /* ── Переход к статистике и обратно ── */
+  /* Той же породы, что кнопка записи: заливка акцентом, тёмный текст */
   .own-jump {
     margin-left: auto; flex-shrink: 0; cursor: pointer;
-    background: none; border: none; padding: 0;
-    color: var(--accent2); font-family: var(--font-ui);
-    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
-    text-transform: uppercase;
-    transition: opacity 0.15s;
+    background: var(--accent2); border: none;
+    border-radius: 8px; padding: 6px 12px;
+    color: #04231f; font-family: var(--font-ui);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+    text-transform: none;
+    box-shadow: 0 4px 12px rgba(45,212,191,0.22);
+    transition: transform 0.16s var(--ease), opacity 0.2s;
   }
-  .own-jump:active { opacity: 0.55; }
+  .own-jump:active { transform: scale(0.94); opacity: 0.9; }
 
   .own-back {
     display: flex; align-items: center; gap: 8px;
@@ -502,10 +505,23 @@
     display: flex; align-items: baseline; gap: 12px;
   }
   .stat-person .nick {
-    flex: 1; min-width: 0;
+    flex: 1; min-width: 0; text-align: left;
     font-size: 13.5px; color: #fff; font-weight: 500;
     overflow-wrap: anywhere; line-height: 1.35;
+    font-family: var(--font-ui);
+    background: none; border: none; padding: 0;
   }
+  /* Ссылкой становится только то, что похоже на юзернейм Telegram:
+     в колонке бывают заметки и имена не из мессенджера */
+  .stat-person .nick.link {
+    cursor: pointer; color: var(--accent-light);
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .stat-person .nick.link::after {
+    content: '\ea9d'; font-family: 'tabler-icons';
+    font-size: 12px; opacity: 0.6;
+  }
+  .stat-person .nick.link:active { opacity: 0.6; }
   .stat-person .sum {
     flex-shrink: 0; font-family: var(--font-display);
     font-size: 14px; font-weight: 600; color: var(--text);
@@ -3045,7 +3061,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 27;
+  const APP_VERSION = 28;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3418,6 +3434,20 @@
   const money = v => '$' + Number(v || 0).toLocaleString('ru-RU',
     { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  // Юзернейм Telegram: 5–32 знака, начинается с буквы, только буквы, цифры
+  // и подчёркивание. Всё остальное в колонке «Контрагент» — заметка или имя
+  // не из мессенджера, и ссылкой его делать нельзя: тап открыл бы пустоту.
+  const TG_NICK = /^@?[A-Za-z][A-Za-z0-9_]{4,31}$/;
+
+  function nickHtml(name) {
+    const имя = String(name || '').trim();
+    if (!TG_NICK.test(имя)) {
+      return `<div class="nick">${имя || 'без имени'}</div>`;
+    }
+    const ник = имя.replace(/^@/, '');
+    return `<button class="nick link" onclick="openTgLink(event,'${ник}')">@${ник}</button>`;
+  }
+
   // «1 сделка», «2 сделки», «5 сделок» — иначе цифра рядом со словом режет глаз
   function склонение(n, одна, две, много) {
     const m10 = n % 10, m100 = n % 100;
@@ -3485,7 +3515,7 @@
         : (p.pending > 0 ? '<i class="wait">в ожидании</i>' : '<i class="got">в инвентаре</i>');
       return `<div class="stat-person">
         <div class="top">
-          <div class="nick">${p.name}</div>
+          ${nickHtml(p.name)}
           <div class="sum">${money(p.total)}</div>
         </div>
         ${пара ? `<div class="bar">${bar(p.received, p.pending)}</div>` : ''}
