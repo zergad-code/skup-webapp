@@ -504,8 +504,15 @@
   .stat-person .top {
     display: flex; align-items: baseline; gap: 12px;
   }
+  /* Ник и число сделок стоят рядом, переносясь при длинном нике */
+  .stat-person .who {
+    flex: 1; min-width: 0;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 9px;
+  }
+  .stat-person .cnt { font-size: 11px; color: var(--t3); white-space: nowrap; }
+
   .stat-person .nick {
-    flex: 1; min-width: 0; text-align: left;
+    flex: 0 1 auto; min-width: 0; text-align: left;
     font-size: 13.5px; color: #fff; font-weight: 500;
     overflow-wrap: anywhere; line-height: 1.35;
     font-family: var(--font-ui);
@@ -3061,7 +3068,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 28;
+  const APP_VERSION = 29;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3504,8 +3511,9 @@
       return `<i class="got" style="width:${g}%"></i><i class="wait" style="width:${100 - g}%"></i>`;
     };
 
-    // Разбивку показываем, только если есть обе стороны: иначе это просто
-    // повтор общей суммы
+    // Полосу рисуем всегда: при одной стороне она сплошного цвета, и это
+    // читается быстрее любой подписи. Цифры под ней — только когда есть обе,
+    // иначе они просто повторяли бы общую сумму.
     const обе = d.received > 0 && d.pending > 0;
 
     const люди = d.people.map(p => {
@@ -3515,11 +3523,14 @@
         : (p.pending > 0 ? '<i class="wait">в ожидании</i>' : '<i class="got">в инвентаре</i>');
       return `<div class="stat-person">
         <div class="top">
-          ${nickHtml(p.name)}
+          <div class="who">
+            ${nickHtml(p.name)}
+            <span class="cnt">${p.count} ${склонение(p.count, 'сделка', 'сделки', 'сделок')}</span>
+          </div>
           <div class="sum">${money(p.total)}</div>
         </div>
-        ${пара ? `<div class="bar">${bar(p.received, p.pending)}</div>` : ''}
-        <div class="parts">${части}${p.count > 1 ? ` · сделок ${p.count}` : ''}</div>
+        <div class="bar">${bar(p.received, p.pending)}</div>
+        <div class="parts">${части}</div>
       </div>`;
     }).join('');
 
@@ -3533,12 +3544,18 @@
           <div class="sum">${money(d.total)}</div>
           <div class="sub">${d.count} ${сделки} · ${d.people.length} ${контрагенты}</div>
         </div>
+        <div class="stat-bar">${bar(d.received, d.pending)}</div>
         ${обе ? `
-          <div class="stat-bar">${bar(d.received, d.pending)}</div>
           <div class="stat-legend">
             <div class="got"><span>В инвентаре</span><b>${money(d.received)}</b></div>
             <div class="wait"><span>В ожидании</span><b>${money(d.pending)}</b></div>
-          </div>` : ''}
+          </div>` : `
+          <div class="stat-legend">
+            <div class="${d.received > 0 ? 'got' : 'wait'}">
+              <span>${d.received > 0 ? 'В инвентаре' : 'В ожидании'}</span>
+              <b>${money(d.total)}</b>
+            </div>
+          </div>`}
       </section>
       <section class="own-card">
         <div class="own-card-h">Контрагенты</div>
