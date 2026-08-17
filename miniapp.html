@@ -174,6 +174,9 @@
     --surface2: rgba(148,200,210,0.075);
     --bg0: #080f15;
     --bg1: #0c1720;
+    /* Цвет «без бана». Зелёный --success слишком близок к бирюзе акцента:
+       на тонкой полоске две корзины сливались */
+    --stat-free: #a78bfa;
     --t2: #8ba3ad;
     --t3: #5d727c;
   }
@@ -486,7 +489,7 @@
     margin: 18px 0 14px; background: var(--surface2);
   }
   .stat-bar i { display: block; height: 100%; }
-  .stat-bar .free   { background: var(--success); }
+  .stat-bar .free   { background: var(--stat-free); }
   .stat-bar .locked { background: var(--accent2); }
   .stat-bar .wait   { background: var(--gold); }
 
@@ -505,7 +508,7 @@
   .stat-legend span::before {
     content: ''; width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0;
   }
-  .stat-legend .free span::before   { background: var(--success); }
+  .stat-legend .free span::before   { background: var(--stat-free); }
   .stat-legend .locked span::before { background: var(--accent2); }
   .stat-legend .wait span::before   { background: var(--gold); }
   .stat-legend b {
@@ -555,17 +558,22 @@
     font-size: 14px; font-weight: 600; color: var(--text);
     font-variant-numeric: tabular-nums;
   }
+  /* Как и в общей сумме: часть, которую пока не продать */
+  .stat-person .sum em {
+    font-style: normal; font-size: 11.5px; font-weight: 600;
+    color: var(--t3); margin-left: 6px;
+  }
   .stat-person .bar {
     display: flex; height: 3px; border-radius: 2px; overflow: hidden;
     margin: 9px 0 7px; background: var(--surface2);
   }
   .stat-person .bar i { display: block; height: 100%; }
-  .stat-person .bar .free   { background: var(--success); }
+  .stat-person .bar .free   { background: var(--stat-free); }
   .stat-person .bar .locked { background: var(--accent2); }
   .stat-person .bar .wait   { background: var(--gold); }
   .stat-person .parts { font-size: 11px; color: var(--t3); line-height: 1.5; }
   .stat-person .parts i { font-style: normal; }
-  .stat-person .parts .free   { color: var(--success); }
+  .stat-person .parts .free   { color: var(--stat-free); }
   .stat-person .parts .locked { color: var(--accent2); }
   .stat-person .parts .wait   { color: var(--gold); }
 
@@ -3091,7 +3099,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 31;
+  const APP_VERSION = 32;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3559,18 +3567,24 @@
     // Рядом с общей суммой — та её часть, которую продать пока нельзя
     const занято = (d.locked || 0) + (d.pending || 0);
 
-    const люди = d.people.map(p => `
+    const люди = d.people.map(p => {
+      // В скобках — то же, что и в общей сумме: сколько за человеком
+      // ещё нельзя продать. Если продать можно всё, скобка не нужна
+      const держится = (p.locked || 0) + (p.pending || 0);
+      return `
       <div class="stat-person">
         <div class="top">
           <div class="who">
             ${nickHtml(p.name)}
             <span class="cnt">${p.count} ${склонение(p.count, 'сделка', 'сделки', 'сделок')}</span>
           </div>
-          <div class="sum">${money(p.total)}</div>
+          <div class="sum">${money(p.total)}${
+            держится > 0 ? `<em>(${money(держится)})</em>` : ''}</div>
         </div>
         <div class="bar">${bar(p.locked, p.pending, p.free)}</div>
         <div class="parts">${части(p)}</div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     const сделки = склонение(d.count, 'сделка', 'сделки', 'сделок');
     const контрагенты = склонение(d.people.length, 'контрагент', 'контрагента', 'контрагентов');
