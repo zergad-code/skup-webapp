@@ -471,6 +471,12 @@
     font-family: var(--font-display); font-size: 34px; font-weight: 600;
     color: #fff; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
     line-height: 1.05;
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px;
+  }
+  /* Часть суммы, которую пока не продать — рядом, но заметно тише */
+  .stat-hero .sum em {
+    font-style: normal; font-size: 19px; font-weight: 600;
+    color: var(--t3);
   }
   .stat-hero .sub { font-size: 12px; color: var(--t3); margin-top: 8px; }
 
@@ -3085,7 +3091,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 30;
+  const APP_VERSION = 31;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3521,33 +3527,37 @@
       return;
     }
 
-    // Три доли: без бана, под баном, в ожидании. Проценты округляем так,
-    // чтобы в сумме всегда выходило 100 и полоса не рвалась
-    const bar = (free, locked, wait) => {
-      const всего = free + locked + wait;
+    // Порядок везде один: под баном, в ожидании, без бана. Новая корзина
+    // идёт последней, чтобы прежние две остались на своих местах.
+    // Проценты округляем так, чтобы в сумме выходило ровно 100.
+    const bar = (locked, wait, free) => {
+      const всего = locked + wait + free;
       if (!всего) return '';
-      const a = Math.round(free / всего * 100);
-      const b = Math.round(locked / всего * 100);
-      return `<i class="free" style="width:${a}%"></i>`
-           + `<i class="locked" style="width:${b}%"></i>`
-           + `<i class="wait" style="width:${100 - a - b}%"></i>`;
+      const a = Math.round(locked / всего * 100);
+      const b = Math.round(wait / всего * 100);
+      return `<i class="locked" style="width:${a}%"></i>`
+           + `<i class="wait" style="width:${b}%"></i>`
+           + `<i class="free" style="width:${100 - a - b}%"></i>`;
     };
 
     const части = p => [
-      p.free   > 0 ? `<i class="free">без бана ${money(p.free)}</i>` : '',
       p.locked > 0 ? `<i class="locked">под баном ${money(p.locked)}</i>` : '',
       p.pending > 0 ? `<i class="wait">в ожидании ${money(p.pending)}</i>` : '',
+      p.free   > 0 ? `<i class="free">без бана ${money(p.free)}</i>` : '',
     ].filter(Boolean).join(' · ');
 
     // Полосу рисуем всегда: при одной корзине она сплошного цвета, и это
     // читается быстрее любой подписи
     const строки_легенды = [
-      ['free',   'Без бана',    d.free],
       ['locked', 'Под баном',   d.locked],
       ['wait',   'В ожидании',  d.pending],
+      ['free',   'Без бана',    d.free],
     ].filter(([, , v]) => v > 0)
      .map(([cls, имя, v]) => `<div class="${cls}"><span>${имя}</span><b>${money(v)}</b></div>`)
      .join('');
+
+    // Рядом с общей суммой — та её часть, которую продать пока нельзя
+    const занято = (d.locked || 0) + (d.pending || 0);
 
     const люди = d.people.map(p => `
       <div class="stat-person">
@@ -3558,7 +3568,7 @@
           </div>
           <div class="sum">${money(p.total)}</div>
         </div>
-        <div class="bar">${bar(p.free, p.locked, p.pending)}</div>
+        <div class="bar">${bar(p.locked, p.pending, p.free)}</div>
         <div class="parts">${части(p)}</div>
       </div>`).join('');
 
@@ -3569,13 +3579,14 @@
       <section class="own-card">
         <div class="own-card-h">Открыто</div>
         <div class="stat-hero">
-          <div class="sum">${money(d.total)}</div>
+          <div class="sum">${money(d.total)}<em>(${money(занято)})</em></div>
           <div class="sub">${d.count} ${сделки} · ${d.people.length} ${контрагенты}</div>
         </div>
-        <div class="stat-bar">${bar(d.free, d.locked, d.pending)}</div>
+        <div class="stat-bar">${bar(d.locked, d.pending, d.free)}</div>
         <div class="stat-legend">${строки_легенды}</div>
-        <div class="stat-note">Без бана — прошло ${d.free_after_days || 8} дней
-          и больше с получения скина</div>
+        <div class="stat-note">В скобках — то, что продать пока нельзя:
+          под баном и в ожидании.<br>Без бана — прошло
+          ${d.free_after_days || 8} дней и больше с получения скина.</div>
       </section>
       <section class="own-card">
         <div class="own-card-h">Контрагенты</div>
