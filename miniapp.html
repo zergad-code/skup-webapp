@@ -480,23 +480,38 @@
     margin: 18px 0 14px; background: var(--surface2);
   }
   .stat-bar i { display: block; height: 100%; }
-  .stat-bar .got  { background: var(--success); }
-  .stat-bar .wait { background: var(--gold); }
+  .stat-bar .free   { background: var(--success); }
+  .stat-bar .locked { background: var(--accent2); }
+  .stat-bar .wait   { background: var(--gold); }
 
-  .stat-legend { display: flex; gap: 22px; }
-  .stat-legend > div { min-width: 0; }
+  /* Три корзины в столбик: в ряд подписи с суммами не влезают на телефон */
+  .stat-legend { display: flex; flex-direction: column; }
+  .stat-legend > div {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--line);
+  }
+  .stat-legend > div:last-child { border-bottom: none; }
   .stat-legend span {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; color: var(--t3); margin-bottom: 5px;
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--t2);
   }
   .stat-legend span::before {
     content: ''; width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0;
   }
-  .stat-legend .got span::before  { background: var(--success); }
-  .stat-legend .wait span::before { background: var(--gold); }
+  .stat-legend .free span::before   { background: var(--success); }
+  .stat-legend .locked span::before { background: var(--accent2); }
+  .stat-legend .wait span::before   { background: var(--gold); }
   .stat-legend b {
-    font-family: var(--font-display); font-size: 16px; font-weight: 600;
+    flex-shrink: 0;
+    font-family: var(--font-display); font-size: 15px; font-weight: 600;
     font-variant-numeric: tabular-nums; color: var(--text);
+  }
+
+  .stat-note {
+    font-size: 10.5px; color: var(--t3); line-height: 1.45;
+    padding-top: 11px; margin-top: 3px;
+    border-top: 1px solid var(--line);
   }
 
   .stat-person { padding: 13px 0; border-bottom: 1px solid var(--line); }
@@ -539,12 +554,14 @@
     margin: 9px 0 7px; background: var(--surface2);
   }
   .stat-person .bar i { display: block; height: 100%; }
-  .stat-person .bar .got  { background: var(--success); }
-  .stat-person .bar .wait { background: var(--gold); }
-  .stat-person .parts { font-size: 11px; color: var(--t3); }
+  .stat-person .bar .free   { background: var(--success); }
+  .stat-person .bar .locked { background: var(--accent2); }
+  .stat-person .bar .wait   { background: var(--gold); }
+  .stat-person .parts { font-size: 11px; color: var(--t3); line-height: 1.5; }
   .stat-person .parts i { font-style: normal; }
-  .stat-person .parts .got  { color: var(--success); }
-  .stat-person .parts .wait { color: var(--gold); }
+  .stat-person .parts .free   { color: var(--success); }
+  .stat-person .parts .locked { color: var(--accent2); }
+  .stat-person .parts .wait   { color: var(--gold); }
 
   .stat-empty { padding: 16px 0; font-size: 13px; color: var(--t3); }
   .own-ver {
@@ -3068,7 +3085,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 29;
+  const APP_VERSION = 30;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3504,24 +3521,36 @@
       return;
     }
 
-    const bar = (got, wait) => {
-      const всего = got + wait;
+    // Три доли: без бана, под баном, в ожидании. Проценты округляем так,
+    // чтобы в сумме всегда выходило 100 и полоса не рвалась
+    const bar = (free, locked, wait) => {
+      const всего = free + locked + wait;
       if (!всего) return '';
-      const g = Math.round(got / всего * 100);
-      return `<i class="got" style="width:${g}%"></i><i class="wait" style="width:${100 - g}%"></i>`;
+      const a = Math.round(free / всего * 100);
+      const b = Math.round(locked / всего * 100);
+      return `<i class="free" style="width:${a}%"></i>`
+           + `<i class="locked" style="width:${b}%"></i>`
+           + `<i class="wait" style="width:${100 - a - b}%"></i>`;
     };
 
-    // Полосу рисуем всегда: при одной стороне она сплошного цвета, и это
-    // читается быстрее любой подписи. Цифры под ней — только когда есть обе,
-    // иначе они просто повторяли бы общую сумму.
-    const обе = d.received > 0 && d.pending > 0;
+    const части = p => [
+      p.free   > 0 ? `<i class="free">без бана ${money(p.free)}</i>` : '',
+      p.locked > 0 ? `<i class="locked">под баном ${money(p.locked)}</i>` : '',
+      p.pending > 0 ? `<i class="wait">в ожидании ${money(p.pending)}</i>` : '',
+    ].filter(Boolean).join(' · ');
 
-    const люди = d.people.map(p => {
-      const пара = p.received > 0 && p.pending > 0;
-      const части = пара
-        ? `<i class="got">в инвентаре ${money(p.received)}</i> · <i class="wait">в ожидании ${money(p.pending)}</i>`
-        : (p.pending > 0 ? '<i class="wait">в ожидании</i>' : '<i class="got">в инвентаре</i>');
-      return `<div class="stat-person">
+    // Полосу рисуем всегда: при одной корзине она сплошного цвета, и это
+    // читается быстрее любой подписи
+    const строки_легенды = [
+      ['free',   'Без бана',    d.free],
+      ['locked', 'Под баном',   d.locked],
+      ['wait',   'В ожидании',  d.pending],
+    ].filter(([, , v]) => v > 0)
+     .map(([cls, имя, v]) => `<div class="${cls}"><span>${имя}</span><b>${money(v)}</b></div>`)
+     .join('');
+
+    const люди = d.people.map(p => `
+      <div class="stat-person">
         <div class="top">
           <div class="who">
             ${nickHtml(p.name)}
@@ -3529,10 +3558,9 @@
           </div>
           <div class="sum">${money(p.total)}</div>
         </div>
-        <div class="bar">${bar(p.received, p.pending)}</div>
-        <div class="parts">${части}</div>
-      </div>`;
-    }).join('');
+        <div class="bar">${bar(p.free, p.locked, p.pending)}</div>
+        <div class="parts">${части(p)}</div>
+      </div>`).join('');
 
     const сделки = склонение(d.count, 'сделка', 'сделки', 'сделок');
     const контрагенты = склонение(d.people.length, 'контрагент', 'контрагента', 'контрагентов');
@@ -3544,18 +3572,10 @@
           <div class="sum">${money(d.total)}</div>
           <div class="sub">${d.count} ${сделки} · ${d.people.length} ${контрагенты}</div>
         </div>
-        <div class="stat-bar">${bar(d.received, d.pending)}</div>
-        ${обе ? `
-          <div class="stat-legend">
-            <div class="got"><span>В инвентаре</span><b>${money(d.received)}</b></div>
-            <div class="wait"><span>В ожидании</span><b>${money(d.pending)}</b></div>
-          </div>` : `
-          <div class="stat-legend">
-            <div class="${d.received > 0 ? 'got' : 'wait'}">
-              <span>${d.received > 0 ? 'В инвентаре' : 'В ожидании'}</span>
-              <b>${money(d.total)}</b>
-            </div>
-          </div>`}
+        <div class="stat-bar">${bar(d.free, d.locked, d.pending)}</div>
+        <div class="stat-legend">${строки_легенды}</div>
+        <div class="stat-note">Без бана — прошло ${d.free_after_days || 8} дней
+          и больше с получения скина</div>
       </section>
       <section class="own-card">
         <div class="own-card-h">Контрагенты</div>
