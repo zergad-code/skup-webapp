@@ -391,7 +391,31 @@
     font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
   }
   .own-price:last-child { border-bottom: none; }
-  .own-price.miss b { color: var(--danger); font-weight: 500; }
+
+  /* «Не найден» — не приговор, а кнопка: цену можно вписать руками */
+  .own-price-miss {
+    flex-shrink: 0; cursor: pointer;
+    background: rgba(239,106,150,0.12); border: none;
+    border-radius: 7px; padding: 5px 10px;
+    color: var(--danger); font-family: var(--font-ui);
+    font-size: 11.5px; font-weight: 600; white-space: nowrap;
+    transition: background 0.16s, transform 0.14s var(--ease);
+  }
+  .own-price-miss:active { transform: scale(0.94); background: rgba(239,106,150,0.22); }
+
+  .own-price-input {
+    flex-shrink: 0; width: 92px;
+    background: none; border: none; outline: none;
+    border-bottom: 1px solid var(--accent2);
+    padding: 2px 0 3px; text-align: right;
+    color: var(--text); font-family: var(--font-display);
+    font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .own-price-input::-webkit-outer-spin-button,
+  .own-price-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .own-price-input[type=number] { -moz-appearance: textfield; }
+  /* Вписанное руками отличаем от пришедшего с маркета */
+  .own-price b.manual { color: var(--gold); }
   .own-fixed {
     display: block; margin-top: 3px;
     font-style: normal; font-size: 10px; letter-spacing: 0.1em;
@@ -3113,7 +3137,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 33;
+  const APP_VERSION = 34;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3721,6 +3745,77 @@
   }
 
   // ── Цены с маркета ───────────────────────────────────────────────────────
+  let adMarketItems = [];   // что вернул маркет; вписанное руками живёт здесь же
+
+  function adRenderPrices() {
+    const box = document.getElementById('adPrices');
+    box.innerHTML = adMarketItems.map((it, i) => {
+      const уточнено = it.rub !== null && it.resolved && it.resolved !== it.name;
+      // Не найденную цену можно вписать руками: маркет знает не всё,
+      // а из-за одного пропуска терять всю сумму незачем
+      const цена = it.rub === null
+        ? `<button class="own-price-miss" onclick="adEditPrice(${i})">не найден</button>`
+        : `<b${it.manual ? ' class="manual"' : ''}>${it.rub.toLocaleString('ru-RU')} ₽</b>`;
+      return `<div class="own-price${it.rub === null ? ' miss' : ''}">
+        <span>${it.resolved || it.name}${уточнено ? '<i class="own-fixed">имя уточнено</i>' : ''}</span>
+        ${цена}
+      </div>`;
+    }).join('');
+    box.classList.add('on');
+    adSumPrices();
+  }
+
+  function adSumPrices() {
+    const найдены = adMarketItems.filter(it => it.rub !== null);
+    const сумма = найдены.reduce((s, it) => s + it.rub, 0);
+    document.getElementById('adMarketRub').value = сумма || '';
+    adRecalc();
+
+    const нет = adMarketItems.length - найдены.length;
+    if (нет) {
+      adShowResult(`Маркет не знает ${нет} из ${adMarketItems.length}. `
+        + 'Нажми «не найден» и впиши цену в рублях сам.', false);
+    } else {
+      adClearResult();
+    }
+  }
+
+  function adEditPrice(i) {
+    const строка = document.getElementById('adPrices').children[i];
+    const кнопка = строка && строка.querySelector('.own-price-miss');
+    if (!кнопка) return;
+
+    const поле = document.createElement('input');
+    поле.type = 'number';
+    поле.inputMode = 'decimal';
+    поле.min = '0';
+    поле.step = '1';
+    поле.className = 'own-price-input';
+    поле.placeholder = '₽';
+    кнопка.replaceWith(поле);
+    поле.focus();
+    haptic('light');
+
+    let закрыто = false;
+    const сохранить = () => {
+      if (закрыто) return;
+      закрыто = true;
+      const v = parseFloat(поле.value);
+      if (!isNaN(v) && v >= 0) {
+        adMarketItems[i].rub = Math.round(v * 100) / 100;
+        adMarketItems[i].manual = true;   // вписано руками — пометим цветом
+        haptic('medium');
+      }
+      adRenderPrices();
+    };
+
+    поле.addEventListener('blur', сохранить);
+    поле.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); сохранить(); }
+      if (e.key === 'Escape') { закрыто = true; adRenderPrices(); }
+    });
+  }
+
   async function adFetchPrice() {
     if (!ad.items.length) {
       flashEl(document.getElementById('adItems'));
@@ -3752,28 +3847,11 @@
       });
       if (fixed) adRenderItems();
 
-      const box = document.getElementById('adPrices');
-      box.innerHTML = data.items.map(it => {
-        const changed = it.rub !== null && it.resolved && it.resolved !== it.name;
-        return `<div class="own-price${it.rub === null ? ' miss' : ''}">
-          <span>${it.resolved || it.name}${changed ? '<i class="own-fixed">имя уточнено</i>' : ''}</span>
-          <b>${it.rub === null ? 'не найден' : it.rub.toLocaleString('ru-RU') + ' ₽'}</b>
-        </div>`;
-      }).join('');
-      box.classList.add('on');
-
-      document.getElementById('adMarketRub').value = data.total_rub || '';
       // Курс не трогаем: он выставлен вручную и подтягивание цен его не касается
       adUsdManual = false;   // пришли свежие цены — считаем заново
-      adRecalc();
-
-      const missed = data.items.length - data.found;
-      if (missed) {
-        haptic('warning');
-        adShowResult(`Маркет не знает ${missed} из ${data.items.length}. Сумма только по найденным — поправь вручную.`, false);
-      } else {
-        haptic('success');
-      }
+      adMarketItems = data.items;
+      adRenderPrices();
+      haptic(data.found < data.items.length ? 'warning' : 'success');
     } catch (e) {
       haptic('error');
       adShowResult('Цену не подтянуло: ' + (e.message || 'нет связи') + '. Впиши рубли вручную.', false);
