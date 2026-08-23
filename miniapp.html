@@ -3137,7 +3137,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 34;
+  const APP_VERSION = 35;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3773,8 +3773,7 @@
 
     const нет = adMarketItems.length - найдены.length;
     if (нет) {
-      adShowResult(`Маркет не знает ${нет} из ${adMarketItems.length}. `
-        + 'Нажми «не найден» и впиши цену в рублях сам.', false);
+      adShowResult(`Маркет не знает ${нет} из ${adMarketItems.length}`, false);
     } else {
       adClearResult();
     }
