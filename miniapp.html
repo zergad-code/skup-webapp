@@ -517,26 +517,20 @@
   .stat-bar .locked { background: var(--accent2); }
   .stat-bar .wait   { background: var(--gold); }
 
-  /* Три корзины в столбик: в ряд подписи с суммами не влезают на телефон */
-  .stat-legend { display: flex; flex-direction: column; }
-  .stat-legend > div {
-    display: flex; align-items: baseline; gap: 10px;
-    padding: 8px 0; border-bottom: 1px solid var(--line);
+  /* Подписи стоят под своими кусками полосы: слева бан, посередине ожидание,
+     справа свободные. Колонки держим всегда, даже когда корзина пуста, иначе
+     единственная подпись уедет под чужой цвет */
+  .stat-legend {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
   }
-  .stat-legend > div:last-child { border-bottom: none; }
-  .stat-legend span {
-    flex: 1; min-width: 0;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12px; color: var(--t2);
-  }
-  .stat-legend span::before {
-    content: ''; width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0;
-  }
-  .stat-legend .free span::before   { background: var(--stat-free); }
-  .stat-legend .locked span::before { background: var(--accent2); }
-  .stat-legend .wait span::before   { background: var(--gold); }
+  .stat-legend > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .stat-legend > div:nth-child(2) { align-items: center; text-align: center; }
+  .stat-legend > div:nth-child(3) { align-items: flex-end; text-align: right; }
+  .stat-legend span { font-size: 11.5px; }
+  .stat-legend .free span   { color: var(--stat-free); }
+  .stat-legend .locked span { color: var(--accent2); }
+  .stat-legend .wait span   { color: var(--gold); }
   .stat-legend b {
-    flex-shrink: 0;
     font-family: var(--font-display); font-size: 15px; font-weight: 600;
     font-variant-numeric: tabular-nums; color: var(--text);
   }
@@ -609,8 +603,13 @@
   .stat-person .bar .free   { background: var(--stat-free); }
   .stat-person .bar .locked { background: var(--accent2); }
   .stat-person .bar .wait   { background: var(--gold); }
-  .stat-person .parts { font-size: 11px; color: var(--t3); line-height: 1.5; }
-  .stat-person .parts i { font-style: normal; }
+  .stat-person .parts {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    font-size: 11px; color: var(--t3); line-height: 1.5;
+  }
+  .stat-person .parts i { font-style: normal; min-width: 0; }
+  .stat-person .parts i:nth-child(2) { text-align: center; }
+  .stat-person .parts i:nth-child(3) { text-align: right; }
   .stat-person .parts .free   { color: var(--stat-free); }
   .stat-person .parts .locked { color: var(--accent2); }
   .stat-person .parts .wait   { color: var(--gold); }
@@ -3137,7 +3136,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 35;
+  const APP_VERSION = 36;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3193,7 +3192,7 @@
   }
 
   // ── Экран владельца: новая закупка ───────────────────────────────────────────
-  const CHANNELS = ['реферал', 'повтор', 'сообщество', 'чат-холод', 'входящий', 'додеп'];
+  const CHANNELS = ['реферал', 'повтор', 'сообщество', 'чаты', 'входящий', 'додеп'];
   const QUALITY_FULL = { FN: 'Factory New', MW: 'Minimal Wear', FT: 'Field-Tested',
                          WW: 'Well-Worn', BS: 'Battle-Scarred' };
 
@@ -3614,10 +3613,11 @@
     };
 
     const части = p => [
-      p.locked > 0 ? `<i class="locked">под баном ${money(p.locked)}</i>` : '',
-      p.pending > 0 ? `<i class="wait">в ожидании ${money(p.pending)}</i>` : '',
-      p.free   > 0 ? `<i class="free">без бана ${money(p.free)}</i>` : '',
-    ].filter(Boolean).join(' · ');
+      ['locked', 'под баном',  p.locked],
+      ['wait',   'в ожидании', p.pending],
+      ['free',   'без бана',   p.free],
+    ].map(([cls, имя, v]) => `<i class="${cls}">${
+      v > 0 ? `${имя} ${money(v)}` : ''}</i>`).join('');
 
     // Полосу рисуем всегда: при одной корзине она сплошного цвета, и это
     // читается быстрее любой подписи
@@ -3625,9 +3625,8 @@
       ['locked', 'Под баном',   d.locked],
       ['wait',   'В ожидании',  d.pending],
       ['free',   'Без бана',    d.free],
-    ].filter(([, , v]) => v > 0)
-     .map(([cls, имя, v]) => `<div class="${cls}"><span>${имя}</span><b>${money(v)}</b></div>`)
-     .join('');
+    ].map(([cls, имя, v]) => `<div class="${cls}">${
+      v > 0 ? `<span>${имя}</span><b>${money(v)}</b>` : ''}</div>`).join('');
 
     // Рядом с общей суммой — та её часть, которую продать пока нельзя
     const занято = (d.locked || 0) + (d.pending || 0);
