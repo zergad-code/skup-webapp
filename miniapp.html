@@ -535,25 +535,64 @@
     font-variant-numeric: tabular-nums; color: var(--text);
   }
 
-  /* Чем сортировать список контрагентов. Переносятся, а не прокручиваются:
-     горизонтальную ленту мышью не пролистать */
+  /* Чем сортировать список контрагентов. Раньше здесь лежал ряд пилюль:
+     шесть штук в две строки перетягивали на себя внимание с самого списка.
+     Теперь порядок назван одной строкой в шапке, а выбор раскрывается */
   .stat-sort {
-    display: flex; flex-wrap: wrap; gap: 6px;
-    padding: 13px 0 4px;
+    display: flex; align-items: center; gap: 5px;
+    cursor: pointer; background: none; border: 0;
+    /* Отступы ради пальца: сама строка занимает 13px, попасть в неё нельзя.
+       Отрицательные поля возвращают её на место в шапке */
+    padding: 9px 0 9px 14px; margin: -9px 0 -9px auto;
+    color: var(--t2); font-family: var(--font-ui);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
+  .stat-sort em {
+    font-style: normal; color: var(--accent-light);
+  }
+  .stat-sort svg { width: 9px; height: 9px; transition: transform 0.18s; }
+  .stat-sort.open svg { transform: rotate(180deg); }
+  .stat-sort-menu {
+    display: none; flex-direction: column;
+    padding: 6px 0 2px;
+  }
+  .stat-sort-menu.on { display: flex; }
   .stat-sort-btn {
-    cursor: pointer; background: none;
-    border: 1px solid var(--line2); border-radius: 999px;
-    padding: 6px 11px;
-    color: var(--t3); font-family: var(--font-ui);
-    font-size: 11.5px; font-weight: 500; white-space: nowrap;
-    transition: border-color 0.16s, color 0.16s, background 0.16s;
+    cursor: pointer; background: none; text-align: left;
+    border: 0; border-bottom: 1px solid var(--line);
+    padding: 10px 2px;
+    color: var(--t2); font-family: var(--font-ui);
+    font-size: 12.5px; font-weight: 500;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: color 0.16s;
   }
+  .stat-sort-btn:last-child { border-bottom: none; }
+  .stat-sort-btn::after {
+    content: '✓'; font-size: 11px; color: var(--accent-light); opacity: 0;
+  }
+  .stat-sort-btn.on::after { opacity: 1; }
   .stat-sort-btn.on {
-    background: var(--accent-soft); border-color: var(--line-accent);
     color: var(--accent-light); font-weight: 600;
   }
-  .stat-sort-btn:active { transform: scale(0.96); }
+  .stat-sort-btn:active { opacity: 0.6; }
+
+  /* Спор — не корзина открытых сделок, а их отсутствие: деньги ушли,
+     а что с ними будет, пока неизвестно. Поэтому отдельной строкой */
+  .stat-dispute {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-top: 13px; padding: 11px 13px;
+    border: 1px solid rgba(239, 106, 150, 0.28); border-radius: 10px;
+    background: rgba(239, 106, 150, 0.08);
+  }
+  .stat-dispute span { flex: 1; min-width: 0; font-size: 12px; color: var(--danger); }
+  .stat-dispute b {
+    font-family: var(--font-display); font-size: 16px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--danger);
+  }
+  .stat-dispute em {
+    font-style: normal; font-size: 11px; color: var(--t3); white-space: nowrap;
+  }
 
   .stat-person { padding: 13px 0; border-bottom: 1px solid var(--line); }
   .stat-person:last-child { border-bottom: none; }
@@ -3136,7 +3175,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 36;
+  const APP_VERSION = 37;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3550,26 +3589,36 @@
   // больше, а не у кого меньше. Данные уже на руках, за ними не ходим заново.
   const SORTS = [
     ['total',   'Сумма'],
-    ['locked',  'Под баном'],
-    ['pending', 'В ожидании'],
-    ['free',    'Без бана'],
     ['inv',     'В инвентаре'],
+    ['free',    'Без бана'],
+    ['pending', 'В ожидании'],
     ['count',   'Сделок'],
   ];
   let adStatsData = null;
   let adSortKey = 'total';
+  let adSortOpen = false;
 
   // «В инвентаре» — это всё, что физически у нас: и под баном, и уже без него
   const adSortValue = (p, key) =>
     key === 'inv' ? (p.locked || 0) + (p.free || 0) : (p[key] || 0);
 
   function adSetSort(key) {
-    if (key === adSortKey || !adStatsData) return;
+    if (!adStatsData) return;
     adSortKey = key;
+    adSortOpen = false;             // выбрал — список схлопывается
     haptic('selection');
     const y = window.scrollY;
     adRenderStats(adStatsData);
     window.scrollTo(0, y);          // список перерисован, но взгляд остаётся
+  }
+
+  function adToggleSortMenu() {
+    if (!adStatsData) return;
+    adSortOpen = !adSortOpen;
+    haptic('light');
+    const y = window.scrollY;
+    adRenderStats(adStatsData);
+    window.scrollTo(0, y);
   }
 
   async function adLoadStats() {
@@ -3631,9 +3680,19 @@
     // Рядом с общей суммой — та её часть, которую продать пока нельзя
     const занято = (d.locked || 0) + (d.pending || 0);
 
-    const чипы = SORTS.map(([key, имя]) =>
+    const пункты = SORTS.map(([key, имя]) =>
       `<button class="stat-sort-btn${key === adSortKey ? ' on' : ''}"
                onclick="adSetSort('${key}')">${имя}</button>`).join('');
+    const текущая = (SORTS.find(([k]) => k === adSortKey) || SORTS[0])[1];
+
+    // Спор показываем, только когда он есть: пустая плашка каждый день
+    // на глазах перестала бы значить хоть что-то
+    const в_споре = d.dispute > 0 ? `
+      <div class="stat-dispute">
+        <span>В споре</span>
+        <em>${d.dispute_count} ${склонение(d.dispute_count, 'сделка', 'сделки', 'сделок')}</em>
+        <b>${money(d.dispute)}</b>
+      </div>` : '';
 
     const по_сортировке = [...d.people]
       .sort((a, b) => adSortValue(b, adSortKey) - adSortValue(a, adSortKey));
@@ -3669,10 +3728,21 @@
         </div>
         <div class="stat-bar">${bar(d.locked, d.pending, d.free)}</div>
         <div class="stat-legend">${строки_легенды}</div>
+        ${в_споре}
       </section>
       <section class="own-card">
-        <div class="own-card-h">Контрагенты</div>
-        <div class="stat-sort">${чипы}</div>
+        <div class="own-card-h">
+          Контрагенты
+          <button type="button" class="stat-sort${adSortOpen ? ' open' : ''}"
+                  onclick="adToggleSortMenu()">
+            <em>${текущая}</em>
+            <svg viewBox="0 0 10 6" fill="none" aria-hidden="true">
+              <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="stat-sort-menu${adSortOpen ? ' on' : ''}">${пункты}</div>
         ${люди}
       </section>`;
   }
