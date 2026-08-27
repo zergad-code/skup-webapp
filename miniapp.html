@@ -492,6 +492,50 @@
   .own-back i { font-size: 16px; }
   .own-back:active { opacity: 0.55; }
 
+  /* Шапка страницы статистики: слева выход, справа спор */
+  .own-topbar { display: flex; align-items: flex-start; gap: 12px; }
+  .own-topbar .own-back { margin-right: auto; }
+  /* Спор нарочно бесцветный: это не тревога, а строка, которую иногда
+     нужно открыть. Красным она мозолила бы глаза каждый день */
+  .own-dispute-chip {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; background: none;
+    border: 1px solid var(--line2); border-radius: 999px;
+    padding: 5px 11px; margin-top: -4px;
+    color: var(--t2); font-family: var(--font-ui);
+    font-size: 11.5px; font-weight: 500; white-space: nowrap;
+    transition: border-color 0.16s, color 0.16s;
+  }
+  .own-dispute-chip b {
+    font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  .own-dispute-chip.open { border-color: var(--line-accent); color: var(--accent-light); }
+  .own-dispute-chip:active { opacity: 0.6; }
+
+  .own-dispute-box {
+    margin: 0 0 18px; padding: 4px 14px;
+    border: 1px solid var(--line2); border-radius: 12px;
+    background: var(--surface);
+  }
+  .own-dispute-box .row {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--line);
+  }
+  .own-dispute-box .row:last-child { border-bottom: none; }
+  .own-dispute-box .who { flex: 1; min-width: 0; }
+  .own-dispute-box .nm { font-size: 12.5px; color: var(--text); }
+  .own-dispute-box .it {
+    display: block; margin-top: 2px;
+    font-size: 11px; color: var(--t3);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .own-dispute-box .amt {
+    flex-shrink: 0;
+    font-family: var(--font-display); font-size: 14px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  .own-dispute-box .dt { flex-shrink: 0; font-size: 11px; color: var(--t3); }
+
   /* ── Статистика: не форма, а сводка — числа крупно, доли видно ── */
   .stat-hero { padding: 16px 0 4px; }
   .stat-hero .sum {
@@ -551,8 +595,9 @@
   .stat-sort em {
     font-style: normal; color: var(--accent-light);
   }
-  .stat-sort svg { width: 9px; height: 9px; transition: transform 0.18s; }
-  .stat-sort.open svg { transform: rotate(180deg); }
+  .stat-sort .ico { width: 11px; height: 11px; color: var(--t3); }
+  .stat-sort .arr { width: 9px; height: 9px; transition: transform 0.18s; }
+  .stat-sort.open .arr { transform: rotate(180deg); }
   .stat-sort-menu {
     display: none; flex-direction: column;
     padding: 6px 0 2px;
@@ -568,10 +613,11 @@
     transition: color 0.16s;
   }
   .stat-sort-btn:last-child { border-bottom: none; }
-  .stat-sort-btn::after {
-    content: '✓'; font-size: 11px; color: var(--accent-light); opacity: 0;
+  .stat-sort-btn em {
+    font-style: normal; font-family: var(--font-display);
+    font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--t3);
   }
-  .stat-sort-btn.on::after { opacity: 1; }
+  .stat-sort-btn.on em { color: var(--accent-light); }
   .stat-sort-btn.on {
     color: var(--accent-light); font-weight: 600;
   }
@@ -649,6 +695,33 @@
   .stat-person .parts i { font-style: normal; min-width: 0; }
   .stat-person .parts i:nth-child(2) { text-align: center; }
   .stat-person .parts i:nth-child(3) { text-align: right; }
+
+  /* Заметки из таблицы. Карточка раскрывается только когда им есть что
+     показать — иначе тап в пустоту выглядел бы поломкой */
+  .stat-person.has-note { cursor: pointer; }
+  .stat-person .notes-cnt {
+    font-size: 11px; color: var(--accent-light); white-space: nowrap;
+  }
+  .stat-person.open .notes-cnt { opacity: 0.6; }
+  .stat-person .notes {
+    margin-top: 10px; padding: 2px 12px;
+    border-left: 2px solid var(--line-accent); border-radius: 2px;
+    background: var(--surface2);
+  }
+  .stat-person .note { padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .stat-person .note:last-child { border-bottom: none; }
+  .stat-person .note .nh {
+    display: flex; align-items: baseline; gap: 8px;
+    font-size: 10.5px; color: var(--t3);
+  }
+  .stat-person .note .it {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .stat-person .note .tx {
+    margin-top: 3px; font-size: 12.5px; color: var(--text);
+    line-height: 1.45; white-space: pre-wrap; word-break: break-word;
+  }
   .stat-person .parts .free   { color: var(--stat-free); }
   .stat-person .parts .locked { color: var(--accent2); }
   .stat-person .parts .wait   { color: var(--gold); }
@@ -1895,9 +1968,16 @@
 
 <!-- ── Страница статистики ── -->
 <div id="adStatsPane" style="display:none;">
-  <button type="button" class="own-back" onclick="adCloseStats()">
-    <i class="ti ti-arrow-left"></i>К новой сделке
-  </button>
+  <div class="own-topbar">
+    <button type="button" class="own-back" onclick="adCloseStats()">
+      <i class="ti ti-arrow-left"></i>К новой сделке
+    </button>
+    <!-- Спор живёт наверху, а не в карточке открытых: это не корзина
+         инвентаря, а отдельный разговор -->
+    <button type="button" class="own-dispute-chip" id="adDisputeChip"
+            onclick="adToggleDispute()" hidden></button>
+  </div>
+  <div class="own-dispute-box" id="adDisputeBox" hidden></div>
   <div id="adStatsBody"></div>
 </div>
 </div>
@@ -3175,7 +3255,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 37;
+  const APP_VERSION = 38;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3590,6 +3670,7 @@
   const SORTS = [
     ['total',   'Сумма'],
     ['inv',     'В инвентаре'],
+    ['locked',  'Под баном'],
     ['free',    'Без бана'],
     ['pending', 'В ожидании'],
     ['count',   'Сделок'],
@@ -3597,6 +3678,8 @@
   let adStatsData = null;
   let adSortKey = 'total';
   let adSortOpen = false;
+  let adDisputeOpen = false;
+  let adNotesOpen = null;         // чьи заметки сейчас развёрнуты
 
   // «В инвентаре» — это всё, что физически у нас: и под баном, и уже без него
   const adSortValue = (p, key) =>
@@ -3610,6 +3693,56 @@
     const y = window.scrollY;
     adRenderStats(adStatsData);
     window.scrollTo(0, y);          // список перерисован, но взгляд остаётся
+  }
+
+  function adRenderDispute(d) {
+    const chip = document.getElementById('adDisputeChip');
+    const box = document.getElementById('adDisputeBox');
+    const споры = d.disputes || [];
+
+    // Споров нет — ни плашки, ни пустого блока
+    if (!споры.length) {
+      chip.hidden = box.hidden = true;
+      adDisputeOpen = false;
+      return;
+    }
+
+    chip.hidden = false;
+    chip.innerHTML = `В споре <b>${споры.length}</b>`;
+    chip.classList.toggle('open', adDisputeOpen);
+
+    box.hidden = !adDisputeOpen;
+    box.innerHTML = споры.map(s => `
+      <div class="row">
+        <div class="who">
+          <span class="nm">${nickHtml(s.name)}</span>
+          ${s.items ? `<span class="it">${s.items}</span>` : ''}
+        </div>
+        ${s.date ? `<span class="dt">${s.date}</span>` : ''}
+        <span class="amt">${money(s.sum)}</span>
+      </div>`).join('')
+      + `<div class="row">
+           <div class="who"><span class="nm">Всего</span></div>
+           <span class="amt">${money(d.dispute)}</span>
+         </div>`;
+  }
+
+  function adToggleNotes(e, el) {
+    // Ник — кнопка перехода в Telegram, по нему открывается чат, а не заметки
+    if (e && e.target.closest('.nick')) return;
+    const ключ = el.dataset.noteKey;
+    adNotesOpen = adNotesOpen === ключ ? null : ключ;
+    haptic('light');
+    const y = window.scrollY;
+    adRenderStats(adStatsData);
+    window.scrollTo(0, y);
+  }
+
+  function adToggleDispute() {
+    if (!adStatsData) return;
+    adDisputeOpen = !adDisputeOpen;
+    haptic('light');
+    adRenderDispute(adStatsData);
   }
 
   function adToggleSortMenu() {
@@ -3680,19 +3813,20 @@
     // Рядом с общей суммой — та её часть, которую продать пока нельзя
     const занято = (d.locked || 0) + (d.pending || 0);
 
+    // Рядом с каждым пунктом — итог по этой метрике. Название сортировки
+    // само по себе ни о чём не говорит, а цифра сразу показывает, что считаем
+    const итог_по = {
+      total: money(d.total), inv: money(d.locked + d.free), locked: money(d.locked),
+      free: money(d.free), pending: money(d.pending), count: String(d.count),
+    };
     const пункты = SORTS.map(([key, имя]) =>
       `<button class="stat-sort-btn${key === adSortKey ? ' on' : ''}"
-               onclick="adSetSort('${key}')">${имя}</button>`).join('');
+               onclick="adSetSort('${key}')">
+         <span>${имя}</span><em>${итог_по[key]}</em>
+       </button>`).join('');
     const текущая = (SORTS.find(([k]) => k === adSortKey) || SORTS[0])[1];
 
-    // Спор показываем, только когда он есть: пустая плашка каждый день
-    // на глазах перестала бы значить хоть что-то
-    const в_споре = d.dispute > 0 ? `
-      <div class="stat-dispute">
-        <span>В споре</span>
-        <em>${d.dispute_count} ${склонение(d.dispute_count, 'сделка', 'сделки', 'сделок')}</em>
-        <b>${money(d.dispute)}</b>
-      </div>` : '';
+    adRenderDispute(d);
 
     const по_сортировке = [...d.people]
       .sort((a, b) => adSortValue(b, adSortKey) - adSortValue(a, adSortKey));
@@ -3701,18 +3835,33 @@
       // В скобках — то же, что и в общей сумме: сколько за человеком
       // ещё нельзя продать. Если продать можно всё, скобка не нужна
       const держится = (p.locked || 0) + (p.pending || 0);
+      const заметки = p.notes || [];
+      const ключ = (p.name || '').toLowerCase();
+      const открыт = заметки.length > 0 && adNotesOpen === ключ;
       return `
-      <div class="stat-person">
+      <div class="stat-person${заметки.length ? ' has-note' : ''}${открыт ? ' open' : ''}"
+           ${заметки.length ? `data-note-key="${ключ.replace(/"/g, '&quot;')}"
+             onclick="adToggleNotes(event, this)"` : ''}>
         <div class="top">
           <div class="who">
             ${nickHtml(p.name)}
             <span class="cnt">${p.count} ${склонение(p.count, 'сделка', 'сделки', 'сделок')}</span>
+            ${заметки.length ? `<span class="notes-cnt">${заметки.length} ${
+              склонение(заметки.length, 'заметка', 'заметки', 'заметок')}</span>` : ''}
           </div>
           <div class="sum">${money(p.total)}${
             держится > 0 ? `<em>(${money(держится)})</em>` : ''}</div>
         </div>
         <div class="bar">${bar(p.locked, p.pending, p.free)}</div>
         <div class="parts">${части(p)}</div>
+        ${открыт ? `<div class="notes">${заметки.map(n => `
+          <div class="note">
+            <div class="nh">
+              ${n.date ? `<span class="dt">${n.date}</span>` : ''}
+              ${n.items ? `<span class="it">${n.items}</span>` : ''}
+            </div>
+            <div class="tx">${n.text}</div>
+          </div>`).join('')}</div>` : ''}
       </div>`;
     }).join('');
 
@@ -3728,15 +3877,19 @@
         </div>
         <div class="stat-bar">${bar(d.locked, d.pending, d.free)}</div>
         <div class="stat-legend">${строки_легенды}</div>
-        ${в_споре}
       </section>
       <section class="own-card">
         <div class="own-card-h">
           Контрагенты
           <button type="button" class="stat-sort${adSortOpen ? ' open' : ''}"
                   onclick="adToggleSortMenu()">
+            <svg class="ico" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3.5 1.5v9M3.5 10.5L1.5 8.5M8.5 10.5v-9M8.5 1.5l2 2"
+                    stroke="currentColor" stroke-width="1.4"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <em>${текущая}</em>
-            <svg viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <svg class="arr" viewBox="0 0 10 6" fill="none" aria-hidden="true">
               <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.6"
                     stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
