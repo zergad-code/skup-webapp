@@ -517,24 +517,55 @@
     border: 1px solid var(--line2); border-radius: 12px;
     background: var(--surface);
   }
-  .own-dispute-box .row {
+  /* Итог первой строкой: сколько всего висит в спорах — главное число здесь */
+  .own-dispute-box .total {
     display: flex; align-items: baseline; gap: 10px;
-    padding: 10px 0; border-bottom: 1px solid var(--line);
+    padding: 11px 0 10px; border-bottom: 1px solid var(--line2);
   }
-  .own-dispute-box .row:last-child { border-bottom: none; }
-  .own-dispute-box .who { flex: 1; min-width: 0; }
-  .own-dispute-box .nm { font-size: 12.5px; color: var(--text); }
-  .own-dispute-box .it {
-    display: block; margin-top: 2px;
-    font-size: 11px; color: var(--t3);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  .own-dispute-box .total span {
+    flex: 1; font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--t3);
   }
+  .own-dispute-box .total b {
+    font-family: var(--font-display); font-size: 17px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--text);
+  }
+
+  .own-dispute-box .who-row {
+    cursor: pointer; padding: 10px 0; border-bottom: 1px solid var(--line);
+  }
+  .own-dispute-box .who-row:last-child { border-bottom: none; }
+  .own-dispute-box .hd { display: flex; align-items: baseline; gap: 10px; }
+  .own-dispute-box .nm {
+    flex: 1; min-width: 0;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 9px;
+  }
+  .own-dispute-box .cnt { font-size: 11px; color: var(--t3); white-space: nowrap; }
   .own-dispute-box .amt {
     flex-shrink: 0;
     font-family: var(--font-display); font-size: 14px; font-weight: 600;
     font-variant-numeric: tabular-nums; color: var(--text);
   }
-  .own-dispute-box .dt { flex-shrink: 0; font-size: 11px; color: var(--t3); }
+  .own-dispute-box .deals {
+    margin: 8px 0 2px; padding: 0 11px;
+    border-left: 2px solid var(--line2); border-radius: 2px;
+  }
+  .own-dispute-box .deal { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .own-dispute-box .deal:last-child { border-bottom: none; }
+  .own-dispute-box .dh {
+    display: flex; align-items: baseline; gap: 8px;
+    font-size: 10.5px; color: var(--t3);
+  }
+  .own-dispute-box .dh .amt { font-size: 12px; }
+  .own-dispute-box .it {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .own-dispute-box .dt { flex-shrink: 0; }
+  .own-dispute-box .tx {
+    margin-top: 3px; font-size: 12.5px; color: var(--text);
+    line-height: 1.45; white-space: pre-wrap; word-break: break-word;
+  }
 
   /* ── Статистика: не форма, а сводка — числа крупно, доли видно ── */
   .stat-hero { padding: 16px 0 4px; }
@@ -595,9 +626,12 @@
   .stat-sort em {
     font-style: normal; color: var(--accent-light);
   }
-  .stat-sort .ico { width: 11px; height: 11px; color: var(--t3); }
-  .stat-sort .arr { width: 9px; height: 9px; transition: transform 0.18s; }
-  .stat-sort.open .arr { transform: rotate(180deg); }
+  /* Один значок вместо двух: стрелки сортировки и так говорят, что это выбор
+     порядка, а шеврон рядом с ними только рябил */
+  .stat-sort .ico {
+    width: 11px; height: 11px; color: var(--t3); transition: color 0.16s;
+  }
+  .stat-sort.open .ico { color: var(--accent-light); }
   .stat-sort-menu {
     display: none; flex-direction: column;
     padding: 6px 0 2px;
@@ -3255,7 +3289,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 38;
+  const APP_VERSION = 39;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3679,6 +3713,7 @@
   let adSortKey = 'total';
   let adSortOpen = false;
   let adDisputeOpen = false;
+  let adDisputeWho = null;        // чей спор сейчас развёрнут
   let adNotesOpen = null;         // чьи заметки сейчас развёрнуты
 
   // «В инвентаре» — это всё, что физически у нас: и под баном, и уже без него
@@ -3708,23 +3743,50 @@
     }
 
     chip.hidden = false;
-    chip.innerHTML = `В споре <b>${споры.length}</b>`;
+    chip.innerHTML = `В споре <b>${money(d.dispute)}</b>`;
     chip.classList.toggle('open', adDisputeOpen);
 
     box.hidden = !adDisputeOpen;
-    box.innerHTML = споры.map(s => `
-      <div class="row">
-        <div class="who">
-          <span class="nm">${nickHtml(s.name)}</span>
-          ${s.items ? `<span class="it">${s.items}</span>` : ''}
-        </div>
-        ${s.date ? `<span class="dt">${s.date}</span>` : ''}
-        <span class="amt">${money(s.sum)}</span>
-      </div>`).join('')
-      + `<div class="row">
-           <div class="who"><span class="nm">Всего</span></div>
-           <span class="amt">${money(d.dispute)}</span>
-         </div>`;
+    box.innerHTML = `
+      <div class="total">
+        <span>Всего</span>
+        <b>${money(d.dispute)}</b>
+      </div>`
+      + споры.map(s => {
+        const ключ = (s.name || '').toLowerCase();
+        const открыт = adDisputeWho === ключ;
+        return `
+        <div class="who-row${открыт ? ' open' : ''}"
+             data-dispute-key="${ключ.replace(/"/g, '&quot;')}"
+             onclick="adToggleDisputeWho(event, this)">
+          <div class="hd">
+            <div class="nm">
+              ${nickHtml(s.name)}
+              <span class="cnt">${s.count} ${
+                склонение(s.count, 'сделка', 'сделки', 'сделок')}</span>
+            </div>
+            <span class="amt">${money(s.total)}</span>
+          </div>
+          ${открыт ? `<div class="deals">${s.deals.map(x => `
+            <div class="deal">
+              <div class="dh">
+                ${x.date ? `<span class="dt">${x.date}</span>` : ''}
+                ${x.items ? `<span class="it">${x.items}</span>` : ''}
+                <span class="amt">${money(x.sum)}</span>
+              </div>
+              ${x.note ? `<div class="tx">${x.note}</div>` : ''}
+            </div>`).join('')}</div>` : ''}
+        </div>`;
+      }).join('');
+  }
+
+  function adToggleDisputeWho(e, el) {
+    // Ник ведёт в чат с человеком, а не разворачивает его сделки
+    if (e && e.target.closest('.nick')) return;
+    const ключ = el.dataset.disputeKey;
+    adDisputeWho = adDisputeWho === ключ ? null : ключ;
+    haptic('light');
+    adRenderDispute(adStatsData);
   }
 
   function adToggleNotes(e, el) {
@@ -3889,10 +3951,6 @@
                     stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <em>${текущая}</em>
-            <svg class="arr" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-              <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.6"
-                    stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
           </button>
         </div>
         <div class="stat-sort-menu${adSortOpen ? ' on' : ''}">${пункты}</div>
