@@ -609,6 +609,14 @@
   }
   .stat-legend .tappable:active { opacity: 0.6; }
 
+  /* Название скинов копируется тапом. Без подчёркиваний и иконок: строк
+     много, любой значок на каждой превратился бы в рябь. Подтверждение —
+     короткая вспышка цвета */
+  .copyable { cursor: pointer; transition: color 0.15s; }
+  .copyable:active { opacity: 0.55; }
+  .copyable.copied { color: var(--accent-light) !important; }
+  .copyable.copy-failed { color: var(--danger) !important; }
+
   /* Сроки прихода: когда контрагент сможет передать скин */
   .stat-waiting {
     margin-top: 14px; padding: 2px 13px;
@@ -769,13 +777,21 @@
   /* Заметки из таблицы. Карточка раскрывается только когда им есть что
      показать — иначе тап в пустоту выглядел бы поломкой */
   .stat-person.has-note { cursor: pointer; }
-  .stat-person .notes-cnt {
-    font-size: 11px; color: var(--accent-light); white-space: nowrap;
+  /* Метки у ника: дата прихода и число заметок. Одна высота, одна
+     типографика, иконка вместо слова — иначе строка под ником превращалась
+     в россыпь надписей разной длины */
+  .stat-person .tag {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; line-height: 1; white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
-  /* Когда человек должен привезти — видно, не раскрывая карточку */
-  .stat-person .soon-cnt {
-    font-size: 11px; color: var(--gold); white-space: nowrap;
-  }
+  /* Имена меток не «note»/«soon»: так уже названы блок заметок и ближайший
+     день, и их отступы протекали сюда */
+  .stat-person .tag i { font-size: 11px; opacity: 0.75; }
+  .stat-person .tag.t-soon { color: var(--gold); }
+  .stat-person .tag.t-soon.late { color: var(--danger); }
+  .stat-person .tag.t-note { color: var(--t3); }
+  .stat-person .tag.t-deals { color: var(--t3); }
 
   /* Его личные сроки: те же дни, что и в общем списке, но только по нему */
   .stat-person .arrivals {
@@ -3357,7 +3373,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 43;
+  const APP_VERSION = 44;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3852,7 +3868,8 @@
             <div class="deal">
               <div class="dh">
                 ${x.date ? `<span class="dt">${x.date}</span>` : ''}
-                ${x.items ? `<span class="it">${x.items}</span>` : ''}
+                ${x.items ? `<span class="it copyable" data-items="${attr(x.items)}"
+                     onclick="adCopyItems(event, this)">${x.items}</span>` : ''}
                 <span class="amt">${money(x.sum)}</span>
               </div>
               ${x.note ? `<div class="tx">${x.note}</div>` : ''}
@@ -3886,6 +3903,46 @@
     adDisputeOpen = !adDisputeOpen;
     haptic('light');
     adRenderDispute(adStatsData);
+  }
+
+  // Значение в HTML-атрибут: имена скинов приходят из таблицы и содержат
+  // кавычки и апострофы, которые иначе разорвут разметку
+  const attr = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+  async function copyText(текст) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(текст);
+        return true;
+      }
+    } catch (_) { /* в WebView clipboard бывает закрыт — пробуем по-старому */ }
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = текст;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, текст.length);
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch (_) { return false; }
+  }
+
+  // Предметы сделки лежат одной строкой через « + » — копируем списком,
+  // так их удобнее вставлять по одному
+  function adCopyItems(e, el) {
+    e.stopPropagation();          // тап по предмету не раскрывает карточку
+    const строка = el.dataset.items || '';
+    if (!строка) return;
+    copyText(строка.split(' + ').map(s => s.trim()).filter(Boolean).join('\n'))
+      .then(ok => {
+        haptic(ok ? 'success' : 'error');
+        el.classList.add(ok ? 'copied' : 'copy-failed');
+        setTimeout(() => el.classList.remove('copied', 'copy-failed'), 1000);
+      });
   }
 
   // «сегодня», «завтра», «через 3 дня», «просрочен 2 дня» — голая дата не
@@ -3995,7 +4052,8 @@
             ${w.deals.map(x => `
               <div class="one">
                 <span class="nm">${nickHtml(x.name)}</span>
-                <span class="it">${x.items || ''}</span>
+                <span class="it copyable" data-items="${attr(x.items)}"
+                      onclick="adCopyItems(event, this)">${x.items || ''}</span>
                 <span class="am">${money(x.sum)}</span>
               </div>`).join('')}
           </div>`).join('')}
@@ -4041,11 +4099,12 @@
         <div class="top">
           <div class="who">
             ${nickHtml(p.name)}
-            <span class="cnt">${p.count} ${склонение(p.count, 'сделка', 'сделки', 'сделок')}</span>
-            ${приходы.length ? `<span class="soon-cnt">${
-              приходы[0].left < 0 ? 'просрочен' : осталось(приходы[0].left)}</span>` : ''}
-            ${заметки.length ? `<span class="notes-cnt">${заметки.length} ${
-              склонение(заметки.length, 'заметка', 'заметки', 'заметок')}</span>` : ''}
+            <span class="tag t-deals"><i class="ti ti-receipt"></i>${p.count}</span>
+            ${приходы.length ? `<span class="tag t-soon${
+              приходы[0].left < 0 ? ' late' : ''}">${
+              приходы[0].date.slice(0, 5)}</span>` : ''}
+            ${заметки.length ? `<span class="tag t-note"><i class="ti ti-note"></i>${
+              заметки.length}</span>` : ''}
           </div>
           <div class="sum">${money(p.total)}${
             держится > 0 ? `<em>(${money(держится)})</em>` : ''}</div>
@@ -4056,14 +4115,16 @@
           <div class="one${a.left < 0 ? ' late' : ''}">
             <span class="dt">${a.date.slice(0, 5)}</span>
             <span class="lf">${осталось(a.left)}</span>
-            <span class="it">${a.items || ''}</span>
+            <span class="it copyable" data-items="${attr(a.items)}"
+                  onclick="adCopyItems(event, this)">${a.items || ''}</span>
             <span class="am">${money(a.sum)}</span>
           </div>`).join('')}</div>` : ''}
         ${открыт && заметки.length ? `<div class="notes">${заметки.map(n => `
           <div class="note">
             <div class="nh">
               ${n.date ? `<span class="dt">${n.date}</span>` : ''}
-              ${n.items ? `<span class="it">${n.items}</span>` : ''}
+              ${n.items ? `<span class="it copyable" data-items="${attr(n.items)}"
+                   onclick="adCopyItems(event, this)">${n.items}</span>` : ''}
             </div>
             <div class="tx">${n.text}</div>
           </div>`).join('')}</div>` : ''}
