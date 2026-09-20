@@ -602,6 +602,49 @@
     font-family: var(--font-display); font-size: 15px; font-weight: 600;
     font-variant-numeric: tabular-nums; color: var(--text);
   }
+  /* Пунктир под подписью — единственный намёк, что корзину можно открыть */
+  .stat-legend .tappable { cursor: pointer; }
+  .stat-legend .tappable span {
+    border-bottom: 1px dashed currentColor; padding-bottom: 1px;
+  }
+  .stat-legend .tappable:active { opacity: 0.6; }
+
+  /* Сроки прихода: когда контрагент сможет передать скин */
+  .stat-waiting {
+    margin-top: 14px; padding: 2px 13px;
+    border: 1px solid var(--line2); border-radius: 12px;
+    background: var(--surface2);
+  }
+  .stat-waiting .day { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .stat-waiting .day:last-child { border-bottom: none; }
+  .stat-waiting .dh {
+    display: flex; align-items: baseline; gap: 8px;
+    font-size: 11px; color: var(--t3);
+  }
+  .stat-waiting .dt {
+    font-size: 12.5px; font-weight: 600; color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-waiting .lf { flex: 1; min-width: 0; }
+  /* Ближайший день выделен: ради него сюда и заходят. Просроченный —
+     красным: срок прошёл, а скина нет, это уже разговор с контрагентом */
+  .stat-waiting .soon .dt, .stat-waiting .soon .lf { color: var(--gold); }
+  .stat-waiting .late .dt, .stat-waiting .late .lf { color: var(--danger); }
+  .stat-waiting .dh b {
+    font-family: var(--font-display); font-size: 13px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  .stat-waiting .one {
+    display: flex; align-items: baseline; gap: 8px;
+    margin-top: 5px; font-size: 11px; color: var(--t3);
+  }
+  .stat-waiting .one .nm { flex-shrink: 0; }
+  .stat-waiting .one .nick { font-size: 11px; }
+  .stat-waiting .one .it {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .stat-waiting .one .am { flex-shrink: 0; font-variant-numeric: tabular-nums; }
 
   /* Чем сортировать список контрагентов. Раньше здесь лежал ряд пилюль:
      шесть штук в две строки перетягивали на себя внимание с самого списка.
@@ -3282,7 +3325,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 41;
+  const APP_VERSION = 42;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3702,6 +3745,7 @@
     ['locked',  'В инвентаре (под баном)'],
     ['free',    'В инвентаре (без бана)'],
     ['pending', 'В ожидании'],
+    ['soon',    'Скоро придут'],
     ['count',   'Сделок'],
   ];
   let adStatsData = null;
@@ -3709,11 +3753,20 @@
   let adSortOpen = false;
   let adDisputeOpen = false;
   let adDisputeWho = null;        // чей спор сейчас развёрнут
+  let adWaitingOpen = false;      // открыты ли сроки прихода
   let adNotesOpen = null;         // чьи заметки сейчас развёрнуты
 
   // «В инвентаре» — это всё, что физически у нас: и под баном, и уже без него
   const adSortValue = (p, key) =>
     key === 'inv' ? (p.locked || 0) + (p.free || 0) : (p[key] || 0);
+
+  // Деньги сортируем по убыванию, а сроки — наоборот: раньше придёт — выше.
+  // Кого не ждём вовсе, уходит вниз, иначе он занял бы место ближайшего
+  const adCompare = (a, b, key) => {
+    if (key !== 'soon') return adSortValue(b, key) - adSortValue(a, key);
+    const x = a.soonest || '9999-12-31', y = b.soonest || '9999-12-31';
+    return x < y ? -1 : x > y ? 1 : b.total - a.total;
+  };
 
   function adSetSort(key) {
     if (!adStatsData) return;
@@ -3803,6 +3856,27 @@
     adRenderDispute(adStatsData);
   }
 
+  // «сегодня», «завтра», «через 3 дня», «просрочен 2 дня» — голая дата не
+  // говорит, горит оно или нет
+  function осталось(дней) {
+    if (дней < 0) {
+      const n = -дней;
+      return `просрочен ${n} ${склонение(n, 'день', 'дня', 'дней')}`;
+    }
+    if (дней === 0) return 'сегодня';
+    if (дней === 1) return 'завтра';
+    return `через ${дней} ${склонение(дней, 'день', 'дня', 'дней')}`;
+  }
+
+  function adToggleWaiting() {
+    if (!adStatsData) return;
+    adWaitingOpen = !adWaitingOpen;
+    haptic('light');
+    const y = window.scrollY;
+    adRenderStats(adStatsData);
+    window.scrollTo(0, y);
+  }
+
   function adToggleSortMenu() {
     if (!adStatsData) return;
     adSortOpen = !adSortOpen;
@@ -3861,12 +3935,39 @@
 
     // Полосу рисуем всегда: при одной корзине она сплошного цвета, и это
     // читается быстрее любой подписи
+    // «В ожидании» открывает сроки прихода — остальные корзины молчат:
+    // по ним ждать нечего, скины уже у нас
+    const ждём = (d.waiting || []).length > 0;
     const строки_легенды = [
-      ['locked', 'Под баном',   d.locked],
-      ['wait',   'В ожидании',  d.pending],
-      ['free',   'Без бана',    d.free],
-    ].map(([cls, имя, v]) => `<div class="${cls}">${
+      ['locked', 'Под баном',   d.locked, false],
+      ['wait',   'В ожидании',  d.pending, ждём],
+      ['free',   'Без бана',    d.free,  false],
+    ].map(([cls, имя, v, кликом]) => `<div class="${cls}${
+      кликом && v > 0 ? ' tappable' : ''}"${
+      кликом && v > 0 ? ' onclick="adToggleWaiting()"' : ''}>${
       v > 0 ? `<span>${имя}</span><b>${money(v)}</b>` : ''}</div>`).join('');
+
+    // Порядок задаём здесь, а не надеемся на него: ближайший день сверху
+    const сроки = ждём ? [...d.waiting].sort((a, b) => (a.iso < b.iso ? -1 : 1)) : [];
+    const первый_живой = сроки.findIndex(w => w.left >= 0);
+
+    const окно_ожидания = (ждём && adWaitingOpen) ? `
+      <div class="stat-waiting">
+        ${сроки.map((w, i) => `
+          <div class="day${w.left < 0 ? ' late' : (i === первый_живой ? ' soon' : '')}">
+            <div class="dh">
+              <span class="dt">${w.date}</span>
+              <span class="lf">${осталось(w.left)}</span>
+              <b>${money(w.sum)}</b>
+            </div>
+            ${w.deals.map(x => `
+              <div class="one">
+                <span class="nm">${nickHtml(x.name)}</span>
+                <span class="it">${x.items || ''}</span>
+                <span class="am">${money(x.sum)}</span>
+              </div>`).join('')}
+          </div>`).join('')}
+      </div>` : '';
 
     // Рядом с общей суммой — та её часть, которую продать пока нельзя
     const занято = (d.locked || 0) + (d.pending || 0);
@@ -3876,6 +3977,8 @@
     const итог_по = {
       total: money(d.total), inv: money(d.locked + d.free), locked: money(d.locked),
       free: money(d.free), pending: money(d.pending), count: String(d.count),
+      // У срока полезна не сумма, а сама дата ближайшего прихода
+      soon: сроки.length ? сроки[0].date.slice(0, 5) : '—',
     };
     const пункты = SORTS.map(([key, имя]) =>
       `<button class="stat-sort-btn${key === adSortKey ? ' on' : ''}"
@@ -3886,8 +3989,7 @@
 
     adRenderDispute(d);
 
-    const по_сортировке = [...d.people]
-      .sort((a, b) => adSortValue(b, adSortKey) - adSortValue(a, adSortKey));
+    const по_сортировке = [...d.people].sort((a, b) => adCompare(a, b, adSortKey));
 
     const люди = по_сортировке.map(p => {
       // В скобках — то же, что и в общей сумме: сколько за человеком
@@ -3935,6 +4037,7 @@
         </div>
         <div class="stat-bar">${bar(d.locked, d.pending, d.free)}</div>
         <div class="stat-legend">${строки_легенды}</div>
+        ${окно_ожидания}
       </section>
       <section class="own-card">
         <div class="own-card-h">
