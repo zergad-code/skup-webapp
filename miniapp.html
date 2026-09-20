@@ -772,6 +772,38 @@
   .stat-person .notes-cnt {
     font-size: 11px; color: var(--accent-light); white-space: nowrap;
   }
+  /* Когда человек должен привезти — видно, не раскрывая карточку */
+  .stat-person .soon-cnt {
+    font-size: 11px; color: var(--gold); white-space: nowrap;
+  }
+
+  /* Его личные сроки: те же дни, что и в общем списке, но только по нему */
+  .stat-person .arrivals {
+    margin-top: 10px; padding: 2px 12px;
+    border-left: 2px solid var(--gold); border-radius: 2px;
+    background: var(--surface2);
+  }
+  .stat-person .arrivals .one {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 7px 0; border-bottom: 1px solid var(--line);
+    font-size: 11px; color: var(--t3);
+  }
+  .stat-person .arrivals .one:last-child { border-bottom: none; }
+  .stat-person .arrivals .dt {
+    font-size: 12px; font-weight: 600; color: var(--gold);
+    font-variant-numeric: tabular-nums; flex-shrink: 0;
+  }
+  .stat-person .arrivals .late .dt, .stat-person .arrivals .late .lf {
+    color: var(--danger);
+  }
+  .stat-person .arrivals .lf { flex-shrink: 0; }
+  .stat-person .arrivals .it {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .stat-person .arrivals .am {
+    flex-shrink: 0; font-variant-numeric: tabular-nums; color: var(--text);
+  }
   .stat-person.open .notes-cnt { opacity: 0.6; }
   .stat-person .notes {
     margin-top: 10px; padding: 2px 12px;
@@ -3325,7 +3357,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 42;
+  const APP_VERSION = 43;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3996,16 +4028,22 @@
       // ещё нельзя продать. Если продать можно всё, скобка не нужна
       const держится = (p.locked || 0) + (p.pending || 0);
       const заметки = p.notes || [];
+      const приходы = p.arrivals || [];
       const ключ = (p.name || '').toLowerCase();
-      const открыт = заметки.length > 0 && adNotesOpen === ключ;
+      // Раскрывать есть что, если человек нам что-то должен привезти
+      // или у сделки осталась твоя запись
+      const раскрываемо = заметки.length > 0 || приходы.length > 0;
+      const открыт = раскрываемо && adNotesOpen === ключ;
       return `
-      <div class="stat-person${заметки.length ? ' has-note' : ''}${открыт ? ' open' : ''}"
-           ${заметки.length ? `data-note-key="${ключ.replace(/"/g, '&quot;')}"
+      <div class="stat-person${раскрываемо ? ' has-note' : ''}${открыт ? ' open' : ''}"
+           ${раскрываемо ? `data-note-key="${ключ.replace(/"/g, '&quot;')}"
              onclick="adToggleNotes(event, this)"` : ''}>
         <div class="top">
           <div class="who">
             ${nickHtml(p.name)}
             <span class="cnt">${p.count} ${склонение(p.count, 'сделка', 'сделки', 'сделок')}</span>
+            ${приходы.length ? `<span class="soon-cnt">${
+              приходы[0].left < 0 ? 'просрочен' : осталось(приходы[0].left)}</span>` : ''}
             ${заметки.length ? `<span class="notes-cnt">${заметки.length} ${
               склонение(заметки.length, 'заметка', 'заметки', 'заметок')}</span>` : ''}
           </div>
@@ -4014,7 +4052,14 @@
         </div>
         <div class="bar">${bar(p.locked, p.pending, p.free)}</div>
         <div class="parts">${части(p)}</div>
-        ${открыт ? `<div class="notes">${заметки.map(n => `
+        ${открыт && приходы.length ? `<div class="arrivals">${приходы.map(a => `
+          <div class="one${a.left < 0 ? ' late' : ''}">
+            <span class="dt">${a.date.slice(0, 5)}</span>
+            <span class="lf">${осталось(a.left)}</span>
+            <span class="it">${a.items || ''}</span>
+            <span class="am">${money(a.sum)}</span>
+          </div>`).join('')}</div>` : ''}
+        ${открыт && заметки.length ? `<div class="notes">${заметки.map(n => `
           <div class="note">
             <div class="nh">
               ${n.date ? `<span class="dt">${n.date}</span>` : ''}
