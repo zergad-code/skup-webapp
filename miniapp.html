@@ -61,7 +61,13 @@
   @keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
   @keyframes spin    { to { transform: rotate(360deg); } }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  /* manipulation убирает зум по двойному тапу: прокрутка и щипок остаются,
+     а быстрые два нажатия по кнопке курса больше не приближают экран */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
 
   html { background: var(--bg0); }
   body {
@@ -2035,13 +2041,13 @@
         <div class="own-money-input">
           <button type="button" class="own-cur" id="adBuyCur" onclick="adToggleBuyCur()"
                   title="Переключить валюту">$</button>
-          <input id="adBuy" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0" oninput="adSpread()">
+          <input id="adBuy" type="text" inputmode="decimal" autocomplete="off" placeholder="0" oninput="adSpread()">
         </div>
       </div>
       <div class="own-money-field">
         <label for="adMarketRub">Референс рынка</label>
         <div class="own-money-input"><span>₽</span>
-          <input id="adMarketRub" type="number" inputmode="decimal" step="1" min="0" placeholder="—" oninput="adRecalc()">
+          <input id="adMarketRub" type="text" inputmode="decimal" autocomplete="off" placeholder="—" oninput="adRecalc()">
         </div>
       </div>
     </div>
@@ -2055,7 +2061,7 @@
       <label for="adRate">Курс ₽ за $</label>
       <div class="own-stepper">
         <button onclick="adBumpRate(-1)" aria-label="Уменьшить курс"><i class="ti ti-minus"></i></button>
-        <input id="adRate" type="number" inputmode="decimal" step="1" min="1" value="80" oninput="adRecalc()">
+        <input id="adRate" type="text" inputmode="decimal" autocomplete="off" value="80" oninput="adRecalc()">
         <button onclick="adBumpRate(1)" aria-label="Увеличить курс"><i class="ti ti-plus"></i></button>
       </div>
     </div>
@@ -2063,7 +2069,7 @@
       <label for="adMarketUsd">В таблицу уйдёт</label>
       <div class="own-usd-box">
         <span>$</span>
-        <input id="adMarketUsd" type="number" inputmode="decimal" step="0.01" min="0"
+        <input id="adMarketUsd" type="text" inputmode="decimal" autocomplete="off"
                placeholder="—" oninput="adUsdEdited()">
       </div>
     </div>
@@ -2117,7 +2123,19 @@
   if (tg) {
     tg.ready(); tg.expand();
     try { tg.setHeaderColor('#0d0d1c'); tg.setBackgroundColor('#0d0d1c'); } catch (_) {}
-    try { tg.disableVerticalSwipes?.(); } catch (_) {}
+    // Свайп вниз — единственный способ свернуть приложение, не закрывая его.
+    // Глухой запрет свайпов оставлял только крестик «Закрыть», поэтому
+    // запрещаем их лишь когда страница пролистана: там свайп означает скролл
+    try { tg.enableClosingConfirmation?.(); } catch (_) {}
+    свайпыПоПрокрутке();
+    window.addEventListener('scroll', свайпыПоПрокрутке, { passive: true });
+  }
+
+  function свайпыПоПрокрутке() {
+    try {
+      if (window.scrollY > 4) tg?.disableVerticalSwipes?.();
+      else tg?.enableVerticalSwipes?.();
+    } catch (_) {}
   }
 
   // Хаптика — мягкая обратная связь, как в нативных приложениях
@@ -3373,7 +3391,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 44;
+  const APP_VERSION = 45;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3515,6 +3533,11 @@
     document.getElementById('adVer').textContent = 'ВЕРСИЯ ' + APP_VERSION;
     adRenderItems();
     adRecalc();
+
+    // Незаписанная сделка переживает закрытие приложения
+    const восстановлен = adLoadDraft();
+    adDraftReady = true;
+    if (восстановлен) adShowResult('Черновик восстановлен', true);
   }
 
   function adTogglePicker() {
@@ -3740,6 +3763,8 @@
       adBuyUsd() !== null,
     ].filter(Boolean).length;
     document.getElementById('adFill').style.transform = `scaleX(${done / 6})`;
+    // adSync зовётся на каждое изменение формы — удобная точка сохранения
+    adSaveDraft();
   }
 
   // ── Статистика ───────────────────────────────────────────────────────────
@@ -4163,13 +4188,74 @@
       </section>`;
   }
 
+  // Ссылку почти всегда копируют с маркета, а не печатают руками. Поэтому
+  // кнопка сначала пробует вставить из буфера; поле с клавиатурой остаётся
+  // запасным путём — буфер отдают не все сборки WebView
   function adToggleLink() {
     const box = document.getElementById('adLinkBox');
-    const opening = box.style.display === 'none';
-    box.style.display = opening ? 'flex' : 'none';
-    document.getElementById('adLinkBtn').classList.toggle('active', opening);
-    if (opening) document.getElementById('adLinkInput').focus();
+    if (box.style.display !== 'none') { adCloseLink(); return; }
     haptic('light');
+    adFromClipboard().then(текст => {
+      // Молча берём из буфера только ссылку: там может лежать что угодно,
+      // и случайное сообщение не должно стать предметом сделки
+      const ссылка = /^https?:\/\//i.test(текст) || /\w\/\w/.test(текст);
+      if (ссылка && adTryAddLink(текст)) return;
+      adOpenLinkBox(текст || '');
+    });
+  }
+
+  function adOpenLinkBox(заполнить) {
+    const box = document.getElementById('adLinkBox');
+    box.style.display = 'flex';
+    document.getElementById('adLinkBtn').classList.add('active');
+    const input = document.getElementById('adLinkInput');
+    if (заполнить) input.value = заполнить;
+    input.focus();
+  }
+
+  function adCloseLink() {
+    document.getElementById('adLinkBox').style.display = 'none';
+    document.getElementById('adLinkBtn').classList.remove('active');
+  }
+
+  // Telegram отдаёт буфер только своим методом и только по жесту; у запуска
+  // не из меню вложений он молча возвращает null — тогда пробуем браузерный
+  function adFromClipboard() {
+    return new Promise(resolve => {
+      let ответил = false;
+      const готово = v => { if (!ответил) { ответил = true; resolve((v || '').trim()); } };
+      try {
+        if (tg?.readTextFromClipboard) {
+          tg.readTextFromClipboard(текст => {
+            if (текст) return готово(текст);
+            браузерный().then(готово);
+          });
+          // На случай, если колбэк не придёт вовсе
+          setTimeout(() => браузерный().then(готово), 400);
+          return;
+        }
+      } catch (_) { /* метода нет — идём обычным путём */ }
+      браузерный().then(готово);
+    });
+
+    async function браузерный() {
+      try {
+        if (navigator.clipboard?.readText) return await navigator.clipboard.readText();
+      } catch (_) { /* доступ закрыт — вернём пусто, откроется поле */ }
+      return '';
+    }
+  }
+
+  // true, если из текста удалось достать предмет и он добавлен
+  function adTryAddLink(текст) {
+    const name = parseItemLink(текст);
+    if (!name) return false;
+    ad.items.push(name);
+    haptic('medium');
+    adClearResult();
+    adRenderItems();
+    adCloseLink();
+    return true;
   }
 
   // Из ссылки берём только имя предмета — цена всё равно запрашивается
@@ -4221,12 +4307,8 @@
         : 'Вставь ссылку на страницу предмета с market.csgo.com', false);
       return;
     }
-    ad.items.push(name);
     input.value = '';
-    haptic('medium');
-    adClearResult();
-    adRenderItems();
-    adToggleLink();
+    adTryAddLink(name);
   }
 
   // ── Цены с маркета ───────────────────────────────────────────────────────
@@ -4270,10 +4352,9 @@
     if (!кнопка) return;
 
     const поле = document.createElement('input');
-    поле.type = 'number';
+    поле.type = 'text';          // как и прочие суммы: запятая тоже подойдёт
     поле.inputMode = 'decimal';
-    поле.min = '0';
-    поле.step = '1';
+    поле.autocomplete = 'off';
     поле.className = 'own-price-input';
     поле.placeholder = '₽';
     кнопка.replaceWith(поле);
@@ -4284,7 +4365,7 @@
     const сохранить = () => {
       if (закрыто) return;
       закрыто = true;
-      const v = parseFloat(поле.value);
+      const v = parseFloat(String(поле.value).replace(',', '.'));
       if (!isNaN(v) && v >= 0) {
         adMarketItems[i].rub = Math.round(v * 100) / 100;
         adMarketItems[i].manual = true;   // вписано руками — пометим цветом
@@ -4345,9 +4426,18 @@
     }
   }
 
+  // Поля сумм — текстовые, а не number: на телефоне числовая клавиатура
+  // по-разному относится к точке и запятой, а «29,5» в <input type=number>
+  // браузер считает невалидным и отдаёт пустую строку. Разбираем сами.
+  const numOf = id => {
+    const el = document.getElementById(id);
+    if (!el) return NaN;
+    return parseFloat(String(el.value).replace(',', '.').replace(/\s/g, ''));
+  };
+
   function adBumpRate(step) {
     const el = document.getElementById('adRate');
-    const next = Math.max(1, (parseFloat(el.value) || 0) + step);
+    const next = Math.max(1, (numOf('adRate') || 0) + step);
     el.value = Number(next.toFixed(2));
     haptic('selection');
     adRecalc();
@@ -4359,15 +4449,15 @@
   let adUsdManual = false;
 
   function adComputeUsd() {
-    const rub = parseFloat(document.getElementById('adMarketRub').value);
-    const rate = parseFloat(document.getElementById('adRate').value);
+    const rub = numOf('adMarketRub');
+    const rate = numOf('adRate');
     if (isNaN(rub) || isNaN(rate) || rate <= 0) return null;
     return Math.round(rub / rate * 100) / 100;
   }
 
   // То, что реально уйдёт в таблицу
   function adMarketUsd() {
-    const v = parseFloat(document.getElementById('adMarketUsd').value);
+    const v = numOf('adMarketUsd');
     return isNaN(v) ? null : v;
   }
 
@@ -4400,10 +4490,10 @@
   }
 
   function adBuyUsd() {
-    const v = parseFloat(document.getElementById('adBuy').value);
+    const v = numOf('adBuy');
     if (isNaN(v)) return null;
     if (adBuyCurrency === 'USD') return v;
-    const rate = parseFloat(document.getElementById('adRate').value);
+    const rate = numOf('adRate');
     if (isNaN(rate) || rate <= 0) return null;
     return Math.round(v / rate * 100) / 100;
   }
@@ -4550,7 +4640,79 @@
     }
   }
 
+  // ── Черновик формы ───────────────────────────────────────────────────────
+  // Mini App закрывается свайпом вниз, и закрыть его проще, чем свернуть.
+  // Введённое переживает закрытие: иначе сделку приходится набирать заново.
+  const DRAFT_KEY = 'zg_draft_v1';
+  let adDraftReady = false;        // до первой отрисовки не сохраняем
+
+  function adSaveDraft() {
+    if (!adDraftReady) return;
+    const зн = id => (document.getElementById(id) || {}).value || '';
+    const черновик = {
+      items: ad.items, channel: ad.channel, tradeBan: ad.tradeBan,
+      banDays: ad.banDays, dealId: ad.dealId, cur: adBuyCurrency,
+      usdManual: adUsdManual,
+      date: зн('adDate'), party: зн('adParty'), buy: зн('adBuy'),
+      rub: зн('adMarketRub'), usd: зн('adMarketUsd'),
+      prices: adMarketItems,
+    };
+    // Пустую форму не храним: иначе при следующем входе оживёт чужой мусор
+    const пусто = !черновик.items.length && !черновик.party && !черновик.buy;
+    try {
+      if (пусто) localStorage.removeItem(DRAFT_KEY);
+      else localStorage.setItem(DRAFT_KEY, JSON.stringify(черновик));
+    } catch (_) { /* приватный режим — просто живём без черновика */ }
+  }
+
+  function adDropDraft() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch (_) {}
+  }
+
+  function adLoadDraft() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (_) {}
+    if (!d || typeof d !== 'object') return false;
+
+    ad.items = Array.isArray(d.items) ? d.items : [];
+    ad.channel = d.channel || null;
+    ad.tradeBan = typeof d.tradeBan === 'boolean' ? d.tradeBan : null;
+    ad.banDays = d.banDays || null;
+    // deal_id сохраняем: это та же сделка, а не новая
+    if (d.dealId) ad.dealId = d.dealId;
+    adBuyCurrency = d.cur === 'RUB' ? 'RUB' : 'USD';
+    adMarketItems = Array.isArray(d.prices) ? d.prices : [];
+
+    const ст = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+    ст('adDate', d.date); ст('adParty', d.party); ст('adBuy', d.buy);
+    ст('adMarketRub', d.rub);
+    document.getElementById('adBuyCur').textContent = adBuyCurrency === 'USD' ? '$' : '₽';
+
+    if (ad.channel) {
+      document.querySelectorAll('#adChannels .chan-btn').forEach(b =>
+        b.classList.toggle('selected', b.textContent === ad.channel));
+    }
+    if (ad.tradeBan !== null) {
+      document.getElementById(ad.tradeBan ? 'adTbYes' : 'adTbNo').classList.add('selected');
+      document.getElementById('adDaysGrid').classList.toggle('visible', ad.tradeBan);
+      if (ad.banDays) {
+        document.querySelectorAll('#adDaysGrid .day-btn').forEach(b =>
+          b.classList.toggle('selected', b.textContent === String(ad.banDays)));
+      }
+    }
+    if (adMarketItems.length) adRenderPrices();
+    adRenderItems();
+    adRecalc();
+    // Ручную правку референса восстанавливаем после пересчёта, иначе он её сотрёт
+    if (d.usdManual && d.usd) {
+      document.getElementById('adMarketUsd').value = d.usd;
+      adUsdEdited();
+    }
+    return true;
+  }
+
   function adResetForm() {
+    adDropDraft();
     // Новый deal_id: следующая сделка должна стать новой строкой
     ad.items = [];
     ad.channel = null;
