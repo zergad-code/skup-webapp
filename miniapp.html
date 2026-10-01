@@ -660,6 +660,20 @@
   }
   .stat-waiting .one .am { flex-shrink: 0; font-variant-numeric: tabular-nums; }
 
+  /* «Получено» — галочка в строке ожидания. Размер под палец, но тихая:
+     нажимают её раз в жизни сделки, кричать о себе ей незачем */
+  .got-btn {
+    flex-shrink: 0; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; margin: -6px 0 -6px 2px;
+    background: none; border: 1px solid var(--line2); border-radius: 8px;
+    color: var(--t3); transition: color 0.16s, border-color 0.16s;
+  }
+  .got-btn i { font-size: 13px; }
+  .got-btn:active { color: var(--accent2); border-color: var(--line-accent); }
+  .got-btn.busy { opacity: 0.5; }
+  .got-btn:disabled { cursor: default; }
+
   /* Чем сортировать список контрагентов. Раньше здесь лежал ряд пилюль:
      шесть штук в две строки перетягивали на себя внимание с самого списка.
      Теперь порядок назван одной строкой в шапке, а выбор раскрывается */
@@ -3391,7 +3405,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 45;
+  const APP_VERSION = 46;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3982,6 +3996,59 @@
     return `через ${дней} ${склонение(дней, 'день', 'дня', 'дней')}`;
   }
 
+  // Отметка «скин приехал». Кнопка стоит в каждой строке ожидания: именно
+  // там на неё смотрят, когда контрагент передал предмет
+  function кнопкаПолучено(x) {
+    if (!x || !x.key) return '';
+    return `<button class="got-btn" title="Получено"
+                    data-row="${x.row || 0}" data-key="${attr(x.key)}"
+                    onclick="adMarkReceived(event, this)"><i class="ti ti-check"></i></button>`;
+  }
+
+  // Подтверждение — нативное окно Telegram, в браузере обычный confirm
+  function спросить(текст) {
+    return new Promise(resolve => {
+      try {
+        if (tg?.showConfirm) { tg.showConfirm(текст, ok => resolve(!!ok)); return; }
+      } catch (_) {}
+      resolve(window.confirm(текст));
+    });
+  }
+
+  async function adMarkReceived(e, el) {
+    e.stopPropagation();                 // не раскрывать и не схлопывать карточку
+    if (el.disabled) return;
+    haptic('light');
+
+    const строка = el.closest('.one');
+    const предмет = (строка?.querySelector('.it')?.textContent || 'скин').trim();
+    if (!await спросить(`Скин получен?\n${предмет}`)) return;
+
+    el.disabled = true;
+    el.classList.add('busy');
+    try {
+      const r = await fetch(ADMIN_API_URL + '/api/admin/received?v=' + APP_VERSION, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json',
+                   'X-Telegram-Init-Data': tg?.initData || '' },
+        body: JSON.stringify({ row: Number(el.dataset.row) || 0, key: el.dataset.key }),
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(d?.error || `ошибка ${r.status}`);
+
+      haptic('success');
+      // Перечитываем статистику: сделка должна переехать из ожидания в бан
+      await adLoadStats();
+      adShowResult(d.already ? `Уже было отмечено ${d.date}`
+                             : `Отмечено получение ${d.date}`, true);
+    } catch (err) {
+      haptic('error');
+      el.disabled = false;
+      el.classList.remove('busy');
+      adShowResult(`Не отметил: ${err.message || 'нет связи'}`, false);
+    }
+  }
+
   function adToggleWaiting() {
     if (!adStatsData) return;
     adWaitingOpen = !adWaitingOpen;
@@ -4080,6 +4147,7 @@
                 <span class="it copyable" data-items="${attr(x.items)}"
                       onclick="adCopyItems(event, this)">${x.items || ''}</span>
                 <span class="am">${money(x.sum)}</span>
+                ${кнопкаПолучено(x)}
               </div>`).join('')}
           </div>`).join('')}
       </div>` : '';
@@ -4143,6 +4211,7 @@
             <span class="it copyable" data-items="${attr(a.items)}"
                   onclick="adCopyItems(event, this)">${a.items || ''}</span>
             <span class="am">${money(a.sum)}</span>
+            ${кнопкаПолучено(a)}
           </div>`).join('')}</div>` : ''}
         ${открыт && заметки.length ? `<div class="notes">${заметки.map(n => `
           <div class="note">
