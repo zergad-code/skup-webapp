@@ -648,9 +648,11 @@
     font-family: var(--font-display); font-size: 13px; font-weight: 600;
     font-variant-numeric: tabular-nums; color: var(--text);
   }
+  /* center, а не baseline: в строке живёт кнопка, и по базовой линии она
+     вылезала за её высоту и наезжала на соседние строки */
   .stat-waiting .one {
-    display: flex; align-items: baseline; gap: 8px;
-    margin-top: 5px; font-size: 11px; color: var(--t3);
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 3px; padding: 3px 0; font-size: 11px; color: var(--t3);
   }
   .stat-waiting .one .nm { flex-shrink: 0; }
   .stat-waiting .one .nick { font-size: 11px; }
@@ -662,14 +664,16 @@
 
   /* «Получено» — галочка в строке ожидания. Размер под палец, но тихая:
      нажимают её раз в жизни сделки, кричать о себе ей незачем */
+  /* Размер держим в пределах строки: отрицательные поля экономили место,
+     но кнопка перекрывала суммы соседних сделок */
   .got-btn {
     flex-shrink: 0; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
-    width: 26px; height: 26px; margin: -6px 0 -6px 2px;
-    background: none; border: 1px solid var(--line2); border-radius: 8px;
+    width: 22px; height: 22px; margin-left: 2px;
+    background: none; border: 1px solid var(--line2); border-radius: 7px;
     color: var(--t3); transition: color 0.16s, border-color 0.16s;
   }
-  .got-btn i { font-size: 13px; }
+  .got-btn i { font-size: 12px; }
   .got-btn:active { color: var(--accent2); border-color: var(--line-accent); }
   .got-btn.busy { opacity: 0.5; }
   .got-btn:disabled { cursor: default; }
@@ -1621,6 +1625,56 @@
   .flash-err { animation: flashErr 1.1s ease; border-radius: var(--r-s); }
 
   /* ── Экран успеха ── */
+  /* Окно подтверждения внутри приложения */
+  .ask-overlay {
+    display: none; position: fixed; inset: 0; z-index: 210;
+    background: rgba(4, 9, 13, 0.72); backdrop-filter: blur(3px);
+    align-items: flex-end; justify-content: center;
+    padding: 16px calc(16px + env(safe-area-inset-left, 0px))
+             calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .ask-overlay.show { display: flex; animation: fadeIn 0.18s ease; }
+  .ask-card {
+    width: 100%; max-width: 420px;
+    background: var(--surface); border: 1px solid var(--line2); border-radius: 18px;
+    padding: 18px 16px 16px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+    animation: askUp 0.2s ease;
+  }
+  @keyframes askUp { from { transform: translateY(14px); opacity: 0; } }
+  .ask-title {
+    font-family: var(--font-display); font-size: 17px; font-weight: 600;
+    color: var(--text);
+  }
+  .ask-item {
+    margin-top: 6px; font-size: 12.5px; color: var(--t2); line-height: 1.45;
+    word-break: break-word;
+  }
+  /* Поле даты показывается только по кнопке «Выбрать дату» */
+  .ask-date { display: none; margin-top: 14px; }
+  .ask-date.on { display: block; }
+  /* Поле даты на телефоне открывается тапом — ему нужна высота под палец */
+  .ask-date input {
+    width: 100%; padding: 12px 14px; font-size: 15px;
+    min-height: 46px; color-scheme: dark;
+  }
+  .ask-date label {
+    display: block; margin-bottom: 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--t3);
+  }
+  .ask-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .ask-btns button {
+    cursor: pointer; width: 100%; padding: 13px 14px;
+    border-radius: 12px; border: 1px solid transparent;
+    font-family: var(--font-ui); font-size: 14px; font-weight: 600;
+    transition: opacity 0.15s;
+  }
+  .ask-btns button:active { opacity: 0.7; }
+  .ask-yes { background: var(--accent2); color: #06221c; }
+  .ask-alt { background: none; border-color: var(--line2); color: var(--t2); }
+  .ask-no { background: none; color: var(--t3); font-weight: 500; }
+
   .success-overlay {
     display: none; position: fixed; inset: 0;
     background:
@@ -3405,7 +3459,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 46;
+  const APP_VERSION = 47;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -4005,14 +4059,55 @@
                     onclick="adMarkReceived(event, this)"><i class="ti ti-check"></i></button>`;
   }
 
-  // Подтверждение — нативное окно Telegram, в браузере обычный confirm
-  function спросить(текст) {
-    return new Promise(resolve => {
-      try {
-        if (tg?.showConfirm) { tg.showConfirm(текст, ok => resolve(!!ok)); return; }
-      } catch (_) {}
-      resolve(window.confirm(текст));
-    });
+  // Своё окно вместо системного: нужна третья кнопка и выбор даты.
+  // Отвечает ISO-датой получения либо null, если передумал
+  let askResolve = null;
+
+  function спросить(предмет) {
+    const box = document.getElementById('askOverlay');
+    document.getElementById('askItem').textContent = предмет;
+    document.getElementById('askDateBox').classList.remove('on');
+
+    const d = new Date();
+    const сегодня = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+                  + `-${String(d.getDate()).padStart(2, '0')}`;
+    const поле = document.getElementById('askDate');
+    поле.value = сегодня;
+    поле.max = сегодня;        // скин не мог приехать завтра
+
+    document.getElementById('askPick').textContent = 'Выбрать дату';
+    box.classList.add('show');
+    return new Promise(resolve => { askResolve = resolve; });
+  }
+
+  function askClose(ответ) {
+    document.getElementById('askOverlay').classList.remove('show');
+    const r = askResolve;
+    askResolve = null;
+    if (r) r(ответ);
+  }
+
+  function askAnswer(что) {
+    const поле = document.getElementById('askDate');
+    const блок = document.getElementById('askDateBox');
+
+    if (что === 'pick' && !блок.classList.contains('on')) {
+      // Первый тап раскрывает календарь, второй — подтверждает выбранное
+      блок.classList.add('on');
+      document.getElementById('askPick').textContent = 'Готово';
+      haptic('light');
+      try { поле.showPicker ? поле.showPicker() : поле.focus(); } catch (_) { поле.focus(); }
+      return;
+    }
+
+    haptic('light');
+    if (что === null) return askClose(null);
+    askClose(что === 'pick' ? (поле.value || null) : поле.max);
+  }
+
+  // Тап мимо карточки — то же, что «Нет»
+  function askDismiss(e) {
+    if (e.target.id === 'askOverlay') askClose(null);
   }
 
   async function adMarkReceived(e, el) {
@@ -4022,7 +4117,8 @@
 
     const строка = el.closest('.one');
     const предмет = (строка?.querySelector('.it')?.textContent || 'скин').trim();
-    if (!await спросить(`Скин получен?\n${предмет}`)) return;
+    const когда = await спросить(предмет);
+    if (!когда) return;
 
     el.disabled = true;
     el.classList.add('busy');
@@ -4031,7 +4127,8 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json',
                    'X-Telegram-Init-Data': tg?.initData || '' },
-        body: JSON.stringify({ row: Number(el.dataset.row) || 0, key: el.dataset.key }),
+        body: JSON.stringify({ row: Number(el.dataset.row) || 0,
+                               key: el.dataset.key, date: когда }),
       });
       const d = await r.json().catch(() => null);
       if (!r.ok) throw new Error(d?.error || `ошибка ${r.status}`);
@@ -4818,6 +4915,24 @@
 </script>
 
 <!-- Экран успеха -->
+<!-- Подтверждение получения: своё окно, а не системное — здесь нужна
+     третья кнопка, дата, и всё в одном стиле с приложением -->
+<div class="ask-overlay" id="askOverlay" onclick="askDismiss(event)">
+  <div class="ask-card" onclick="event.stopPropagation()">
+    <div class="ask-title">Скин получен?</div>
+    <div class="ask-item" id="askItem"></div>
+    <div class="ask-date" id="askDateBox">
+      <label for="askDate">Дата получения</label>
+      <input type="date" id="askDate" class="own-input">
+    </div>
+    <div class="ask-btns">
+      <button class="ask-yes" id="askYes" onclick="askAnswer('today')">Да, сегодня</button>
+      <button class="ask-alt" id="askPick" onclick="askAnswer('pick')">Выбрать дату</button>
+      <button class="ask-no" onclick="askAnswer(null)">Нет</button>
+    </div>
+  </div>
+</div>
+
 <div class="success-overlay" id="successOverlay">
   <svg class="success-check" viewBox="0 0 100 100">
     <circle cx="50" cy="50" r="45"/>
