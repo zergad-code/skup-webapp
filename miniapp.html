@@ -420,8 +420,20 @@
   .own-price-input::-webkit-outer-spin-button,
   .own-price-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .own-price-input[type=number] { -moz-appearance: textfield; }
+  /* Цена — тоже кнопка: ошибиться при ручном вводе легко, и переписать её
+     нужно столько раз, сколько потребуется. Выглядит как обычное число,
+     пунктир снизу — единственный намёк, что по ней можно нажать */
+  .own-price-val {
+    flex-shrink: 0; cursor: pointer;
+    background: none; border: none; padding: 2px 0;
+    border-bottom: 1px dashed var(--line2);
+    font-family: var(--font-display); font-size: 12.5px; font-weight: 600;
+    color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap;
+    transition: border-color 0.16s, opacity 0.14s;
+  }
+  .own-price-val:active { opacity: 0.6; }
   /* Вписанное руками отличаем от пришедшего с маркета */
-  .own-price b.manual { color: var(--gold); }
+  .own-price-val.manual { color: var(--gold); border-bottom-color: var(--gold); }
   .own-fixed {
     display: block; margin-top: 3px;
     font-style: normal; font-size: 10px; letter-spacing: 0.1em;
@@ -3459,7 +3471,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 47;
+  const APP_VERSION = 48;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -4486,9 +4498,12 @@
       const уточнено = it.rub !== null && it.resolved && it.resolved !== it.name;
       // Не найденную цену можно вписать руками: маркет знает не всё,
       // а из-за одного пропуска терять всю сумму незачем
+      // Цену можно переписывать сколько угодно: с первого раза ошибиться
+      // легко, а единственная попытка оставляла бы неверную сумму навсегда
       const цена = it.rub === null
         ? `<button class="own-price-miss" onclick="adEditPrice(${i})">не найден</button>`
-        : `<b${it.manual ? ' class="manual"' : ''}>${it.rub.toLocaleString('ru-RU')} ₽</b>`;
+        : `<button class="own-price-val${it.manual ? ' manual' : ''}"
+                   onclick="adEditPrice(${i})">${it.rub.toLocaleString('ru-RU')} ₽</button>`;
       return `<div class="own-price${it.rub === null ? ' miss' : ''}">
         <span>${it.resolved || it.name}${уточнено ? '<i class="own-fixed">имя уточнено</i>' : ''}</span>
         ${цена}
@@ -4514,7 +4529,7 @@
 
   function adEditPrice(i) {
     const строка = document.getElementById('adPrices').children[i];
-    const кнопка = строка && строка.querySelector('.own-price-miss');
+    const кнопка = строка && строка.querySelector('.own-price-miss, .own-price-val');
     if (!кнопка) return;
 
     const поле = document.createElement('input');
@@ -4523,16 +4538,27 @@
     поле.autocomplete = 'off';
     поле.className = 'own-price-input';
     поле.placeholder = '₽';
+    // Правим уже вписанное — показываем текущее число, а не пустое поле
+    const было = adMarketItems[i].rub;
+    if (было !== null) поле.value = String(было);
     кнопка.replaceWith(поле);
     поле.focus();
+    поле.select();
     haptic('light');
 
     let закрыто = false;
     const сохранить = () => {
       if (закрыто) return;
       закрыто = true;
-      const v = parseFloat(String(поле.value).replace(',', '.'));
-      if (!isNaN(v) && v >= 0) {
+      const сырое = String(поле.value).trim();
+      const v = parseFloat(сырое.replace(',', '.'));
+      if (сырое === '') {
+        // Стёр всё — значит отказался от своей правки: возвращаем цену
+        // маркета, а если её не было, строка снова станет «не найден»
+        adMarketItems[i].rub = adMarketItems[i].market ?? null;
+        adMarketItems[i].manual = false;
+        haptic('light');
+      } else if (!isNaN(v) && v >= 0) {
         adMarketItems[i].rub = Math.round(v * 100) / 100;
         adMarketItems[i].manual = true;   // вписано руками — пометим цветом
         haptic('medium');
@@ -4580,7 +4606,9 @@
 
       // Курс не трогаем: он выставлен вручную и подтягивание цен его не касается
       adUsdManual = false;   // пришли свежие цены — считаем заново
-      adMarketItems = data.items;
+      // market — то, что сказал маркет. Нужен, чтобы можно было отменить
+      // свою правку и вернуться к исходной цене
+      adMarketItems = data.items.map(it => ({ ...it, market: it.rub }));
       adRenderPrices();
       haptic(data.found < data.items.length ? 'warning' : 'success');
     } catch (e) {
