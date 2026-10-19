@@ -641,6 +641,27 @@
     border: 1px solid var(--line2); border-radius: 12px;
     background: var(--surface2);
   }
+  /* Свёрнутая просрочка: одна строка вместо десятка дней */
+  .stat-waiting .late-head {
+    display: flex; align-items: baseline; gap: 8px; cursor: pointer;
+    padding: 11px 0; border-bottom: 1px solid var(--line);
+    font-size: 11px; color: var(--t3);
+  }
+  .stat-waiting .late-head .ttl {
+    font-size: 12.5px; font-weight: 600; color: var(--danger);
+  }
+  .stat-waiting .late-head .cnt { flex: 1; min-width: 0; }
+  .stat-waiting .late-head b {
+    font-family: var(--font-display); font-size: 13px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--danger);
+  }
+  .stat-waiting .late-head .arr {
+    width: 9px; height: 9px; flex-shrink: 0; color: var(--t3);
+    transition: transform 0.18s;
+  }
+  .stat-waiting .late-head.open .arr { transform: rotate(180deg); }
+  .stat-waiting .late-head:active { opacity: 0.6; }
+
   .stat-waiting .day { padding: 10px 0; border-bottom: 1px solid var(--line); }
   .stat-waiting .day:last-child { border-bottom: none; }
   .stat-waiting .dh {
@@ -3471,7 +3492,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 48;
+  const APP_VERSION = 49;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3907,6 +3928,7 @@
   let adDisputeOpen = false;
   let adDisputeWho = null;        // чей спор сейчас развёрнут
   let adWaitingOpen = false;      // открыты ли сроки прихода
+  let adLateOpen = false;         // развёрнут ли список просроченных
   let adNotesOpen = null;         // чьи заметки сейчас развёрнуты
 
   // «В инвентаре» — это всё, что физически у нас: и под баном, и уже без него
@@ -4158,6 +4180,15 @@
     }
   }
 
+  function adToggleLate() {
+    if (!adStatsData) return;
+    adLateOpen = !adLateOpen;
+    haptic('light');
+    const y = window.scrollY;
+    adRenderStats(adStatsData);
+    window.scrollTo(0, y);
+  }
+
   function adToggleWaiting() {
     if (!adStatsData) return;
     adWaitingOpen = !adWaitingOpen;
@@ -4241,24 +4272,47 @@
     const сроки = ждём ? [...d.waiting].sort((a, b) => (a.iso < b.iso ? -1 : 1)) : [];
     const первый_живой = сроки.findIndex(w => w.left >= 0);
 
+    // Просроченные копятся и съедают весь экран, а смотрят на них реже,
+    // чем на ближайшие приходы. Поэтому держим их свёрнутыми в одну строку
+    const просрочено = сроки.filter(w => w.left < 0);
+    const впереди = сроки.filter(w => w.left >= 0);
+    const сделокПросрочено = просрочено.reduce((s, w) => s + w.deals.length, 0);
+    const суммаПросрочено = просрочено.reduce((s, w) => s + w.sum, 0);
+
+    const день = (w, классы) => `
+      <div class="day${классы}">
+        <div class="dh">
+          <span class="dt">${w.date}</span>
+          <span class="lf">${осталось(w.left)}</span>
+          <b>${money(w.sum)}</b>
+        </div>
+        ${w.deals.map(x => `
+          <div class="one">
+            <span class="nm">${nickHtml(x.name)}</span>
+            <span class="it copyable" data-items="${attr(x.items)}"
+                  onclick="adCopyItems(event, this)">${x.items || ''}</span>
+            <span class="am">${money(x.sum)}</span>
+            ${кнопкаПолучено(x)}
+          </div>`).join('')}
+      </div>`;
+
+    const блок_просрочки = просрочено.length ? `
+      <div class="late-head${adLateOpen ? ' open' : ''}" onclick="adToggleLate()">
+        <span class="ttl">Просрочено</span>
+        <span class="cnt">${сделокПросрочено} ${
+          склонение(сделокПросрочено, 'сделка', 'сделки', 'сделок')}</span>
+        <b>${money(суммаПросрочено)}</b>
+        <svg class="arr" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+          <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      ${adLateOpen ? просрочено.map(w => день(w, ' late')).join('') : ''}` : '';
+
     const окно_ожидания = (ждём && adWaitingOpen) ? `
       <div class="stat-waiting">
-        ${сроки.map((w, i) => `
-          <div class="day${w.left < 0 ? ' late' : (i === первый_живой ? ' soon' : '')}">
-            <div class="dh">
-              <span class="dt">${w.date}</span>
-              <span class="lf">${осталось(w.left)}</span>
-              <b>${money(w.sum)}</b>
-            </div>
-            ${w.deals.map(x => `
-              <div class="one">
-                <span class="nm">${nickHtml(x.name)}</span>
-                <span class="it copyable" data-items="${attr(x.items)}"
-                      onclick="adCopyItems(event, this)">${x.items || ''}</span>
-                <span class="am">${money(x.sum)}</span>
-                ${кнопкаПолучено(x)}
-              </div>`).join('')}
-          </div>`).join('')}
+        ${блок_просрочки}
+        ${впереди.map((w, i) => день(w, i === 0 ? ' soon' : '')).join('')}
       </div>` : '';
 
     // Рядом с общей суммой — та её часть, которую продать пока нельзя
