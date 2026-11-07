@@ -368,6 +368,10 @@
     font-size: 12.5px; font-weight: 600; cursor: pointer;
   }
   .own-link button:active { opacity: 0.6; }
+  /* Кнопка «вставить» — та же рамка, но только иконка: место под палец есть,
+     а ширины на второе слово в строке уже нет */
+  .own-link button.paste { padding: 9px 11px; }
+  .own-link button.paste i { font-size: 15px; display: block; }
 
   /* Подтягивание цены */
   .own-fetch {
@@ -2067,9 +2071,15 @@
         <i class="ti ti-link"></i>Ссылка
       </button>
     </div>
+    <!-- readonly снимается тапом по полю: иначе Telegram поднимает клавиатуру
+         каждый раз, хотя ссылку почти всегда вставляют из буфера -->
     <div class="own-link" id="adLinkBox" style="display:none;">
-      <input class="own-input" id="adLinkInput" type="url" inputmode="url"
-             autocapitalize="none" autocomplete="off" placeholder="Ссылка на предмет с market.csgo.com">
+      <input class="own-input" id="adLinkInput" type="url" inputmode="url" readonly
+             autocapitalize="none" autocomplete="off" onclick="adLinkTyping()"
+             placeholder="Вставь ссылку или название">
+      <button class="paste" onclick="adPasteIntoLink()" title="Вставить из буфера">
+        <i class="ti ti-clipboard"></i>
+      </button>
       <button onclick="adAddFromLink()">Добавить</button>
     </div>
   </section>
@@ -3492,7 +3502,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 49;
+  const APP_VERSION = 50;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -4442,12 +4452,41 @@
     document.getElementById('adLinkBtn').classList.add('active');
     const input = document.getElementById('adLinkInput');
     if (заполнить) input.value = заполнить;
+    // Фокус не ставим: клавиатура закрывает пол-экрана, а печатают здесь редко.
+    // blur на случай, если поле осталось в фокусе с прошлого открытия
+    input.readOnly = true;
+    input.blur();
+  }
+
+  // Тап по самому полю — значит печатать всё-таки хотят
+  function adLinkTyping() {
+    const input = document.getElementById('adLinkInput');
+    if (!input.readOnly) return;
+    input.readOnly = false;
     input.focus();
+  }
+
+  // Повторная попытка взять из буфера, уже по явной кнопке
+  function adPasteIntoLink() {
+    haptic('light');
+    adFromClipboard().then(текст => {
+      const input = document.getElementById('adLinkInput');
+      if (!текст) {
+        adShowResult('Буфер пуст или закрыт — нажми на поле и впиши вручную', false);
+        return;
+      }
+      input.value = текст;
+      adClearResult();
+      // Разобралось в предмет — добавляем сразу, незачем жать «Добавить»
+      if (adTryAddLink(текст)) input.value = '';
+    });
   }
 
   function adCloseLink() {
     document.getElementById('adLinkBox').style.display = 'none';
     document.getElementById('adLinkBtn').classList.remove('active');
+    // Следующее открытие снова без клавиатуры
+    document.getElementById('adLinkInput').readOnly = true;
   }
 
   // Telegram отдаёт буфер только своим методом и только по жесту; у запуска
