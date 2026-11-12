@@ -531,16 +531,21 @@
   .own-back i { font-size: 16px; }
   .own-back:active { opacity: 0.55; }
 
-  /* Шапка страницы статистики: слева выход, справа спор */
-  .own-topbar { display: flex; align-items: flex-start; gap: 12px; }
-  .own-topbar .own-back { margin-right: auto; }
+  /* Шапка страницы: всё в один ряд по центру — выход, переход, спор.
+     По flex-start они висели на разной высоте и смотрелись вразнобой */
+  .own-topbar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .own-topbar .own-back { margin-right: auto; padding: 0; }
+  .own-topbar .own-jump { flex-shrink: 0; }
   /* Спор нарочно бесцветный: это не тревога, а строка, которую иногда
      нужно открыть. Красным она мозолила бы глаза каждый день */
   .own-dispute-chip {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
     cursor: pointer; background: none;
     border: 1px solid var(--line2); border-radius: 999px;
-    padding: 5px 11px; margin-top: -4px;
+    height: 26px; padding: 0 11px;
     color: var(--t2); font-family: var(--font-ui);
     font-size: 11.5px; font-weight: 500; white-space: nowrap;
     transition: border-color 0.16s, color 0.16s;
@@ -1168,6 +1173,42 @@
   .ana-note.neutral {
     background: var(--surface2); border-color: var(--line2); color: var(--t3);
   }
+
+  /* Трейд-бан: две колонки бок о бок, чтобы сравнивать, а не вычитать */
+  .tb-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    margin-top: 12px; background: var(--line); border-radius: 12px; overflow: hidden;
+  }
+  .tb-col { padding: 12px; background: var(--surface); }
+  .tb-h {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--t3);
+  }
+  .tb-sum {
+    margin: 6px 0 10px;
+    font-family: var(--font-display); font-size: 19px; font-weight: 600;
+    color: var(--accent2); font-variant-numeric: tabular-nums;
+  }
+  .tb-sum.minus { color: var(--danger); }
+  .tb-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+    padding: 3px 0; font-size: 10.5px; color: var(--t3);
+  }
+  .tb-row b {
+    font-family: var(--font-display); font-size: 12px; font-weight: 600;
+    color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .tb-bar {
+    height: 3px; margin-top: 9px; border-radius: 2px;
+    background: var(--surface2); overflow: hidden;
+  }
+  .tb-bar i { display: block; height: 100%; background: var(--accent2); }
+  .tb-share { margin-top: 4px; font-size: 9.5px; color: var(--t3); }
+  .tb-note {
+    margin-top: 10px; padding: 9px 11px; border-radius: 9px;
+    background: var(--surface2); font-size: 11.5px; color: var(--t2);
+  }
+  .tb-note b { color: var(--accent-light); }
 
   .ana-more {
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -3879,7 +3920,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 55;
+  const APP_VERSION = 56;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -4737,10 +4778,18 @@
           ${плитка('Цикл', d.cycle.buy_to_sell !== null
               ? d.cycle.buy_to_sell + ' дн' : '—', 'от закупки до продажи')}
         </div>
+        <div class="ana-sub-h">Трейд-бан</div>
+        ${тбБлок(d.tb)}
         <div class="ana-sub-h">Рекорды сделок</div>
         ${сделка('Лучшая', d.best, true)}
         ${сделка('Худшая', d.worst, false)}
-        ${!d.best && !d.worst ? '<div class="ana-empty">Закрытых сделок за период нет</div>' : ''}`,
+        ${!d.best && !d.worst ? '<div class="ana-empty">Закрытых сделок за период нет</div>' : ''}
+        ${d.tb ? `
+          <div class="ana-sub-h">Рекорды по бану</div>
+          ${сделка('Лучшая с баном', d.tb.with.best, true)}
+          ${сделка('Худшая с баном', d.tb.with.worst, false)}
+          ${сделка('Лучшая без бана', d.tb.without.best, true)}
+          ${сделка('Худшая без бана', d.tb.without.worst, false)}` : ''}`,
 
       income: `
         <div class="ana-ctl">
@@ -4849,6 +4898,41 @@
         <div class="ana-note">Не нашёл колонки: ${d.missing_columns.join(', ')} —
           часть цифр посчитана без них</div>` : ''}
       <div class="own-ver">ВЕРСИЯ ${APP_VERSION}</div>`;
+  }
+
+  // Две колонки рядом: главное здесь — сравнение, а не абсолютные числа
+  function тбБлок(tb) {
+    if (!tb) return '<div class="ana-empty">Колонки «ТБ» в листе нет</div>';
+    const знак = v => (v > 0 ? '+' : '') + деньги(v);
+    const всегоСделок = tb.with.deals + tb.without.deals;
+    if (!всегоСделок) return '<div class="ana-empty">Сделок за период нет</div>';
+
+    const колонка = (имя, v, доля) => `
+      <div class="tb-col">
+        <div class="tb-h">${имя}</div>
+        <div class="tb-sum ${v.profit < 0 ? 'minus' : ''}">${знак(v.profit)}</div>
+        <div class="tb-row"><span>Сделок</span><b>${v.deals}</b></div>
+        <div class="tb-row"><span>Оборот</span><b>${деньги(v.spent)}</b></div>
+        <div class="tb-row"><span>Маржа</span><b>${v.margin}%</b></div>
+        <div class="tb-row"><span>Чек</span><b>${деньги(v.avg_deal)}</b></div>
+        <div class="tb-row"><span>Прибыль/сделка</span><b>${деньги(v.avg_profit)}</b></div>
+        <div class="tb-bar"><i style="width:${доля}%"></i></div>
+        <div class="tb-share">${доля}% сделок</div>
+      </div>`;
+
+    const доляС = Math.round(tb.with.deals / всегоСделок * 100);
+    // Какой режим выгоднее — по марже, она не зависит от объёма
+    const лучше = tb.with.margin === tb.without.margin ? null
+      : (tb.with.margin > tb.without.margin ? 'с баном' : 'без бана');
+    const разница = Math.abs(tb.with.margin - tb.without.margin).toFixed(1);
+
+    return `
+      <div class="tb-grid">
+        ${колонка('С баном', tb.with, доляС)}
+        ${колонка('Без бана', tb.without, 100 - доляС)}
+      </div>
+      ${лучше && tb.with.closed && tb.without.closed ? `
+        <div class="tb-note">Выгоднее <b>${лучше}</b>: маржа выше на ${разница}%</div>` : ''}`;
   }
 
   const плитка = (к, знач, подпись) => `
