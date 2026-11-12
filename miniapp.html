@@ -1048,6 +1048,99 @@
     font-family: var(--font-display); font-weight: 600; color: var(--danger);
     font-variant-numeric: tabular-nums;
   }
+  /* Навигация по страницам: четыре раздела в одной полосе */
+  .ana-nav {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px;
+    padding: 3px; margin-bottom: 12px;
+    background: var(--surface2); border-radius: 11px;
+  }
+  .ana-nav button {
+    position: relative; cursor: pointer;
+    padding: 9px 4px; border: none; border-radius: 9px; background: none;
+    color: var(--t3); font-family: var(--font-ui);
+    font-size: 11.5px; font-weight: 600;
+    transition: background 0.16s, color 0.16s;
+  }
+  .ana-nav button.on { background: var(--surface); color: var(--accent-light); }
+  .ana-nav button i {
+    position: absolute; top: 3px; right: 6px;
+    font-style: normal; font-size: 9px; font-weight: 700;
+    color: var(--danger);
+  }
+
+  /* Выбранный период — всегда на виду, он меняет все цифры ниже */
+  .ana-period {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    margin-bottom: 14px; padding: 10px 12px; cursor: pointer;
+    background: none; border: 1px solid var(--line2); border-radius: 11px;
+    color: var(--t2); font-family: var(--font-ui); font-size: 12.5px;
+  }
+  .ana-period i { font-size: 14px; color: var(--accent2); }
+  .ana-period span { flex: 1; text-align: left; color: var(--text); }
+  .ana-period em { font-style: normal; font-size: 11px; color: var(--t3); }
+  .ana-period:active { opacity: 0.6; }
+
+  .ana-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .ana-quick button {
+    cursor: pointer; padding: 11px; border-radius: 10px;
+    background: none; border: 1px solid var(--line2);
+    color: var(--t2); font-family: var(--font-ui); font-size: 13px; font-weight: 600;
+  }
+  .ana-quick button:active { opacity: 0.6; }
+  .ana-dates { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .ana-dates label {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; color: var(--t3);
+  }
+  .ana-dates input { flex: 1; min-height: 44px; padding: 10px 12px; color-scheme: dark; }
+
+  /* Рисованный график: заливка, кривая, точки */
+  .ana-plot { position: relative; margin: 14px 0 4px; }
+  .ana-plot svg { display: block; width: 100%; height: 130px; overflow: visible; }
+  .ana-plot .fill { fill: url(#anaFill); }
+  .ana-plot .g-top { stop-color: var(--accent2); stop-opacity: 0.38; }
+  .ana-plot .g-bottom { stop-color: var(--accent2); stop-opacity: 0.02; }
+  .ana-plot svg.minus .g-top { stop-color: var(--danger); stop-opacity: 0.3; }
+  .ana-plot svg.minus .g-bottom { stop-color: var(--danger); stop-opacity: 0.02; }
+  .ana-plot .line {
+    fill: none; stroke: var(--accent2); stroke-width: 2;
+    stroke-linejoin: round; stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .ana-plot svg.minus .line { stroke: var(--danger); }
+  .ana-plot .zero {
+    stroke: var(--line2); stroke-width: 1; stroke-dasharray: 3 4;
+    vector-effect: non-scaling-stroke;
+  }
+  .ana-plot .dot { fill: var(--bg0); stroke: var(--accent2); stroke-width: 1.5; opacity: 0.55; }
+  .ana-plot .dot.on { opacity: 1; fill: var(--accent2); r: 4; }
+  /* Прозрачные колонки поверх кривой: пальцем в линию не попасть */
+  .ana-plot .hit { position: absolute; inset: 0; display: flex; }
+  .ana-plot .hit button {
+    flex: 1; background: none; border: none; cursor: pointer; padding: 0;
+  }
+  .ana-plot .hit button.on { background: rgba(45,212,191,0.07); border-radius: 4px; }
+  .ana-axis {
+    display: flex; justify-content: space-between;
+    font-size: 9.5px; color: var(--t3); font-variant-numeric: tabular-nums;
+  }
+
+  .ana-ctl { display: flex; align-items: center; gap: 8px; padding: 12px 0 2px; }
+  .ana-ctl .ana-tabs { margin-left: 0; }
+  .ana-ctl > .ana-tab { margin-left: auto; }
+
+  .ana-sub-h {
+    margin: 18px 0 2px; padding-top: 14px; border-top: 1px solid var(--line2);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--t3);
+  }
+  .ana-hero .sum.warn { color: var(--gold); }
+  .ana-line.warn b { color: var(--gold); }
+  .ana-row .sub .warn { font-style: normal; color: var(--gold); }
+  .ana-note.neutral {
+    background: var(--surface2); border-color: var(--line2); color: var(--t3);
+  }
+
   .ana-empty { padding: 14px 0; font-size: 12px; color: var(--t3); }
   .ana-note {
     margin: 4px 0 10px; padding: 10px 12px; border-radius: 10px;
@@ -3663,7 +3756,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 51;
+  const APP_VERSION = 52;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -4084,6 +4177,8 @@
   let adAna = null;               // последний ответ /analytics
   let adAnaScale = 'months';      // разрез графика: days | weeks | months
   let adAnaTop = 'profit';        // чем мерить людей: profit | spent | deals
+  let adAnaPage = 'money';        // открытая страница: money | income | people | risk
+  let adAnaFrom = '', adAnaTo = ''; // окно отчёта, пусто — всё время
 
   function adOpenAnalytics() {
     document.getElementById('adFormPane').style.display = 'none';
@@ -4100,11 +4195,21 @@
     window.scrollTo(0, 0);
   }
 
+  function adAnaSetPage(k) {
+    adAnaPage = k;
+    haptic('light');
+    adRenderAnalytics();
+    window.scrollTo(0, 0);
+  }
+
   async function adLoadAnalytics() {
     const box = document.getElementById('adAnaBody');
-    box.innerHTML = '<div class="stat-empty"><span class="spinner"></span>Считаю по всему журналу…</div>';
+    box.innerHTML = '<div class="stat-empty"><span class="spinner"></span>Считаю по журналу…</div>';
+    const q = new URLSearchParams({ v: APP_VERSION });
+    if (adAnaFrom) q.set('from', adAnaFrom);
+    if (adAnaTo) q.set('to', adAnaTo);
     try {
-      const r = await fetch(ADMIN_API_URL + '/api/admin/analytics?v=' + APP_VERSION, {
+      const r = await fetch(ADMIN_API_URL + '/api/admin/analytics?' + q, {
         headers: { 'X-Telegram-Init-Data': tg?.initData || '' },
       });
       const d = await r.json().catch(() => null);
@@ -4120,23 +4225,130 @@
   function adAnaSetScale(k) { adAnaScale = k; haptic('selection'); adRenderAnalytics(); }
   function adAnaSetTop(k) { adAnaTop = k; haptic('selection'); adRenderAnalytics(); }
 
-  // Столбики дохода. Своя разметка вместо библиотеки: один график на экран,
-  // тянуть ради него зависимость незачем
+  // Рисованный график: заливка под кривой, сама кривая и точки. SVG вместо
+  // библиотеки — один график на экран, зависимость ради него не нужна
+  let adAnaCum = false;           // накопительно или по отрезкам
+
   function adAnaChart(ряд) {
-    if (!ряд.length) return '<div class="ana-empty">Продаж пока нет</div>';
-    const последние = ряд.slice(-14);
-    const максимум = Math.max(...последние.map(x => Math.abs(x.profit)), 1);
-    return `<div class="ana-chart">${последние.map(x => {
-      const доля = Math.abs(x.profit) / максимум * 100;
-      const минус = x.profit < 0;
-      return `<div class="bar${минус ? ' minus' : ''}" onclick="adAnaPoint(this)"
-                   data-label="${attr(названиеОтрезка(x))}" data-profit="${attr(money(x.profit))}"
-                   data-deals="${x.deals}">
-        <div class="col"><i style="height:${Math.max(доля, 2)}%"></i></div>
-        <span class="tick">${короткаяМетка(x)}</span>
+    if (!ряд.length) return '<div class="ana-empty">Продаж за период нет</div>';
+
+    const точек = adAnaScale === 'days' ? 30 : (adAnaScale === 'weeks' ? 16 : 12);
+    const видимые = ряд.slice(-точек);
+    let накоп = 0;
+    const данные = видимые.map(x => {
+      накоп += x.profit;
+      return { ...x, cum: накоп };
+    });
+    const знач = x => (adAnaCum ? x.cum : x.profit);
+
+    const W = 320, H = 120, пад = 6;
+    const значения = данные.map(знач);
+    const верх = Math.max(...значения, 0);
+    const низ = Math.min(...значения, 0);
+    const размах = (верх - низ) || 1;
+    const шагX = данные.length > 1 ? (W - пад * 2) / (данные.length - 1) : 0;
+    const X = i => пад + i * шагX;
+    const Y = v => пад + (верх - v) / размах * (H - пад * 2);
+    const нольY = Y(0);
+
+    const точки = данные.map((x, i) => [X(i), Y(знач(x))]);
+    // Сглаживание по средним точкам: кривая без выбросов и без библиотеки
+    const кривая = точки.map(([x, y], i) => {
+      if (!i) return `M${x},${y}`;
+      const [px, py] = точки[i - 1];
+      const сx = (px + x) / 2;
+      return `C${сx},${py} ${сx},${y} ${x},${y}`;
+    }).join('');
+    const заливка = `${кривая} L${X(данные.length - 1)},${нольY} L${X(0)},${нольY} Z`;
+    const минус = знач(данные[данные.length - 1]) < 0;
+
+    return `
+      <div class="ana-plot">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="${минус ? 'minus' : ''}">
+          <defs>
+            <!-- Цвет задаём классами: как XML-атрибут var(--…) не работает -->
+            <linearGradient id="anaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop class="g-top" offset="0"/>
+              <stop class="g-bottom" offset="1"/>
+            </linearGradient>
+          </defs>
+          <line class="zero" x1="0" y1="${нольY}" x2="${W}" y2="${нольY}"/>
+          <path class="fill" d="${заливка}"/>
+          <path class="line" d="${кривая}"/>
+          ${точки.map(([x, y], i) => `<circle class="dot" cx="${x}" cy="${y}" r="2.4"
+              data-i="${i}"/>`).join('')}
+        </svg>
+        <!-- Столбики-мишени поверх: по тонкой линии пальцем не попасть -->
+        <div class="hit">${данные.map((x, i) => `
+          <button onclick="adAnaPoint(this)" data-i="${i}"
+                  data-label="${attr(названиеОтрезка(x))}"
+                  data-profit="${attr(money(x.profit))}"
+                  data-cum="${attr(money(x.cum))}"
+                  data-deals="${x.deals}"></button>`).join('')}</div>
+      </div>
+      <div class="ana-axis">
+        <span>${короткаяМетка(данные[0])}</span>
+        <span>${данные.length > 2 ? короткаяМетка(данные[данные.length >> 1]) : ''}</span>
+        <span>${короткаяМетка(данные[данные.length - 1])}</span>
+      </div>
+      <div class="ana-point" id="adAnaPoint">
+        ${adAnaCum ? 'Накопительно за период' : 'Нажми на график'}
       </div>`;
-    }).join('')}</div>
-    <div class="ana-point" id="adAnaPoint">Нажми на столбик</div>`;
+  }
+
+  function adAnaToggleCum() {
+    adAnaCum = !adAnaCum;
+    haptic('selection');
+    adRenderAnalytics();
+  }
+
+  // ── Период отчёта ────────────────────────────────────────────────────────
+  function adAnaOpenPeriod() {
+    haptic('light');
+    const p = adAna?.period || {};
+    const сегодня = new Date().toISOString().slice(0, 10);
+    const box = document.getElementById('anaPeriod');
+    document.getElementById('anaFrom').value = adAnaFrom || p.all_from || '';
+    document.getElementById('anaTo').value = adAnaTo || p.all_to || сегодня;
+    ['anaFrom', 'anaTo'].forEach(id => {
+      const el = document.getElementById(id);
+      if (p.all_from) el.min = p.all_from;
+      el.max = сегодня;
+    });
+    box.classList.add('show');
+  }
+
+  function adAnaClosePeriod() {
+    document.getElementById('anaPeriod').classList.remove('show');
+  }
+
+  // Быстрые отрезки: за ними ходят чаще, чем за точными датами
+  function adAnaQuick(дней) {
+    const до = new Date();
+    const от = new Date();
+    от.setDate(от.getDate() - дней + 1);
+    adAnaFrom = от.toISOString().slice(0, 10);
+    adAnaTo = до.toISOString().slice(0, 10);
+    adAnaApplyPeriod(true);
+  }
+
+  function adAnaAllTime() {
+    adAnaFrom = adAnaTo = '';
+    adAnaApplyPeriod(true);
+  }
+
+  function adAnaApplyPeriod(готово) {
+    if (!готово) {
+      adAnaFrom = document.getElementById('anaFrom').value || '';
+      adAnaTo = document.getElementById('anaTo').value || '';
+      // Перепутанные местами границы меняем сами, а не ругаемся
+      if (adAnaFrom && adAnaTo && adAnaFrom > adAnaTo) {
+        [adAnaFrom, adAnaTo] = [adAnaTo, adAnaFrom];
+      }
+    }
+    haptic('medium');
+    adAnaClosePeriod();
+    adLoadAnalytics();
   }
 
   const МЕСЯЦЫ = ['январь','февраль','март','апрель','май','июнь',
@@ -4188,18 +4400,20 @@
     const каналы = (d.channels || []).filter(c => c.deals > 0);
     const максКанал = Math.max(...каналы.map(c => c.deals), 1);
 
-    document.getElementById('adAnaBody').innerHTML = `
-      <section class="own-card">
-        <div class="own-card-h">Итоги</div>
+    // Страницы вместо одной ленты: на телефоне свиток в десять экранов
+    // невозможно читать, а переключатель держит всё в одном касании
+    const страницы = {
+      money: `
         <div class="ana-hero">
           <div class="sum${t.profit < 0 ? ' minus' : ''}">${знак(t.profit)}</div>
-          <div class="sub">прибыль за ${p.days} ${
-            склонение(p.days, 'день', 'дня', 'дней')} · с ${p.from} по ${p.to}</div>
+          <div class="sub">итог с учётом кидков${t.scam_loss
+            ? ` · по сделкам ${знак(t.trade_profit)}, кидки −${money(t.scam_loss)}` : ''}</div>
         </div>
         <div class="ana-grid">
-          ${плитка('Оборот', money(t.spent), 'закуплено всего')}
+          ${плитка('Оборот', money(t.spent), 'закуплено за период')}
           ${плитка('Выручка', money(t.revenue), 'получено с продаж')}
-          ${плитка('Маржа', t.margin + '%', 'от вложенного')}
+          ${плитка('Маржа', t.margin + '%', t.scam_loss
+              ? `без кидков ${t.trade_margin}%` : 'от вложенного')}
           ${плитка('Сделок', t.deals, `${t.closed} закрыто · ${t.open} открыто`)}
           ${плитка('Скинов', t.items, `${t.sold_items} продано`)}
           ${плитка('Средний чек', money(t.avg_deal), `прибыль ${money(t.avg_profit)}`)}
@@ -4207,33 +4421,31 @@
           ${плитка('Цикл', d.cycle.buy_to_sell !== null
               ? d.cycle.buy_to_sell + ' дн' : '—', 'от закупки до продажи')}
         </div>
-      </section>
+        <div class="ana-sub-h">Рекорды сделок</div>
+        ${сделка('Лучшая', d.best, true)}
+        ${сделка('Худшая', d.worst, false)}
+        ${!d.best && !d.worst ? '<div class="ana-empty">Закрытых сделок за период нет</div>' : ''}`,
 
-      <section class="own-card">
-        <div class="own-card-h">Доход
+      income: `
+        <div class="ana-ctl">
           <div class="ana-tabs">
             ${[['days','Дни'],['weeks','Недели'],['months','Месяцы']].map(([k, имя]) =>
               `<button class="ana-tab${k === adAnaScale ? ' on' : ''}"
                        onclick="adAnaSetScale('${k}')">${имя}</button>`).join('')}
           </div>
+          <button class="ana-tab${adAnaCum ? ' on' : ''}" onclick="adAnaToggleCum()">
+            Накопительно</button>
         </div>
         ${adAnaChart(ряд)}
+        <div class="ana-sub-h">Рекорды</div>
         <div class="ana-recs">
           ${рекорд('Лучший день', d.records?.day)}
           ${рекорд('Лучшая неделя', d.records?.week)}
           ${рекорд('Лучший месяц', d.records?.month)}
-        </div>
-      </section>
+        </div>`,
 
-      <section class="own-card">
-        <div class="own-card-h">Сделки-рекорды</div>
-        ${сделка('Лучшая', d.best, true)}
-        ${сделка('Худшая', d.worst, false)}
-        ${!d.best && !d.worst ? '<div class="ana-empty">Закрытых сделок ещё нет</div>' : ''}
-      </section>
-
-      <section class="own-card">
-        <div class="own-card-h">Контрагенты
+      people: `
+        <div class="ana-ctl">
           <div class="ana-tabs">
             ${[['profit','Прибыль'],['spent','Оборот'],['deals','Сделки']].map(([k, имя]) =>
               `<button class="ana-tab${k === adAnaTop ? ' on' : ''}"
@@ -4250,12 +4462,10 @@
                  style="width:${Math.abs(x[adAnaTop] || 0) / максЛюди * 100}%"></i></div>
             <div class="sub">${x.deals} ${склонение(x.deals, 'сделка', 'сделки', 'сделок')}
               · оборот ${money(x.spent)} · маржа ${x.margin}%${
-              x.disputes ? ` · <em class="bad">споров ${x.disputes}</em>` : ''}</div>
-          </div>`).join('') : '<div class="ana-empty">Пока никого</div>'}
-      </section>
-
-      <section class="own-card">
-        <div class="own-card-h">Откуда приходят</div>
+              x.scams ? ` · <em class="bad">кидков ${x.scams}</em>` : ''}${
+              x.disputes ? ` · <em class="warn">споров ${x.disputes}</em>` : ''}</div>
+          </div>`).join('') : '<div class="ana-empty">За период никого</div>'}
+        <div class="ana-sub-h">Откуда приходят</div>
         ${каналы.length ? каналы.map(c => `
           <div class="ana-row">
             <div class="hd"><span class="ch">${c.name}</span>
@@ -4263,21 +4473,54 @@
             <div class="track"><i style="width:${c.deals / максКанал * 100}%"></i></div>
             <div class="sub">${c.deals} ${
               склонение(c.deals, 'сделка', 'сделки', 'сделок')} · оборот ${money(c.spent)}</div>
-          </div>`).join('') : '<div class="ana-empty">Канал не заполняется</div>'}
-      </section>
+          </div>`).join('') : '<div class="ana-empty">Канал не заполняется</div>'}`,
 
-      ${d.disputes.count ? `
-      <section class="own-card">
-        <div class="own-card-h">Кинули</div>
+      risk: `
         <div class="ana-hero small">
-          <div class="sum minus">−${money(d.disputes.sum)}</div>
-          <div class="sub">${d.disputes.count} ${
-            склонение(d.disputes.count, 'сделка', 'сделки', 'сделок')} · ${
-            (d.disputes.sum / (t.spent || 1) * 100).toFixed(1)}% оборота</div>
+          <div class="sum minus">−${money(t.scam_loss)}</div>
+          <div class="sub">потеряно на кидках · ${t.scams} ${
+            склонение(t.scams, 'сделка', 'сделки', 'сделок')}${t.spent
+            ? ` · ${(t.scam_loss / t.spent * 100).toFixed(1)}% оборота` : ''}</div>
         </div>
-        ${d.disputes.people.map(x => `
-          <div class="ana-line">${nickHtml(x.name)}<b>${money(x.sum)}</b></div>`).join('')}
-      </section>` : ''}
+        ${(d.scams?.people || []).length ? d.scams.people.map(x => `
+          <div class="ana-line">${nickHtml(x.name)}<b>${money(x.sum)}</b></div>`).join('')
+          : '<div class="ana-empty">Кидков за период нет</div>'}
+        <div class="ana-sub-h">В споре</div>
+        <div class="ana-note neutral">Деньги ещё не потеряны: спор может
+          закончиться возвратом, поэтому в прибыль они не попадают — ни плюсом,
+          ни минусом.</div>
+        <div class="ana-hero small">
+          <div class="sum warn">${money(t.disputes_sum || 0)}</div>
+          <div class="sub">${t.disputes} ${
+            склонение(t.disputes, 'сделка', 'сделки', 'сделок')} в разбирательстве</div>
+        </div>
+        ${(d.disputes?.people || []).length ? d.disputes.people.map(x => `
+          <div class="ana-line warn">${nickHtml(x.name)}<b>${money(x.sum)}</b></div>`).join('')
+          : '<div class="ana-empty">Споров за период нет</div>'}`,
+    };
+
+    const вкладки = [['money','Деньги'],['income','Доход'],
+                     ['people','Люди'],['risk','Риски']];
+
+    document.getElementById('adAnaBody').innerHTML = `
+      <div class="ana-nav">
+        ${вкладки.map(([k, имя]) => `
+          <button class="${k === adAnaPage ? 'on' : ''}"
+                  onclick="adAnaSetPage('${k}')">${имя}${
+            k === 'risk' && (t.scams || t.disputes)
+              ? `<i>${t.scams + t.disputes}</i>` : ''}</button>`).join('')}
+      </div>
+
+      <button class="ana-period" onclick="adAnaOpenPeriod()">
+        <i class="ti ti-calendar"></i>
+        <span>${p.filtered ? `${p.from} — ${p.to}` : 'Всё время'}</span>
+        <em>${p.days} ${склонение(p.days, 'день', 'дня', 'дней')}</em>
+      </button>
+
+      <section class="own-card">
+        <div class="own-card-h">${вкладки.find(([k]) => k === adAnaPage)[1]}</div>
+        ${страницы[adAnaPage]}
+      </section>
 
       ${(d.missing_columns || []).length ? `
         <div class="ana-note">Не нашёл колонки: ${d.missing_columns.join(', ')} —
@@ -4293,13 +4536,17 @@
     </div>`;
 
   function adAnaPoint(el) {
-    document.querySelectorAll('.ana-chart .bar').forEach(b => b.classList.remove('on'));
+    const i = el.dataset.i;
+    document.querySelectorAll('.ana-plot .hit button').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('.ana-plot .dot').forEach(d =>
+      d.classList.toggle('on', d.dataset.i === i));
     el.classList.add('on');
     haptic('selection');
     const сделки = +el.dataset.deals;
     document.getElementById('adAnaPoint').innerHTML =
       `<b>${el.dataset.label}</b> · ${el.dataset.profit} · ${сделки} ${
-        склонение(сделки, 'продажа', 'продажи', 'продаж')}`;
+        склонение(сделки, 'продажа', 'продажи', 'продаж')}`
+      + (adAnaCum ? ` · всего ${el.dataset.cum}` : '');
   }
 
   // Сортировка списка контрагентов. Всегда по убыванию: интересует, у кого
@@ -5419,6 +5666,27 @@
 </script>
 
 <!-- Экран успеха -->
+<!-- Период отчёта: пресеты и свои даты -->
+<div class="ask-overlay" id="anaPeriod" onclick="if(event.target.id==='anaPeriod')adAnaClosePeriod()">
+  <div class="ask-card" onclick="event.stopPropagation()">
+    <div class="ask-title">Период</div>
+    <div class="ana-quick">
+      <button onclick="adAnaQuick(7)">7 дней</button>
+      <button onclick="adAnaQuick(30)">30 дней</button>
+      <button onclick="adAnaQuick(90)">3 месяца</button>
+      <button onclick="adAnaAllTime()">Всё время</button>
+    </div>
+    <div class="ana-dates">
+      <label>С <input type="date" id="anaFrom" class="own-input"></label>
+      <label>По <input type="date" id="anaTo" class="own-input"></label>
+    </div>
+    <div class="ask-btns">
+      <button class="ask-yes" onclick="adAnaApplyPeriod(false)">Показать</button>
+      <button class="ask-no" onclick="adAnaClosePeriod()">Отмена</button>
+    </div>
+  </div>
+</div>
+
 <!-- Подтверждение получения: своё окно, а не системное — здесь нужна
      третья кнопка, дата, и всё в одном стиле с приложением -->
 <div class="ask-overlay" id="askOverlay" onclick="askDismiss(event)">
