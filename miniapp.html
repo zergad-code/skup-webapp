@@ -503,6 +503,17 @@
     transition: transform 0.16s var(--ease), opacity 0.2s;
   }
   .own-jump:active { transform: scale(0.94); opacity: 0.9; }
+  /* Вторая кнопка рядом — контуром, чтобы две заливки не спорили.
+     Рамка добавляет 2px, поэтому у обеих высота задана явно: по базовой
+     линии они разъезжались и шапка уходила в две строки */
+  .own-jump, .own-jump.ghost {
+    align-self: center; height: 26px; display: inline-flex;
+    align-items: center; padding: 0 11px;
+  }
+  .own-jump.ghost {
+    margin-left: 0; background: none; box-shadow: none;
+    border: 1px solid var(--line-accent); color: var(--accent-light);
+  }
 
   .own-back {
     display: flex; align-items: center; gap: 8px;
@@ -904,6 +915,145 @@
   .stat-person .parts .free   { color: var(--stat-free); }
   .stat-person .parts .locked { color: var(--accent2); }
   .stat-person .parts .wait   { color: var(--gold); }
+
+  /* ── Итоги ───────────────────────────────────────────────────────────── */
+  .ana-hero { padding: 16px 0 6px; }
+  .ana-hero .sum {
+    font-family: var(--font-display); font-size: 34px; font-weight: 600;
+    color: var(--accent2); letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums; line-height: 1.05;
+  }
+  .ana-hero .sum.minus { color: var(--danger); }
+  .ana-hero.small .sum { font-size: 24px; }
+  .ana-hero .sub { margin-top: 8px; font-size: 12px; color: var(--t3); }
+
+  /* Плитки: две колонки — на телефоне три уже режут числа */
+  .ana-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    margin-top: 14px; background: var(--line); border-radius: 12px; overflow: hidden;
+  }
+  .ana-cell {
+    display: flex; flex-direction: column; gap: 3px;
+    padding: 11px 12px; background: var(--surface);
+  }
+  .ana-cell .k {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--t3);
+  }
+  .ana-cell b {
+    font-family: var(--font-display); font-size: 17px; font-weight: 600;
+    color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .ana-cell .v { font-size: 10.5px; color: var(--t3); }
+
+  .ana-tabs { margin-left: auto; display: flex; gap: 4px; }
+  .ana-tab {
+    cursor: pointer; background: none; border: 1px solid var(--line2);
+    border-radius: 999px; padding: 4px 9px;
+    color: var(--t3); font-family: var(--font-ui);
+    font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  .ana-tab.on {
+    background: var(--accent-soft); border-color: var(--line-accent);
+    color: var(--accent-light);
+  }
+
+  /* График: столбики тянутся вверх от общей базы, минус — красным вниз */
+  .ana-chart {
+    display: flex; align-items: flex-end; gap: 3px;
+    height: 120px; margin: 16px 0 8px;
+  }
+  .ana-chart .bar {
+    flex: 1; min-width: 0; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    height: 100%;
+  }
+  .ana-chart .col {
+    flex: 1; width: 100%; display: flex; align-items: flex-end;
+  }
+  .ana-chart .col i {
+    display: block; width: 100%; border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, var(--accent2), rgba(45,212,191,0.25));
+    transition: opacity 0.16s;
+  }
+  .ana-chart .bar.minus .col i {
+    background: linear-gradient(180deg, var(--danger), rgba(239,106,150,0.25));
+  }
+  .ana-chart .bar.on .col i { filter: brightness(1.25); }
+  .ana-chart .tick {
+    font-size: 9px; color: var(--t3); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .ana-point {
+    padding: 9px 11px; border-radius: 9px; background: var(--surface2);
+    font-size: 11.5px; color: var(--t2); text-align: center;
+  }
+  .ana-point b { color: var(--text); font-weight: 600; }
+
+  .ana-recs { display: flex; flex-direction: column; gap: 1px; margin-top: 12px; }
+  .ana-rec {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .ana-rec:last-child { border-bottom: none; }
+  .ana-rec .k { flex-shrink: 0; font-size: 11.5px; color: var(--t2); width: 108px; }
+  .ana-rec b {
+    font-family: var(--font-display); font-size: 14px; font-weight: 600;
+    color: var(--accent2); font-variant-numeric: tabular-nums;
+  }
+  .ana-rec .v { flex: 1; text-align: right; font-size: 10.5px; color: var(--t3); }
+
+  .ana-deal { padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .ana-deal:last-child { border-bottom: none; }
+  .ana-deal .hd {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    font-size: 11.5px; color: var(--t2);
+  }
+  .ana-deal .hd b {
+    font-family: var(--font-display); font-size: 16px; font-weight: 600;
+    color: var(--accent2); font-variant-numeric: tabular-nums;
+  }
+  .ana-deal.bad .hd b { color: var(--danger); }
+  .ana-deal .it { margin-top: 4px; font-size: 12.5px; color: var(--text); line-height: 1.4; }
+  .ana-deal .sub { margin-top: 3px; font-size: 10.5px; color: var(--t3); }
+  .ana-deal .nick { font-size: 10.5px; }
+
+  .ana-row { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .ana-row:last-child { border-bottom: none; }
+  .ana-row .hd {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  }
+  .ana-row .hd b {
+    font-family: var(--font-display); font-size: 14px; font-weight: 600;
+    color: var(--text); font-variant-numeric: tabular-nums; flex-shrink: 0;
+  }
+  .ana-row .hd b.minus { color: var(--danger); }
+  .ana-row .ch { font-size: 12.5px; color: var(--text); }
+  .ana-row .track {
+    height: 3px; margin: 7px 0 5px; border-radius: 2px;
+    background: var(--surface2); overflow: hidden;
+  }
+  .ana-row .track i { display: block; height: 100%; background: var(--accent2); }
+  .ana-row .track i.minus { background: var(--danger); }
+  .ana-row .sub { font-size: 10.5px; color: var(--t3); }
+  .ana-row .sub .bad { font-style: normal; color: var(--danger); }
+
+  .ana-line {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 12px;
+  }
+  .ana-line:last-child { border-bottom: none; }
+  .ana-line b {
+    font-family: var(--font-display); font-weight: 600; color: var(--danger);
+    font-variant-numeric: tabular-nums;
+  }
+  .ana-empty { padding: 14px 0; font-size: 12px; color: var(--t3); }
+  .ana-note {
+    margin: 4px 0 10px; padding: 10px 12px; border-radius: 10px;
+    background: rgba(232,184,75,0.08); border: 1px solid rgba(232,184,75,0.25);
+    font-size: 11px; color: var(--gold); line-height: 1.45;
+  }
 
   .stat-empty { padding: 16px 0; font-size: 13px; color: var(--t3); }
   .own-ver {
@@ -2045,6 +2195,7 @@
 <div id="adFormPane">
   <section class="own-card">
     <div class="own-card-h"><i class="ti ti-file-invoice"></i>Сделка
+      <button type="button" class="own-jump ghost" onclick="adOpenAnalytics()">Итоги</button>
       <button type="button" class="own-jump" onclick="adOpenStats()">Статистика</button>
     </div>
     <div class="own-row">
@@ -2214,6 +2365,16 @@
   </div>
   <div class="own-dispute-box" id="adDisputeBox" hidden></div>
   <div id="adStatsBody"></div>
+</div>
+
+<!-- ── Итоги: всё, что журнал знает о деньгах ── -->
+<div id="adAnaPane" style="display:none;">
+  <div class="own-topbar">
+    <button type="button" class="own-back" onclick="adCloseAnalytics()">
+      <i class="ti ti-arrow-left"></i>К новой сделке
+    </button>
+  </div>
+  <div id="adAnaBody"></div>
 </div>
 </div>
 
@@ -3502,7 +3663,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 50;
+  const APP_VERSION = 51;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -3917,6 +4078,228 @@
     document.getElementById('adFormPane').style.display = 'block';
     haptic('light');
     window.scrollTo(0, 0);
+  }
+
+  // ── Итоги ────────────────────────────────────────────────────────────────
+  let adAna = null;               // последний ответ /analytics
+  let adAnaScale = 'months';      // разрез графика: days | weeks | months
+  let adAnaTop = 'profit';        // чем мерить людей: profit | spent | deals
+
+  function adOpenAnalytics() {
+    document.getElementById('adFormPane').style.display = 'none';
+    document.getElementById('adAnaPane').style.display = 'block';
+    haptic('light');
+    window.scrollTo(0, 0);
+    adLoadAnalytics();
+  }
+
+  function adCloseAnalytics() {
+    document.getElementById('adAnaPane').style.display = 'none';
+    document.getElementById('adFormPane').style.display = 'block';
+    haptic('light');
+    window.scrollTo(0, 0);
+  }
+
+  async function adLoadAnalytics() {
+    const box = document.getElementById('adAnaBody');
+    box.innerHTML = '<div class="stat-empty"><span class="spinner"></span>Считаю по всему журналу…</div>';
+    try {
+      const r = await fetch(ADMIN_API_URL + '/api/admin/analytics?v=' + APP_VERSION, {
+        headers: { 'X-Telegram-Init-Data': tg?.initData || '' },
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(d?.error || `ошибка ${r.status}`);
+      adAna = d;
+      adRenderAnalytics();
+    } catch (e) {
+      box.innerHTML = `<div class="stat-empty" style="color:var(--danger)">
+        Не удалось получить: ${e.message || 'нет связи'}</div>`;
+    }
+  }
+
+  function adAnaSetScale(k) { adAnaScale = k; haptic('selection'); adRenderAnalytics(); }
+  function adAnaSetTop(k) { adAnaTop = k; haptic('selection'); adRenderAnalytics(); }
+
+  // Столбики дохода. Своя разметка вместо библиотеки: один график на экран,
+  // тянуть ради него зависимость незачем
+  function adAnaChart(ряд) {
+    if (!ряд.length) return '<div class="ana-empty">Продаж пока нет</div>';
+    const последние = ряд.slice(-14);
+    const максимум = Math.max(...последние.map(x => Math.abs(x.profit)), 1);
+    return `<div class="ana-chart">${последние.map(x => {
+      const доля = Math.abs(x.profit) / максимум * 100;
+      const минус = x.profit < 0;
+      return `<div class="bar${минус ? ' minus' : ''}" onclick="adAnaPoint(this)"
+                   data-label="${attr(названиеОтрезка(x))}" data-profit="${attr(money(x.profit))}"
+                   data-deals="${x.deals}">
+        <div class="col"><i style="height:${Math.max(доля, 2)}%"></i></div>
+        <span class="tick">${короткаяМетка(x)}</span>
+      </div>`;
+    }).join('')}</div>
+    <div class="ana-point" id="adAnaPoint">Нажми на столбик</div>`;
+  }
+
+  const МЕСЯЦЫ = ['январь','февраль','март','апрель','май','июнь',
+                  'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
+  // На оси помещается две-три буквы: день — число, неделя — её понедельник,
+  // месяц — три буквы названия
+  function короткаяМетка(x) {
+    if (adAnaScale === 'days' || adAnaScale === 'weeks') return x.label.slice(0, 2);
+    return МЕСЯЦЫ[+x.key.split('-')[1] - 1].slice(0, 3);
+  }
+
+  // «2026-10» — машинный ключ; человеку показываем «октябрь 2026»
+  function названиеОтрезка(x) {
+    if (!x) return '';
+    const m = /^(\d{4})-(\d{2})$/.exec(x.key || '');
+    return m ? `${МЕСЯЦЫ[+m[2] - 1]} ${m[1]}` : x.label;
+  }
+
+  function adRenderAnalytics() {
+    const d = adAna;
+    if (!d) return;
+    const t = d.totals, p = d.period;
+    const ряд = (d.income || {})[adAnaScale] || [];
+    const знак = v => (v > 0 ? '+' : '') + money(v);
+
+    // Карточка-рекорд: пусто, пока нечего показать
+    const рекорд = (имя, r) => r ? `
+      <div class="ana-rec">
+        <span class="k">${имя}</span>
+        <b>${знак(r.profit)}</b>
+        <span class="v">${названиеОтрезка(r)} · ${r.deals} ${
+          склонение(r.deals, 'продажа', 'продажи', 'продаж')}</span>
+      </div>` : '';
+
+    const сделка = (имя, s, плюс) => s ? `
+      <div class="ana-deal${плюс ? '' : ' bad'}">
+        <div class="hd"><span>${имя}</span><b>${знак(s.profit)}</b></div>
+        <div class="it">${s.items || '—'}</div>
+        <div class="sub">${nickHtml(s.name)} · ${s.date} · закуп ${money(s.buy)}</div>
+      </div>` : '';
+
+    const люди = [...(d.people || [])]
+      .sort((a, b) => (b[adAnaTop] || 0) - (a[adAnaTop] || 0))
+      .slice(0, 8);
+    const максЛюди = Math.max(...люди.map(x => Math.abs(x[adAnaTop] || 0)), 1);
+    const значение = x => adAnaTop === 'deals' ? x.deals : money(x[adAnaTop]);
+
+    const каналы = (d.channels || []).filter(c => c.deals > 0);
+    const максКанал = Math.max(...каналы.map(c => c.deals), 1);
+
+    document.getElementById('adAnaBody').innerHTML = `
+      <section class="own-card">
+        <div class="own-card-h">Итоги</div>
+        <div class="ana-hero">
+          <div class="sum${t.profit < 0 ? ' minus' : ''}">${знак(t.profit)}</div>
+          <div class="sub">прибыль за ${p.days} ${
+            склонение(p.days, 'день', 'дня', 'дней')} · с ${p.from} по ${p.to}</div>
+        </div>
+        <div class="ana-grid">
+          ${плитка('Оборот', money(t.spent), 'закуплено всего')}
+          ${плитка('Выручка', money(t.revenue), 'получено с продаж')}
+          ${плитка('Маржа', t.margin + '%', 'от вложенного')}
+          ${плитка('Сделок', t.deals, `${t.closed} закрыто · ${t.open} открыто`)}
+          ${плитка('Скинов', t.items, `${t.sold_items} продано`)}
+          ${плитка('Средний чек', money(t.avg_deal), `прибыль ${money(t.avg_profit)}`)}
+          ${плитка('Темп', t.per_month + '/мес', `${t.per_week} в неделю`)}
+          ${плитка('Цикл', d.cycle.buy_to_sell !== null
+              ? d.cycle.buy_to_sell + ' дн' : '—', 'от закупки до продажи')}
+        </div>
+      </section>
+
+      <section class="own-card">
+        <div class="own-card-h">Доход
+          <div class="ana-tabs">
+            ${[['days','Дни'],['weeks','Недели'],['months','Месяцы']].map(([k, имя]) =>
+              `<button class="ana-tab${k === adAnaScale ? ' on' : ''}"
+                       onclick="adAnaSetScale('${k}')">${имя}</button>`).join('')}
+          </div>
+        </div>
+        ${adAnaChart(ряд)}
+        <div class="ana-recs">
+          ${рекорд('Лучший день', d.records?.day)}
+          ${рекорд('Лучшая неделя', d.records?.week)}
+          ${рекорд('Лучший месяц', d.records?.month)}
+        </div>
+      </section>
+
+      <section class="own-card">
+        <div class="own-card-h">Сделки-рекорды</div>
+        ${сделка('Лучшая', d.best, true)}
+        ${сделка('Худшая', d.worst, false)}
+        ${!d.best && !d.worst ? '<div class="ana-empty">Закрытых сделок ещё нет</div>' : ''}
+      </section>
+
+      <section class="own-card">
+        <div class="own-card-h">Контрагенты
+          <div class="ana-tabs">
+            ${[['profit','Прибыль'],['spent','Оборот'],['deals','Сделки']].map(([k, имя]) =>
+              `<button class="ana-tab${k === adAnaTop ? ' on' : ''}"
+                       onclick="adAnaSetTop('${k}')">${имя}</button>`).join('')}
+          </div>
+        </div>
+        ${люди.length ? люди.map(x => `
+          <div class="ana-row">
+            <div class="hd">
+              ${nickHtml(x.name)}
+              <b class="${(x[adAnaTop] || 0) < 0 ? 'minus' : ''}">${значение(x)}</b>
+            </div>
+            <div class="track"><i class="${(x[adAnaTop] || 0) < 0 ? 'minus' : ''}"
+                 style="width:${Math.abs(x[adAnaTop] || 0) / максЛюди * 100}%"></i></div>
+            <div class="sub">${x.deals} ${склонение(x.deals, 'сделка', 'сделки', 'сделок')}
+              · оборот ${money(x.spent)} · маржа ${x.margin}%${
+              x.disputes ? ` · <em class="bad">споров ${x.disputes}</em>` : ''}</div>
+          </div>`).join('') : '<div class="ana-empty">Пока никого</div>'}
+      </section>
+
+      <section class="own-card">
+        <div class="own-card-h">Откуда приходят</div>
+        ${каналы.length ? каналы.map(c => `
+          <div class="ana-row">
+            <div class="hd"><span class="ch">${c.name}</span>
+              <b class="${c.profit < 0 ? 'minus' : ''}">${знак(c.profit)}</b></div>
+            <div class="track"><i style="width:${c.deals / максКанал * 100}%"></i></div>
+            <div class="sub">${c.deals} ${
+              склонение(c.deals, 'сделка', 'сделки', 'сделок')} · оборот ${money(c.spent)}</div>
+          </div>`).join('') : '<div class="ana-empty">Канал не заполняется</div>'}
+      </section>
+
+      ${d.disputes.count ? `
+      <section class="own-card">
+        <div class="own-card-h">Кинули</div>
+        <div class="ana-hero small">
+          <div class="sum minus">−${money(d.disputes.sum)}</div>
+          <div class="sub">${d.disputes.count} ${
+            склонение(d.disputes.count, 'сделка', 'сделки', 'сделок')} · ${
+            (d.disputes.sum / (t.spent || 1) * 100).toFixed(1)}% оборота</div>
+        </div>
+        ${d.disputes.people.map(x => `
+          <div class="ana-line">${nickHtml(x.name)}<b>${money(x.sum)}</b></div>`).join('')}
+      </section>` : ''}
+
+      ${(d.missing_columns || []).length ? `
+        <div class="ana-note">Не нашёл колонки: ${d.missing_columns.join(', ')} —
+          часть цифр посчитана без них</div>` : ''}
+      <div class="own-ver">ВЕРСИЯ ${APP_VERSION}</div>`;
+  }
+
+  const плитка = (к, знач, подпись) => `
+    <div class="ana-cell">
+      <span class="k">${к}</span>
+      <b>${знач}</b>
+      <span class="v">${подпись}</span>
+    </div>`;
+
+  function adAnaPoint(el) {
+    document.querySelectorAll('.ana-chart .bar').forEach(b => b.classList.remove('on'));
+    el.classList.add('on');
+    haptic('selection');
+    const сделки = +el.dataset.deals;
+    document.getElementById('adAnaPoint').innerHTML =
+      `<b>${el.dataset.label}</b> · ${el.dataset.profit} · ${сделки} ${
+        склонение(сделки, 'продажа', 'продажи', 'продаж')}`;
   }
 
   // Сортировка списка контрагентов. Всегда по убыванию: интересует, у кого
