@@ -506,12 +506,16 @@
   /* Вторая кнопка рядом — контуром, чтобы две заливки не спорили.
      Рамка добавляет 2px, поэтому у обеих высота задана явно: по базовой
      линии они разъезжались и шапка уходила в две строки */
+  .own-jumps {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    align-self: center;
+  }
   .own-jump, .own-jump.ghost {
-    align-self: center; height: 26px; display: inline-flex;
+    margin-left: 0; height: 26px; display: inline-flex;
     align-items: center; padding: 0 11px;
   }
   .own-jump.ghost {
-    margin-left: 0; background: none; box-shadow: none;
+    background: none; box-shadow: none;
     border: 1px solid var(--line-accent); color: var(--accent-light);
   }
 
@@ -1162,6 +1166,74 @@
   .ana-note.neutral {
     background: var(--surface2); border-color: var(--line2); color: var(--t3);
   }
+
+  .ana-more {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 12px; padding: 11px; cursor: pointer;
+    background: none; border: 1px solid var(--line2); border-radius: 10px;
+    color: var(--accent-light); font-family: var(--font-ui);
+    font-size: 12.5px; font-weight: 600;
+  }
+  .ana-more em {
+    font-style: normal; color: var(--t3); font-variant-numeric: tabular-nums;
+  }
+  .ana-more:active { opacity: 0.6; }
+
+  /* Полноэкранный лист: список людей длинный, половины экрана ему мало */
+  .sheet {
+    display: none; position: fixed; inset: 0; z-index: 220;
+    background: rgba(4, 9, 13, 0.75); backdrop-filter: blur(3px);
+    align-items: flex-end;
+  }
+  .sheet.show { display: flex; animation: fadeIn 0.18s ease; }
+  .sheet-card {
+    display: flex; flex-direction: column;
+    width: 100%; max-height: 92vh;
+    padding: 16px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface); border: 1px solid var(--line2);
+    border-radius: 18px 18px 0 0;
+    animation: askUp 0.22s ease;
+  }
+  .sheet-top { display: flex; align-items: flex-start; gap: 12px; }
+  .sheet-title {
+    font-family: var(--font-display); font-size: 17px; font-weight: 600;
+    color: var(--text);
+  }
+  .sheet-sub { margin-top: 3px; font-size: 11.5px; color: var(--t3); }
+  .sheet-x {
+    margin-left: auto; flex-shrink: 0; cursor: pointer;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    background: var(--surface2); border: none; border-radius: 10px; color: var(--t2);
+  }
+  .sheet-x:active { opacity: 0.6; }
+  .sheet-search {
+    width: 100%; margin-top: 12px; padding: 11px 12px;
+    text-align: left; border: 1px solid var(--line2); border-radius: 10px;
+  }
+  .sheet-card .ana-tabs { margin: 10px 0 2px; }
+  .sheet-list {
+    flex: 1; min-height: 0; overflow-y: auto;
+    margin-top: 6px; padding-right: 7px;   /* чтобы суммы не липли к полосе */
+    -webkit-overflow-scrolling: touch;
+  }
+  .all-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--line);
+  }
+  .all-row:last-child { border-bottom: none; }
+  .all-row .num {
+    flex-shrink: 0; width: 22px;
+    font-size: 11px; color: var(--t3); font-variant-numeric: tabular-nums;
+  }
+  .all-row .who { flex: 1; min-width: 0; }
+  .all-row .who .sub { display: block; margin-top: 2px; font-size: 10.5px; color: var(--t3); }
+  .all-row .who .bad { font-style: normal; color: var(--danger); }
+  .all-row .who .warn { font-style: normal; color: var(--gold); }
+  .all-row b {
+    flex-shrink: 0; font-family: var(--font-display); font-size: 14px; font-weight: 600;
+    color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .all-row b.minus { color: var(--danger); }
 
   .ana-empty { padding: 14px 0; font-size: 12px; color: var(--t3); }
   .ana-note {
@@ -2310,8 +2382,12 @@
 <div id="adFormPane">
   <section class="own-card">
     <div class="own-card-h"><i class="ti ti-file-invoice"></i>Сделка
-      <button type="button" class="own-jump ghost" onclick="adOpenAnalytics()">Итоги</button>
-      <button type="button" class="own-jump" onclick="adOpenStats()">Статистика</button>
+      <!-- Обе кнопки одной группой справа: порознь одна липла к заголовку,
+           а вторая уезжала к краю -->
+      <div class="own-jumps">
+        <button type="button" class="own-jump ghost" onclick="adOpenAnalytics()">Итоги</button>
+        <button type="button" class="own-jump" onclick="adOpenStats()">Статистика</button>
+      </div>
     </div>
     <div class="own-row">
       <label for="adDate">Дата оплаты</label>
@@ -3778,7 +3854,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 53;
+  const APP_VERSION = 54;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -4331,6 +4407,58 @@
     adRenderAnalytics();
   }
 
+  // ── Все контрагенты ──────────────────────────────────────────────────────
+  // Их много, поэтому на странице только верхушка, а полный список живёт
+  // в отдельном окне с поиском — иначе страница превращается в свиток
+  let adAllSort = 'profit';
+  let adAllQuery = '';
+
+  function adAnaOpenAll() {
+    haptic('light');
+    adAllQuery = '';
+    document.getElementById('anaAllSearch').value = '';
+    document.getElementById('anaAll').classList.add('show');
+    adRenderAll();
+  }
+
+  function adAnaCloseAll() {
+    document.getElementById('anaAll').classList.remove('show');
+  }
+
+  function adAllSetSort(k) { adAllSort = k; haptic('selection'); adRenderAll(); }
+  function adAllSearch(v) { adAllQuery = (v || '').trim().toLowerCase(); adRenderAll(); }
+
+  function adRenderAll() {
+    const все = adAna?.people || [];
+    const найдены = adAllQuery
+      ? все.filter(p => (p.name || '').toLowerCase().includes(adAllQuery))
+      : все;
+    const по = [...найдены].sort((a, b) => (b[adAllSort] || 0) - (a[adAllSort] || 0));
+
+    document.getElementById('anaAllHead').innerHTML =
+      `${по.length} ${склонение(по.length, 'контрагент', 'контрагента', 'контрагентов')}`
+      + (adAllQuery ? ` из ${все.length}` : '');
+
+    document.getElementById('anaAllSort').innerHTML =
+      [['profit','Прибыль'],['spent','Оборот'],['deals','Сделки']].map(([k, имя]) =>
+        `<button class="ana-tab${k === adAllSort ? ' on' : ''}"
+                 onclick="adAllSetSort('${k}')">${имя}</button>`).join('');
+
+    document.getElementById('anaAllList').innerHTML = по.length ? по.map((x, i) => `
+      <div class="all-row">
+        <span class="num">${i + 1}</span>
+        <div class="who">
+          ${nickHtml(x.name)}
+          <span class="sub">${x.deals} ${склонение(x.deals, 'сделка', 'сделки', 'сделок')}
+            · оборот ${money(x.spent)} · маржа ${x.margin}%${
+            x.scams ? ` · <em class="bad">кидков ${x.scams}</em>` : ''}${
+            x.disputes ? ` · <em class="warn">споров ${x.disputes}</em>` : ''}</span>
+        </div>
+        <b class="${(x.profit || 0) < 0 ? 'minus' : ''}">${
+          adAllSort === 'deals' ? x.deals : money(x[adAllSort])}</b>
+      </div>`).join('') : '<div class="ana-empty">Никого не нашёл</div>';
+  }
+
   // ── Период отчёта ────────────────────────────────────────────────────────
   function adAnaOpenPeriod() {
     haptic('light');
@@ -4519,6 +4647,10 @@
               x.scams ? ` · <em class="bad">кидков ${x.scams}</em>` : ''}${
               x.disputes ? ` · <em class="warn">споров ${x.disputes}</em>` : ''}</div>
           </div>`).join('') : '<div class="ana-empty">За период никого</div>'}
+        ${(d.people || []).length > люди.length ? `
+          <button class="ana-more" onclick="adAnaOpenAll()">
+            Все контрагенты<em>${d.people.length}</em>
+          </button>` : ''}
         <div class="ana-sub-h">Откуда приходят</div>
         ${каналы.length ? каналы.map(c => `
           <div class="ana-row">
@@ -5720,6 +5852,24 @@
 </script>
 
 <!-- Экран успеха -->
+<!-- Полный список контрагентов: на всю высоту, с поиском -->
+<div class="sheet" id="anaAll">
+  <div class="sheet-card">
+    <div class="sheet-top">
+      <div>
+        <div class="sheet-title">Контрагенты</div>
+        <div class="sheet-sub" id="anaAllHead"></div>
+      </div>
+      <button class="sheet-x" onclick="adAnaCloseAll()"><i class="ti ti-x"></i></button>
+    </div>
+    <input class="own-input sheet-search" id="anaAllSearch" type="text"
+           autocapitalize="none" autocomplete="off" placeholder="Поиск по нику"
+           oninput="adAllSearch(this.value)">
+    <div class="ana-tabs" id="anaAllSort"></div>
+    <div class="sheet-list" id="anaAllList"></div>
+  </div>
+</div>
+
 <!-- Период отчёта: пресеты и свои даты -->
 <div class="ask-overlay" id="anaPeriod" onclick="if(event.target.id==='anaPeriod')adAnaClosePeriod()">
   <div class="ask-card" onclick="event.stopPropagation()">
