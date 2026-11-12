@@ -223,8 +223,10 @@
 
   /* ── Секция: заголовок-рубрика без коробки ── */
   .own-card { margin-bottom: 26px; }
+  /* center, а не baseline: рядом с заголовком стоят кнопки, и по базовой
+     линии текст уезжал выше их середины */
   .own-card-h {
-    display: flex; align-items: baseline; gap: 8px;
+    display: flex; align-items: center; gap: 8px;
     font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
     text-transform: uppercase; color: var(--t3);
     padding-bottom: 14px; margin-bottom: 0;
@@ -1216,6 +1218,26 @@
     margin-top: 6px; padding-right: 7px;   /* чтобы суммы не липли к полосе */
     -webkit-overflow-scrolling: touch;
   }
+  /* Развёрнутый график: лента вбок, столбики от нулевой линии */
+  .big-scroll {
+    margin-top: 10px; overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .big-plot { position: relative; }
+  .big-plot svg { display: block; }
+  .big-plot .zero { stroke: var(--line2); stroke-width: 1; stroke-dasharray: 3 4; }
+  .big-plot .bar { fill: var(--accent2); opacity: 0.85; }
+  .big-plot .bar.minus { fill: var(--danger); }
+  .big-hit { position: absolute; inset: 0; display: flex; }
+  .big-hit button {
+    flex-shrink: 0; background: none; border: none; cursor: pointer;
+    padding: 0; display: flex; align-items: flex-end; justify-content: center;
+    color: var(--t3); font-family: var(--font-ui); font-size: 9px;
+    font-variant-numeric: tabular-nums;
+  }
+  .big-hit button span { padding-bottom: 2px; }
+  .big-hit button.on { background: rgba(45,212,191,0.1); border-radius: 4px; color: var(--accent-light); }
+
   .all-row {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 0; border-bottom: 1px solid var(--line);
@@ -2549,6 +2571,8 @@
     <button type="button" class="own-back" onclick="adCloseStats()">
       <i class="ti ti-arrow-left"></i>К новой сделке
     </button>
+    <!-- Переход сразу в соседний экран, минуя форму -->
+    <button type="button" class="own-jump ghost" onclick="adStatsToAnalytics()">Итоги</button>
     <!-- Спор живёт наверху, а не в карточке открытых: это не корзина
          инвентаря, а отдельный разговор -->
     <button type="button" class="own-dispute-chip" id="adDisputeChip"
@@ -2564,6 +2588,7 @@
     <button type="button" class="own-back" onclick="adCloseAnalytics()">
       <i class="ti ti-arrow-left"></i>К новой сделке
     </button>
+    <button type="button" class="own-jump ghost" onclick="adAnalyticsToStats()">Статистика</button>
   </div>
   <div id="adAnaBody"></div>
 </div>
@@ -3854,7 +3879,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 54;
+  const APP_VERSION = 55;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -4231,6 +4256,8 @@
   }
 
   // ── Статистика ───────────────────────────────────────────────────────────
+  // Минус ставим перед знаком валюты: «$-188,00» читается как опечатка
+  const деньги = v => (Number(v) < 0 ? '−' + money(-v) : money(v));
   const money = v => '$' + Number(v || 0).toLocaleString('ru-RU',
     { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -4292,6 +4319,17 @@
     document.getElementById('adFormPane').style.display = 'block';
     haptic('light');
     window.scrollTo(0, 0);
+  }
+
+  // Переходы между соседними экранами напрямую, без возврата к форме
+  function adAnalyticsToStats() {
+    document.getElementById('adAnaPane').style.display = 'none';
+    adOpenStats();
+  }
+
+  function adStatsToAnalytics() {
+    document.getElementById('adStatsPane').style.display = 'none';
+    adOpenAnalytics();
   }
 
   function adAnaSetPage(k) {
@@ -4381,8 +4419,8 @@
         <div class="hit">${данные.map((x, i) => `
           <button onclick="adAnaPoint(this)" data-i="${i}"
                   data-label="${attr(названиеОтрезка(x))}"
-                  data-profit="${attr(money(x.profit))}"
-                  data-cum="${attr(money(x.cum))}"
+                  data-profit="${attr(деньги(x.profit))}"
+                  data-cum="${attr(деньги(x.cum))}"
                   data-deals="${x.deals}"></button>`).join('')}</div>
       </div>
       <div class="ana-axis">
@@ -4406,6 +4444,99 @@
     haptic('selection');
     adRenderAnalytics();
   }
+
+  // ── График на весь экран ─────────────────────────────────────────────────
+  // Поперёк экрана помещается десяток точек, а истории бывает триста дней.
+  // В развёрнутом виде лента прокручивается вбок и показывает всё
+  let adBigScale = 'days';
+
+  function adAnaOpenChart() {
+    haptic('light');
+    adBigScale = adAnaScale;
+    document.getElementById('anaChart').classList.add('show');
+    adRenderBigChart();
+  }
+
+  function adAnaCloseChart() {
+    document.getElementById('anaChart').classList.remove('show');
+  }
+
+  function adBigSetScale(k) { adBigScale = k; haptic('selection'); adRenderBigChart(); }
+
+  function adRenderBigChart() {
+    const ряд = (adAna?.income || {})[adBigScale] || [];
+    document.getElementById('anaChartSort').innerHTML =
+      [['days','Дни'],['weeks','Недели'],['months','Месяцы']].map(([k, имя]) =>
+        `<button class="ana-tab${k === adBigScale ? ' on' : ''}"
+                 onclick="adBigSetScale('${k}')">${имя}</button>`).join('');
+
+    const шапка = document.getElementById('anaChartHead');
+    const тело = document.getElementById('anaChartBody');
+    if (!ряд.length) {
+      шапка.textContent = 'Продаж за период нет';
+      тело.innerHTML = '<div class="ana-empty">Пусто</div>';
+      return;
+    }
+
+    const всего = ряд.reduce((s, x) => s + x.profit, 0);
+    const лучший = ряд.reduce((a, b) => (b.profit > a.profit ? b : a));
+    шапка.innerHTML = `${ряд.length} ${
+      склонение(ряд.length, 'отрезок', 'отрезка', 'отрезков')} · итог ${
+      (всего > 0 ? '+' : '') + деньги(всего)} · лучший ${money(лучший.profit)}`;
+
+    // Каждому отрезку своя колонка фиксированной ширины — лента едет вбок
+    const Ш = adBigScale === 'days' ? 26 : 46;
+    const H = 200, пад = 10;
+    const W = Math.max(ряд.length * Ш, 300);
+    const верх = Math.max(...ряд.map(x => x.profit), 0);
+    const низ = Math.min(...ряд.map(x => x.profit), 0);
+    const размах = (верх - низ) || 1;
+    const Y = v => пад + (верх - v) / размах * (H - пад * 2);
+    const нольY = Y(0);
+
+    тело.innerHTML = `
+      <div class="big-plot" style="width:${W}px">
+        <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
+          <line class="zero" x1="0" y1="${нольY}" x2="${W}" y2="${нольY}"/>
+          ${ряд.map((x, i) => {
+            const cx = i * Ш + Ш / 2;
+            const y = Y(x.profit);
+            const высота = Math.max(Math.abs(y - нольY), 1.5);
+            return `<rect class="bar${x.profit < 0 ? ' minus' : ''}"
+                          x="${cx - Ш * 0.32}" y="${Math.min(y, нольY)}"
+                          width="${Ш * 0.64}" height="${высота}" rx="2"/>`;
+          }).join('')}
+        </svg>
+        <div class="big-hit">${ряд.map(x => `
+          <button style="width:${Ш}px" onclick="adBigPoint(this)"
+                  data-label="${attr(названиеОтрезкаПо(x, adBigScale))}"
+                  data-profit="${attr(деньги(x.profit))}"
+                  data-revenue="${attr(money(x.revenue))}"
+                  data-deals="${x.deals}">
+            <span>${короткаяМеткаПо(x, adBigScale)}</span>
+          </button>`).join('')}</div>
+      </div>`;
+
+    // Открываем на свежих данных: их смотрят чаще, чем начало истории
+    тело.scrollLeft = тело.scrollWidth;
+    document.getElementById('anaChartPoint').textContent = 'Нажми на столбик';
+  }
+
+  function adBigPoint(el) {
+    document.querySelectorAll('.big-hit button').forEach(b => b.classList.remove('on'));
+    el.classList.add('on');
+    haptic('selection');
+    const сделки = +el.dataset.deals;
+    document.getElementById('anaChartPoint').innerHTML =
+      `<b>${el.dataset.label}</b> · ${el.dataset.profit} · выручка ${el.dataset.revenue} · ${
+        сделки} ${склонение(сделки, 'продажа', 'продажи', 'продаж')}`;
+  }
+
+  // Те же подписи, но для произвольного разреза, а не текущего на странице
+  const короткаяМеткаПо = (x, разрез) =>
+    разрез === 'months' ? МЕСЯЦЫ[+x.key.split('-')[1] - 1].slice(0, 3) : x.label.slice(0, 2);
+  const названиеОтрезкаПо = (x, разрез) =>
+    разрез === 'months' ? `${МЕСЯЦЫ[+x.key.split('-')[1] - 1]} ${x.key.split('-')[0]}` : x.label;
 
   // ── Все контрагенты ──────────────────────────────────────────────────────
   // Их много, поэтому на странице только верхушка, а полный список живёт
@@ -4455,7 +4586,7 @@
             x.disputes ? ` · <em class="warn">споров ${x.disputes}</em>` : ''}</span>
         </div>
         <b class="${(x.profit || 0) < 0 ? 'minus' : ''}">${
-          adAllSort === 'deals' ? x.deals : money(x[adAllSort])}</b>
+          adAllSort === 'deals' ? x.deals : деньги(x[adAllSort])}</b>
       </div>`).join('') : '<div class="ana-empty">Никого не нашёл</div>';
   }
 
@@ -4530,7 +4661,7 @@
     if (!d) return;
     const t = d.totals, p = d.period;
     const ряд = (d.income || {})[adAnaScale] || [];
-    const знак = v => (v > 0 ? '+' : '') + money(v);
+    const знак = v => (v > 0 ? '+' : '') + деньги(v);
 
     // Карточка-рекорд: пусто, пока нечего показать
     const рекорд = (имя, r) => r ? `
@@ -4552,7 +4683,7 @@
       .sort((a, b) => (b[adAnaTop] || 0) - (a[adAnaTop] || 0))
       .slice(0, 8);
     const максЛюди = Math.max(...люди.map(x => Math.abs(x[adAnaTop] || 0)), 1);
-    const значение = x => adAnaTop === 'deals' ? x.deals : money(x[adAnaTop]);
+    const значение = x => adAnaTop === 'deals' ? x.deals : деньги(x[adAnaTop]);
 
     const каналы = (d.channels || []).filter(c => c.deals > 0);
     const максКанал = Math.max(...каналы.map(c => c.deals), 1);
@@ -4588,7 +4719,10 @@
               ? 'История доступна только на всём периоде'
               : (сИсторией ? 'Считаю с историей до учёта' : 'Добавить историю до учёта')}</span>
             <em>${знак(h.profit)}</em>
-          </button>` : ''}
+          </button>`
+          : (d.history_error
+              ? `<div class="ana-note">История до учёта не подхватилась: ${
+                  d.history_error}</div>` : '')}
         <div class="ana-grid">
           ${плитка('Оборот', money(итог.spent), сИсторией
               ? `с историей · сейчас ${money(t.spent)}` : 'закуплено за период')}
@@ -4619,6 +4753,9 @@
             Накопительно</button>
         </div>
         ${adAnaChart(ряд)}
+        <button class="ana-more" onclick="adAnaOpenChart()">
+          Развернуть график<em>${ряд.length}</em>
+        </button>
         <div class="ana-sub-h">Рекорды</div>
         <div class="ana-recs">
           ${рекорд('Лучший день', d.records?.day)}
@@ -5852,6 +5989,22 @@
 </script>
 
 <!-- Экран успеха -->
+<!-- График на весь экран: лента прокручивается вбок -->
+<div class="sheet" id="anaChart">
+  <div class="sheet-card">
+    <div class="sheet-top">
+      <div>
+        <div class="sheet-title">Доход по отрезкам</div>
+        <div class="sheet-sub" id="anaChartHead"></div>
+      </div>
+      <button class="sheet-x" onclick="adAnaCloseChart()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="ana-tabs" id="anaChartSort"></div>
+    <div class="big-scroll" id="anaChartBody"></div>
+    <div class="ana-point" id="anaChartPoint"></div>
+  </div>
+</div>
+
 <!-- Полный список контрагентов: на всю высоту, с поиском -->
 <div class="sheet" id="anaAll">
   <div class="sheet-card">
