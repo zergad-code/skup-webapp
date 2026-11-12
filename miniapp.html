@@ -1080,6 +1080,28 @@
   .ana-period em { font-style: normal; font-size: 11px; color: var(--t3); }
   .ana-period:active { opacity: 0.6; }
 
+  /* Тумблер истории: видно и что она есть, и включена ли */
+  .ana-hist {
+    display: flex; align-items: center; gap: 9px; width: 100%;
+    margin-top: 14px; padding: 10px 12px; cursor: pointer;
+    background: none; border: 1px dashed var(--line2); border-radius: 11px;
+    color: var(--t3); font-family: var(--font-ui); font-size: 12px;
+    text-align: left;
+  }
+  .ana-hist i { font-size: 15px; }
+  .ana-hist span { flex: 1; }
+  .ana-hist em {
+    font-style: normal; font-family: var(--font-display); font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--t2);
+  }
+  .ana-hist.on {
+    border-style: solid; border-color: var(--line-accent);
+    background: var(--accent-soft); color: var(--accent-light);
+  }
+  .ana-hist.on em { color: var(--accent-light); }
+  .ana-hist:disabled { opacity: 0.45; cursor: default; }
+  .ana-hist:not(:disabled):active { opacity: 0.65; }
+
   .ana-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
   .ana-quick button {
     cursor: pointer; padding: 11px; border-radius: 10px;
@@ -3756,7 +3778,7 @@
   let IS_ADMIN = false;
 
   // Версия фронта: уходит в лог бэкенда, чтобы отличать свежий HTML от кэша.
-  const APP_VERSION = 52;
+  const APP_VERSION = 53;
 
   // Какой экран запрошен при запуске. screen=table приходит из inline-кнопки
   // бота и означает интерфейс владельца вместо клиентского флоу продажи.
@@ -4179,6 +4201,7 @@
   let adAnaTop = 'profit';        // чем мерить людей: profit | spent | deals
   let adAnaPage = 'money';        // открытая страница: money | income | people | risk
   let adAnaFrom = '', adAnaTo = ''; // окно отчёта, пусто — всё время
+  let adAnaHistory = false;         // прибавлять ли историю до начала учёта
 
   function adOpenAnalytics() {
     document.getElementById('adFormPane').style.display = 'none';
@@ -4302,6 +4325,12 @@
     adRenderAnalytics();
   }
 
+  function adAnaToggleHistory() {
+    adAnaHistory = !adAnaHistory;
+    haptic('selection');
+    adRenderAnalytics();
+  }
+
   // ── Период отчёта ────────────────────────────────────────────────────────
   function adAnaOpenPeriod() {
     haptic('light');
@@ -4400,19 +4429,44 @@
     const каналы = (d.channels || []).filter(c => c.deals > 0);
     const максКанал = Math.max(...каналы.map(c => c.deals), 1);
 
+    // История — только на всём периоде: она про время до начала учёта,
+    // складывать её с выбранным окном было бы подлогом
+    const h = d.history;
+    const сИсторией = !!h && adAnaHistory && !p.filtered;
+    const итог = сИсторией ? {
+      profit: t.profit + h.profit,
+      spent: t.spent + h.spent,
+      revenue: t.revenue + h.revenue,
+      margin: (t.spent + h.spent)
+        ? Math.round((t.profit + h.profit) / (t.spent + h.spent) * 1000) / 10 : 0,
+    } : { profit: t.profit, spent: t.spent, revenue: t.revenue, margin: t.margin };
+
     // Страницы вместо одной ленты: на телефоне свиток в десять экранов
     // невозможно читать, а переключатель держит всё в одном касании
     const страницы = {
       money: `
         <div class="ana-hero">
-          <div class="sum${t.profit < 0 ? ' minus' : ''}">${знак(t.profit)}</div>
-          <div class="sub">итог с учётом кидков${t.scam_loss
+          <div class="sum${итог.profit < 0 ? ' minus' : ''}">${знак(итог.profit)}</div>
+          <div class="sub">${сИсторией
+            ? `с историей до учёта (${знак(h.profit)})`
+            : 'итог с учётом кидков'}${t.scam_loss
             ? ` · по сделкам ${знак(t.trade_profit)}, кидки −${money(t.scam_loss)}` : ''}</div>
         </div>
+        ${h ? `
+          <button class="ana-hist${сИсторией ? ' on' : ''}"
+                  onclick="adAnaToggleHistory()" ${p.filtered ? 'disabled' : ''}>
+            <i class="ti ti-history"></i>
+            <span>${p.filtered
+              ? 'История доступна только на всём периоде'
+              : (сИсторией ? 'Считаю с историей до учёта' : 'Добавить историю до учёта')}</span>
+            <em>${знак(h.profit)}</em>
+          </button>` : ''}
         <div class="ana-grid">
-          ${плитка('Оборот', money(t.spent), 'закуплено за период')}
-          ${плитка('Выручка', money(t.revenue), 'получено с продаж')}
-          ${плитка('Маржа', t.margin + '%', t.scam_loss
+          ${плитка('Оборот', money(итог.spent), сИсторией
+              ? `с историей · сейчас ${money(t.spent)}` : 'закуплено за период')}
+          ${плитка('Выручка', money(итог.revenue), сИсторией
+              ? `с историей · сейчас ${money(t.revenue)}` : 'получено с продаж')}
+          ${плитка('Маржа', итог.margin + '%', t.scam_loss
               ? `без кидков ${t.trade_margin}%` : 'от вложенного')}
           ${плитка('Сделок', t.deals, `${t.closed} закрыто · ${t.open} открыто`)}
           ${плитка('Скинов', t.items, `${t.sold_items} продано`)}
